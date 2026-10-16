@@ -2224,5 +2224,29 @@ window.COURSE_INDEX = [
     "href": "lab/report.html",
     "text": "TTC、纵向加速度、Jerk、急刹次数和场景得分对比",
     "keywords": "实验报告 评分 TTC Jerk 急刹"
+  },
+  {
+    "title": "实验中心 · AI 辅助实验闭环",
+    "href": "lab/ai-loop.html",
+    "text": "AI 在环境检查、场景运行、日志定位、录包、评分和报告复盘中的介入点。",
+    "keywords": "AI 辅助 闭环 Apollo Claw apollo-env apollo-dev apollo-test apollo-eval"
+  },
+  {
+    "title": "实验中心 · AI 证据链",
+    "href": "lab/evidence.html",
+    "text": "从日志、record、channel、指标、AI 建议到优化前后验证的完整证据链。",
+    "keywords": "证据链 record channel TTC Jerk 评分 优化 前后对比"
+  },
+  {
+    "title": "实验中心 · 本地环境与 Harness",
+    "href": "setup/index.html",
+    "text": "预装 Ubuntu 镜像、WSL2、Harness 启动和本地 DeepSeek Key 配置。",
+    "keywords": "镜像 Ubuntu WSL2 Harness DeepSeek API Key 本地环境"
+  },
+  {
+    "title": "实验中心 · 本地 Harness 约定",
+    "href": "harness/manifest.json",
+    "text": "Apollo Claw Harness 版本、命令和本地接口约定。",
+    "keywords": "harness manifest doctor explain record report eval advise"
   }
 ];

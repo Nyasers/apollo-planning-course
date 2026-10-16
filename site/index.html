@@ -17,7 +17,7 @@
       <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>从仿真环境到 Scenario 与 Task</span></span>
     </a>
     <div class="top-actions">
-      <a class="action-button lab-entry-button" href="lab/index.html"><span>实验中心</span><span class="button-label">进入 MVP</span></a>
+      <a class="action-button lab-entry-button" href="lab/index.html"><span>AI 实验中心</span><span class="button-label">进入闭环</span></a>
       <span class="commit-pill">commit d53aa3da</span>
       <button class="action-button" type="button" data-search-open aria-label="搜索课程"><span>搜索</span><span class="button-label">课程内容</span><span aria-hidden="true">/</span></button>
       <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题" aria-pressed="false">◐</button>
@@ -30,11 +30,12 @@
         <div class="reveal">
           <p class="hero-kicker">Apollo Planning Self-Study</p>
           <h1>先跑起来，<span>再读懂规划。</span></h1>
-          <p class="hero-summary">这不是一份从函数细节开始的“劝退教程”。路线从 Linux 仿真环境出发，先建立 Apollo 与 Planning 的整体地图，再逐步进入 Scenario、Task 和读懂代码所需的 C++。</p>
+          <p class="hero-summary">这不是一份从函数细节开始的“劝退教程”。路线从 Linux 仿真环境出发，先建立 Apollo 与 Planning 的整体地图，再逐步进入 Scenario、Task 和读懂代码所需的 C++。实验中心新增 Apollo Claw AI 辅助闭环，把环境检查、日志定位、record、评分和报告串成可追溯证据链。</p>
           <div class="hero-actions">
-            <a class="button-primary" href="lab/index.html">进入实验中心</a>
+            <a class="button-primary" href="lab/index.html">进入 AI 实验中心</a>
+            <a class="button-secondary" href="lab/ai-loop.html">查看 AI 辅助闭环</a>
+            <a class="button-secondary" href="setup/index.html">准备本地环境</a>
             <a class="button-secondary" href="lesson-00.html">从第 00 课开始</a>
-            <a class="button-secondary" href="#roadmap">查看完整路线</a>
           </div>
         </div>
         <div class="route-board reveal" aria-label="课程路线状态">
@@ -74,6 +75,19 @@
         <thead><tr><th>编号</th><th>主题</th><th>你会得到什么</th><th>状态</th></tr></thead>
         <tbody><tr data-status="ready" data-course-unit="lesson-00"><td>00</td><td><a href="lesson-00.html">Linux 与 Apollo 仿真环境</a></td><td>安装指南与首次启动</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-01"><td>01</td><td><a href="lesson-01.html">Apollo 与 Planning 全景</a></td><td>先认识项目，不碰复杂函数</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-02"><td>02</td><td><a href="lesson-02.html">Planning 一轮流程</a></td><td>上游输入到 ADCTrajectory</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-03"><td>03</td><td><a href="lesson-03.html">Scenario / Stage / Task</a></td><td>建立三层层级关系</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-04"><td>04</td><td><a href="lesson-04.html">变量、函数与条件</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-05"><td>05</td><td><a href="lesson-05.html">指针基础</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-06"><td>06</td><td><a href="lesson-06.html">引用与 const</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-07"><td>07</td><td><a href="lesson-07.html">类、对象与构造</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-08"><td>08</td><td><a href="lesson-08.html">继承与 override</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-09"><td>09</td><td><a href="lesson-09.html">vector 与智能指针</a></td><td>围绕 Task 和 Planning 补 C++</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-10"><td>10</td><td><a href="lesson-10.html">ScenarioManager 场景切换</a></td><td>场景、Stage 和执行流程</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-11"><td>11</td><td><a href="lesson-11.html">LaneFollow 场景</a></td><td>场景、Stage 和执行流程</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-12"><td>12</td><td><a href="lesson-12.html">Stage 如何执行 Task</a></td><td>场景、Stage 和执行流程</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-13"><td>13</td><td><a href="lesson-13.html">Task 基类</a></td><td>Task、路径、速度与规则</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-14"><td>14</td><td><a href="lesson-14.html">路径 Task 示例</a></td><td>Task、路径、速度与规则</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-15"><td>15</td><td><a href="lesson-15.html">速度 Task 示例</a></td><td>Task、路径、速度与规则</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-16"><td>16</td><td><a href="lesson-16.html">TrafficRule 与 Task</a></td><td>Task、路径、速度与规则</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-17"><td>17</td><td><a href="lesson-17.html">配置、插件与编译</a></td><td>配置、插件和构建流程</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-18"><td>18</td><td><a href="lesson-18.html">新增一个简单 Task</a></td><td>新增第一个安全 Task</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-19"><td>19</td><td><a href="lesson-19.html">日志与 DreamView 调试</a></td><td>日志、channel 与 DreamView</td><td><span class="course-status">可学习</span></td></tr><tr data-status="ready" data-course-unit="lesson-20"><td>20</td><td><a href="lesson-20.html">小型限速功能实战</a></td><td>完成小型限速修改和验证</td><td><span class="course-status">可学习</span></td></tr></tbody>
       </table>
+    </section>
+
+    <section class="page-section">
+      <div class="section-intro reveal">
+        <div><p class="section-kicker">AI-assisted Lab</p><h2>AI 不是侧边栏，而是实验主线</h2></div>
+        <p>Apollo Claw 以 env、dev、test、eval 四类技能贯穿实验前、中、后。网页展示 AI 介入点、证据链、优化前后对比和能力画像；真实执行、DeepSeek 调用和报告由本地 Harness 完成。</p>
+      </div>
+      <div class="lab-ai-timeline">
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>环境检查</h3><p>解释 Ubuntu、WSL2、Docker、aem 和 Apollo 状态。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>doctor.json</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>日志定位</h3><p>从 planning、control 日志中定位减速、急刹和路径问题。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>日志摘要 / 配置位置</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>录包与评分</h3><p>录制 record、盘点 channel、生成图表并解释 TTC、Jerk 和场景得分。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>CSV / PNG / 评分报告</small></div></article>
+      </div>
+      <div class="lab-local-banner" style="margin-top:18px"><div><strong>本地 Harness 模式</strong><p>网页只展示和引导；DeepSeek API Key 保存在学生本地 <code>~/.apollo-claw/.env</code>，不进入网页。</p></div><div class="lab-card-actions"><a class="button-primary" href="lab/ai-loop.html">查看 AI 闭环</a><a class="button-secondary" href="setup/index.html">配置本地环境</a></div></div>
     </section>
 
     <section class="page-section">

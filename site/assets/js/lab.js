@@ -1,6 +1,13 @@
 (function () {
   "use strict";
-  const config = window.APOLLO_LAB_CONFIG || {};
+  const config = Object.assign({
+    apiBase: "",
+    simulationUrl: "",
+    localPanelUrl: "http://127.0.0.1:8765",
+    taskId: "crosswalk",
+    lesson: "lesson-15",
+    demoMode: true
+  }, window.APOLLO_LAB_CONFIG || {});
   const metricsKey = "apollo-lab-metrics-v1";
 
   const stages = [
@@ -29,6 +36,23 @@
 
   function writeMetrics(value) {
     localStorage.setItem(metricsKey, JSON.stringify(value));
+  }
+
+  function localPanelHref() {
+    const base = (config.localPanelUrl || "http://127.0.0.1:8765").replace(/\/$/, "");
+    const params = new URLSearchParams({
+      task: config.taskId || "crosswalk",
+      lesson: config.lesson || "lesson-15",
+      source: "apc",
+      return: window.location.href
+    });
+    return base + "/?" + params.toString();
+  }
+
+  function syncLocalPanelLinks() {
+    document.querySelectorAll("[data-local-panel]").forEach((link) => {
+      link.setAttribute("href", localPanelHref());
+    });
   }
 
   function setText(root, selector, value) {
@@ -90,10 +114,10 @@
     });
 
     const messages = {
-      env: "环境检查完成：Docker 正常，aem 正常，buildtool 可用；当前为教学演示模式，未执行任何系统修改。",
-      dev: "问题定位建议：先检查 crosswalk TrafficRule、参考线停止点和速度边界配置。建议顺序：日志 → 场景配置 → Task pipeline。",
-      test: "数据采集建议：使用 pnc profile 录制 record，重点检查 planning、control、localization 和 perception channel。",
-      eval: "评分提示：当前演示数据中 TTC 偏低且急刹次数较多。建议降低通过人行道前的速度上限，并观察 Jerk 是否下降。"
+      env: "环境检查完成：Docker 正常，aem 正常，buildtool 可用；当前为教学演示模式，未执行任何系统修改。本地模式下由 apollo-env 返回真实检查结果。",
+      dev: "AI 诊断建议：先检查 crosswalk TrafficRule、参考线停止点和速度边界配置。证据来自 planning 日志，建议按“日志 → 场景配置 → Task pipeline”顺序定位。",
+      test: "数据采集建议：使用 pnc profile 录制 record，重点检查 planning、control、localization 和 perception channel；由 apollo-test 生成 channel_summary.csv、PNG 和 Markdown 报告。",
+      eval: "评分提示：当前演示数据中 TTC 偏低且急刹次数较多。建议降低通过人行道前的速度上限，并观察 Jerk 是否下降。该结论只有在本地 Harness 和 apollo-eval 运行后才作为真实实验证据。"
     };
 
     async function requestAgent(skill, message) {
@@ -255,6 +279,7 @@
     }
   }
 
+  syncLocalPanelLinks();
   initRunPage();
   initReportPage();
 })();

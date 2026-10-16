@@ -18,12 +18,15 @@
     </a>
     <nav class="lab-nav" aria-label="实验中心导航">
       <a href="./">实验中心</a>
+      <a href="ai-loop.html">AI 闭环</a>
       <a href="crosswalk.html" aria-current="page">人行道避让</a>
       <a href="report.html">实验报告</a>
+      <a href="evidence.html">证据链</a>
+      <a href="../setup/index.html">环境部署</a>
       <a href="../index.html">返回课程</a>
     </nav>
     <div class="lab-actions">
-      <span class="lab-status-pill">演示模式</span>
+      <span class="lab-status-pill">AI 辅助实验 · 演示模式</span>
       <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button>
     </div>
   </header>
@@ -49,7 +52,7 @@
           <div>
             <p class="lesson-kicker">Experiment 01 · Crosswalk</p>
             <h1>人行道避让综合实验</h1>
-            <p>跟随一条最小教学闭环，观察规划轨迹、速度曲线、TTC 与舒适性指标，并用 Apollo Claw 辅助完成一次优化。</p>
+            <p>跟随一条最小教学闭环，观察规划轨迹、速度曲线、TTC 与舒适性指标，并用 Apollo Claw 辅助完成一次优化。网页展示 AI 介入点和证据链；真实 record、评分与 DeepSeek 调用由本地 Harness 完成。</p>
           </div>
           <div>
             <span class="lab-chip" data-stage-count>01 / 08</span>
@@ -61,6 +64,11 @@
           <h2 data-stage-title>实验准备</h2>
           <p data-stage-desc>确认课程、实验目标和运行环境，进入人行道避让任务。</p>
         </section>
+
+        <div class="lab-local-banner" style="margin-top:16px">
+          <div><strong>AI 辅助模式</strong><p>页面以演示数据展示 AI 如何介入 8 个阶段；本地 Harness 启动后，可用真实环境检查、record、评分和 DeepSeek 解释替换演示数据。</p></div>
+          <div class="lab-card-actions"><a class="button-primary" data-local-panel href="#">打开本地 Harness</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
+        </div>
 
         <div class="lab-workspace-grid">
           <section class="lab-simulation">
@@ -75,6 +83,7 @@
             <div class="lab-controls">
               <button class="lab-control-button is-primary" type="button" data-run-demo>运行演示流程</button>
               <button class="lab-control-button" type="button" data-open-simulation>打开仿真入口</button>
+              <a class="lab-control-button" data-local-panel href="http://127.0.0.1:8765/">打开本地实验台</a>
               <a class="lab-control-button" href="report.html" data-report-link aria-disabled="true">查看实验报告</a>
             </div>
           </section>
@@ -103,6 +112,43 @@
           <div class="lab-metric"><span>场景得分</span><strong>82 → 94</strong><small>本地自评估</small></div>
           <div class="lab-metric"><span>证据</span><strong>record</strong><small>CSV / PNG / Report</small></div>
         </div>
+
+        <section class="lab-section">
+          <div class="lab-section-head">
+            <div><p class="section-kicker">AI Evidence Chain</p><h2>AI 建议如何变成可验证结果</h2></div>
+            <p>每个 AI 结论都必须绑定日志、record、CSV、PNG 或评分结果，不能只停留在对话。</p>
+          </div>
+          <div class="lab-evidence-flow">
+            <article class="lab-evidence-step"><span>01 输入</span><strong>日志与 record</strong><small>planning.INFO、TTC 1.4s、急刹 2 次</small></article>
+            <article class="lab-evidence-step"><span>02 AI 判断</span><strong>减速偏晚</strong><small>apollo-dev 关联人行道停止区和速度边界</small></article>
+            <article class="lab-evidence-step"><span>03 建议</span><strong>降低速度上限</strong><small>给出最小改动和验证方法</small></article>
+            <article class="lab-evidence-step"><span>04 学生确认</span><strong>修改参数</strong><small>学生确认后再次运行仿真</small></article>
+            <article class="lab-evidence-step"><span>05 验证</span><strong>指标改善</strong><small>TTC 1.4 → 2.3s，急刹 2 → 0</small></article>
+          </div>
+          <div class="lab-evidence" style="margin-top:18px">
+            <article class="lab-evidence-card">
+              <h3>本次 AI 辅助记录</h3>
+              <div class="lab-evidence-row"><strong>使用技能</strong><span><code>apollo-dev</code> + <code>apollo-eval</code></span></div>
+              <div class="lab-evidence-row"><strong>输入证据</strong><span>planning 日志、record、channel_summary.csv、评分结果</span></div>
+              <div class="lab-evidence-row"><strong>AI 判断</strong><span>通过人行道前减速偏晚，TTC 偏低</span></div>
+              <div class="lab-evidence-row"><strong>建议操作</strong><span>检查 crosswalk 场景和速度边界配置</span></div>
+              <div class="lab-evidence-row"><strong>学生确认</strong><span>已确认修改，并完成第二轮仿真</span></div>
+              <div class="lab-evidence-row"><strong>验证结果</strong><span>TTC 1.4 → 2.3s，急刹 2 → 0，Jerk 下降</span></div>
+              <div class="lab-evidence-row"><strong>证据文件</strong><span>record、CSV、PNG、report.md</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="lab-section">
+          <div class="lab-section-head">
+            <div><p class="section-kicker">AI Boundary</p><h2>AI 做什么，不做什么</h2></div>
+            <p>AI 辅助必须可解释、可追溯、可复核，不能替代学生判断和教师评价。</p>
+          </div>
+          <div class="lab-ai-boundary">
+            <article><h3>AI 负责</h3><ul><li>解释环境检查、日志和评分</li><li>定位相关配置、源码和知识库</li><li>生成结构化优化建议</li><li>汇总证据链和实验报告</li></ul></article>
+            <article><h3>AI 不负责</h3><ul><li>不直接修改代码或执行危险命令</li><li>不把模型输出当作评分裁判</li><li>不上传本地 API Key 和隐私数据</li><li>不替代感知、定位算法教学</li></ul></article>
+          </div>
+        </section>
       </div>
     </div>
   </main>
@@ -110,7 +156,7 @@
   <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容">
     <div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div>
   </div>
-  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"",demoMode:true};</script>
+  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
   <script src="../assets/js/lab.js"></script>

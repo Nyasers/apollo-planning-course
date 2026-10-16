@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Apollo Claw AI 辅助实验闭环：环境检查、日志定位、record、评分优化和证据链。">
+  <title>AI 辅助闭环 | Apollo Planning Lab</title>
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/lab.css">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>AI 辅助实验 · 本地 Harness</span></span></a>
+    <nav class="lab-nav" aria-label="实验中心导航">
+      <a href="./">实验中心</a><a href="ai-loop.html" aria-current="page">AI 闭环</a><a href="crosswalk.html">人行道避让</a><a href="report.html">实验报告</a><a href="evidence.html">证据链</a><a href="../setup/index.html">环境部署</a><a href="../index.html">返回课程</a>
+    </nav>
+    <div class="lab-actions"><span class="lab-status-pill">AI 辅助闭环</span><button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button></div>
+  </header>
+  <main class="lab-shell" id="main-content">
+    <section class="lab-hero">
+      <div class="lab-hero-copy">
+        <p class="lesson-kicker">AI-assisted Experiment</p>
+        <h1>AI 不是侧边栏，<span>而是实验主线。</span></h1>
+        <p>Apollo Claw 以 apollo-env、apollo-dev、apollo-test、apollo-eval 四类技能贯穿实验前、中、后。每个 AI 结论都绑定日志、record、CSV、PNG 或评分结果。</p>
+        <div class="lab-hero-actions"><a class="button-primary" href="crosswalk.html">进入人行道避让实验</a><a class="button-secondary" data-local-panel href="http://127.0.0.1:8765/">打开本地 Harness</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
+        <div class="lab-ai-hero-note"><strong>模型接入方式：</strong><span>网页不直接调用 DeepSeek。真实模型调用、record、评分和报告由本地 Harness 完成，API Key 只保存在 <code>~/.apollo-claw/.env</code>。</span></div>
+      </div>
+      <div class="lab-hero-board"><p class="lab-board-label">AI ASSISTANCE LOOP</p><ol class="lab-flow"><li><b>01</b><span>环境检查</span><em>apollo-env</em></li><li><b>02</b><span>运行场景</span><em>apollo-dev</em></li><li><b>03</b><span>日志定位</span><em>apollo-dev</em></li><li><b>04</b><span>录包与报告</span><em>apollo-test</em></li><li><b>05</b><span>评分与优化</span><em>apollo-eval</em></li></ol></div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">Eight Stages</p><h2>AI 在 8 个阶段的介入点</h2></div><p>每一阶段都明确 AI 技能、输入证据、输出结果和学生确认动作。</p></div>
+      <div class="lab-ai-timeline">
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>实验准备</h3><p>生成预习检查清单，明确任务、场景、交付物和评分目标。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：预习检查清单</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>环境检查</h3><p>解释 Ubuntu、WSL2、Docker、aem、Apollo 容器和磁盘状态。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：doctor.json、环境报告</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>场景运行</h3><p>提示 DreamView 入口、SimControl 模式、车辆和地图配置。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：运行状态记录</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">04</div><div><h3>观察问题</h3><p>从 planning、control、mainboard 日志中提取减速偏晚和异常线索。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：日志摘要、可疑配置</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">05</div><div><h3>诊断定位</h3><p>关联知识库，定位 crosswalk 场景、TrafficRule、速度边界和 Task 管线。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：代码/配置位置、建议</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">06</div><div><h3>录制与可视化</h3><p>按 pnc profile 录制 record，盘点 channel，生成 CSV、PNG 和 Markdown。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test</span><small>产出：record、channel_summary.csv</small></div></article>
+        <article class="lab-ai-stage is-priority"><div class="lab-ai-stage-marker">07</div><div><h3>评分与优化</h3><p>解释 TTC、加速度、Jerk、急刹和场景得分，给出下一轮最小改动。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-eval</span><small>产出：评分解释、优化建议</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">08</div><div><h3>报告与复盘</h3><p>汇总建议、学生操作、证据链和优化前后对比，形成能力画像。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>产出：report.md、能力画像</small></div></article>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">AI Output Contract</p><h2>模型只输出结构化建议</h2></div><p>模型不计算分数、不直接执行命令。事实由脚本产生，模型负责解释，学生负责确认。</p></div>
+      <div class="lab-ai-boundary">
+        <article><h3>模型输入</h3><ul><li>环境检查 JSON</li><li>日志摘要和知识库片段</li><li>record channel 摘要</li><li>TTC、Jerk、急刹和评分结果</li></ul></article>
+        <article><h3>模型输出</h3><ul><li>事实：数据说明了什么</li><li>推测：可能的原因</li><li>建议：下一轮最小改动</li><li>待确认：需要学生执行的命令</li></ul></article>
+      </div>
+      <pre class="lab-code">facts: TTC = 1.4s；急刹 = 2 次
+hypothesis: 通过人行道前减速偏晚
+suggestion: 检查 crosswalk 速度边界与停止线参数
+need_student_confirm: true
+evidence: planning.log / record / channel_summary.csv
+verification: TTC 1.4 → 2.3s；急刹 2 → 0</pre>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">Responsibility Boundary</p><h2>AI 使用与责任边界</h2></div><p>AI 辅助效果必须可解释、可追溯、可复核。</p></div>
+      <div class="lab-ai-boundary">
+        <article><h3>AI 负责</h3><ul><li>解释环境、日志、数据和评分</li><li>检索本地知识库和配置位置</li><li>生成结构化优化建议</li><li>汇总实验证据和报告草稿</li></ul></article>
+        <article><h3>AI 不负责</h3><ul><li>不直接修改代码或执行危险命令</li><li>不替代学生判断和教师终评</li><li>不把本地自评估写成官方评分</li><li>不接收或上传 API Key 和隐私数据</li></ul></article>
+      </div>
+    </section>
+  </main>
+  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容"><div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div></div>
+  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
+  <script src="../assets/js/search-index.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script src="../assets/js/lab.js"></script>
+</body>
+</html>

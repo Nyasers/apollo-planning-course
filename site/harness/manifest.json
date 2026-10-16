@@ -1,0 +1,11 @@
+{
+  "harness": "apollo-claw-harness",
+  "version": "0.1.0",
+  "apollo": "9.0",
+  "panel": "http://127.0.0.1:8765/",
+  "status": "design",
+  "capabilities": ["doctor", "explain", "test record", "test report", "eval", "advise"],
+  "localOnly": true,
+  "apiKeyLocation": "~/.apollo-claw/.env",
+  "notes": "网页只负责展示和跳转；真实执行、模型调用和报告由本地 Harness 完成。"
+}

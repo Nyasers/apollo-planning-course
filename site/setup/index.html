@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Apollo Claw 本地实验环境：预装 Ubuntu 镜像、WSL2、Harness 和 DeepSeek 配置。">
+  <title>本地环境与 Harness | Apollo Planning Lab</title>
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/lab.css">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>本地环境 · Harness</span></span></a>
+    <nav class="lab-nav" aria-label="实验中心导航">
+      <a href="../lab/">实验中心</a><a href="../lab/ai-loop.html">AI 闭环</a><a href="../lab/crosswalk.html">人行道避让</a><a href="../lab/report.html">实验报告</a><a href="../lab/evidence.html">证据链</a><a href="./" aria-current="page">环境部署</a><a href="../index.html">返回课程</a>
+    </nav>
+    <div class="lab-actions"><span class="lab-status-pill">本地 Harness</span><button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button></div>
+  </header>
+  <main class="lab-shell" id="main-content">
+    <section class="lab-hero">
+      <div class="lab-hero-copy">
+        <p class="lesson-kicker">Local Linux + Local Harness</p>
+        <h1>先准备环境，<span>再开始实验。</span></h1>
+        <p>推荐使用预装 Ubuntu 镜像，镜像内包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。</p>
+        <div class="lab-hero-actions"><a class="button-primary" data-local-panel href="http://127.0.0.1:8765/">打开本地 Harness</a><a class="button-secondary" href="../lesson-00.html">查看第 00 课安装指南</a><a class="button-secondary" href="../lab/ai-loop.html">查看 AI 闭环</a></div>
+      </div>
+      <div class="lab-hero-board"><p class="lab-board-label">SETUP ROUTES</p><ol class="lab-flow"><li><b>A</b><span>预装 Ubuntu 镜像</span><em>推荐</em></li><li><b>B</b><span>WSL2 手动安装</span><em>需验证</em></li><li><b>C</b><span>Ubuntu 虚拟机</span><em>兼容性好</em></li></ol></div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">Choose a Route</p><h2>三种环境路线</h2></div><p>零基础学生优先使用预装镜像；熟悉命令行的学生可以按第 00 课手动安装。</p></div>
+      <div class="lab-setup-grid">
+        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐</span><h3>预装 Ubuntu 镜像</h3><p>镜像内含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、四套 skill 和 Harness。</p><ul><li>离线导入，减少下载失败</li><li>首次启动自动检查环境</li><li>本地配置 DeepSeek Key</li></ul><div class="lab-card-actions"><a class="button-primary" href="#image">查看镜像说明</a></div></article>
+        <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉 Windows、Docker 和命令行的学生。需要单独验证 Docker、AEM、GUI 和端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>DreamView localhost 转发</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+        <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但占用更多内存和磁盘。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+      </div>
+    </section>
+
+    <section class="lab-section" id="image">
+      <div class="lab-section-head"><div><p class="section-kicker">Prebuilt Image</p><h2>预装 Ubuntu 镜像待发布</h2></div><p>镜像链接、文件大小和校验值将在镜像上传后补充。当前页面先固定交付结构和导入流程。</p></div>
+      <div class="lab-ai-hero-note"><strong>镜像状态：</strong><span>准备中。请勿在正式教学中填写不存在的下载链接。镜像发布后，在此补充文件格式、大小、SHA256 和托管位置。</span></div>
+      <div class="lab-evidence" style="margin-top:18px"><article class="lab-evidence-card">
+        <div class="lab-evidence-row"><strong>镜像格式</strong><span>待确认：VMware/VirtualBox OVA 或 WSL tar</span></div>
+        <div class="lab-evidence-row"><strong>压缩后大小</strong><span>待确认</span></div>
+        <div class="lab-evidence-row"><strong>校验值</strong><span>待补充 SHA256</span></div>
+        <div class="lab-evidence-row"><strong>托管位置</strong><span>待确认：网盘、对象存储或学校服务器</span></div>
+      </article></div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">First Start</p><h2>首次启动和 Harness 检查</h2></div><p>镜像导入后，先启动 Apollo 仿真，再启动本地 Harness。</p></div>
+      <pre class="lab-code"># 1. 进入 Ubuntu 终端
+cd ~/application-pnc
+
+# 2. 启动 Apollo 容器并进入
+aem start
+aem enter
+
+# 3. 启动 DreamView
+aem bootstrap start --plus
+
+# 4. 新开终端，启动 Apollo Claw Harness
+~/apollo-claw/scripts/start-harness.sh
+
+# 5. 浏览器访问本地实验台
+# http://127.0.0.1:8765/</pre>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head"><div><p class="section-kicker">DeepSeek Key</p><h2>本地模型配置</h2></div><p>DeepSeek Key 只保存在本地环境，不进入网页、Git 或实验报告。</p></div>
+      <pre class="lab-code">mkdir -p ~/.apollo-claw
+cat > ~/.apollo-claw/.env &lt;&lt;'EOF'
+DEEPSEEK_API_KEY=sk-your-key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+EOF
+chmod 600 ~/.apollo-claw/.env</pre>
+      <div class="lab-ai-boundary" style="margin-top:18px">
+        <article><h3>允许</h3><ul><li>本地保存 Key</li><li>本地调用 Harness</li><li>本地保存 record 和报告</li></ul></article>
+        <article><h3>禁止</h3><ul><li>把 Key 写进网页</li><li>把 Key 提交到 Git</li><li>把隐私数据上传到公开平台</li></ul></article>
+      </div>
+    </section>
+  </main>
+  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容"><div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div></div>
+  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
+  <script src="../assets/js/search-index.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script src="../assets/js/lab.js"></script>
+</body>
+</html>
