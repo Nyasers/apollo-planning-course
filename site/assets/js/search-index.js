@@ -2,7 +2,7 @@ window.COURSE_INDEX = [
   {
     "title": "第 00 课 · Linux 与 Apollo 仿真环境安装",
     "href": "lesson-00.html",
-    "text": "先把 Linux、Docker、AEM、application-pnc 和 DreamView 跑通。没有这一步，后面的 Planning 阅读和实验都只是纸上谈兵。",
+    "text": "安装并启动 Linux、Docker、AEM、application-pnc 和 DreamView，完成 Apollo 仿真环境准备。",
     "keywords": "Linux Ubuntu WSL 虚拟机 双系统 Docker AEM application-pnc DreamView 安装"
   },
   {
