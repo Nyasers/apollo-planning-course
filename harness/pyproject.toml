@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apollo-claw-harness"
+version = "0.1.0"
+description = "Thin local harness for Apollo Claw experiment workflow"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+apollo-claw = "apollo_claw.cli:main"
+
+[tool.setuptools]
+packages = ["apollo_claw"]
