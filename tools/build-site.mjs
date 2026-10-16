@@ -70,6 +70,7 @@ function renderSidebar(activeId = "") {
       <p class="sidebar-note"><span data-progress-count>0 / 21</span> 个单元已完成。进度只保存在你的浏览器。</p>
     </div>
     ${groups}
+    <section class="nav-group"><p class="nav-label">实验平台</p><ul class="nav-list"><li><a class="nav-link" href="lab/index.html"><span class="nav-index">LAB</span><span class="nav-title">MVP 实验中心</span><span class="nav-state" aria-hidden="true"></span></a></li></ul></section>
   </aside>`;
 }
 
@@ -80,6 +81,7 @@ function topbar() {
       <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>从仿真环境到 Scenario 与 Task</span></span>
     </a>
     <div class="top-actions">
+      <a class="action-button lab-entry-button" href="lab/index.html"><span>实验中心</span><span class="button-label">进入 MVP</span></a>
       <span class="commit-pill">commit ${COMMIT.slice(0, 8)}</span>
       <button class="action-button" type="button" data-search-open aria-label="搜索课程"><span>搜索</span><span class="button-label">课程内容</span><span aria-hidden="true">/</span></button>
       <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题" aria-pressed="false">◐</button>
@@ -189,7 +191,8 @@ function renderHome() {
           <h1>先跑起来，<span>再读懂规划。</span></h1>
           <p class="hero-summary">这不是一份从函数细节开始的“劝退教程”。路线从 Linux 仿真环境出发，先建立 Apollo 与 Planning 的整体地图，再逐步进入 Scenario、Task 和读懂代码所需的 C++。</p>
           <div class="hero-actions">
-            <a class="button-primary" href="lesson-00.html">从第 00 课开始</a>
+            <a class="button-primary" href="lab/index.html">进入实验中心</a>
+            <a class="button-secondary" href="lesson-00.html">从第 00 课开始</a>
             <a class="button-secondary" href="#roadmap">查看完整路线</a>
           </div>
         </div>
@@ -294,6 +297,27 @@ async function build() {
     const next = builtLessons[index + 1];
     await fs.writeFile(path.join(siteDir, lesson.output), renderLessonPage(lesson, lesson.html, prev, next), "utf8");
   }
+
+  searchIndex.push(
+    {
+      title: "实验中心 · 城市道路自动驾驶综合仿真实验",
+      href: "lab/index.html",
+      text: "Apollo Claw 四技能、MVP 范围和实验路线",
+      keywords: "实验中心 Apollo Claw MVP 人行道 避让"
+    },
+    {
+      title: "实验 · 人行道避让综合实验",
+      href: "lab/crosswalk.html",
+      text: "环境检查、场景运行、代码定位、录包、评分与优化闭环",
+      keywords: "人行道 避让 apollo-env apollo-dev apollo-test apollo-eval"
+    },
+    {
+      title: "实验报告 · 人行道避让优化前后对比",
+      href: "lab/report.html",
+      text: "TTC、纵向加速度、Jerk、急刹次数和场景得分对比",
+      keywords: "实验报告 评分 TTC Jerk 急刹"
+    }
+  );
 
   const searchFile = `window.COURSE_INDEX = ${JSON.stringify(searchIndex, null, 2)};\n`;
   await fs.writeFile(path.join(assetsDir, "js", "search-index.js"), searchFile, "utf8");

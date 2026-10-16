@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Apollo Claw MVP 实验报告：人行道避让优化前后对比。">
+  <title>实验报告 | Apollo Planning Lab</title>
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/lab.css">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>实验报告 · MVP 原型</span></span>
+    </a>
+    <nav class="lab-nav" aria-label="实验中心导航">
+      <a href="./">实验中心</a>
+      <a href="crosswalk.html">人行道避让</a>
+      <a href="report.html" aria-current="page">实验报告</a>
+      <a href="../index.html">返回课程</a>
+    </nav>
+    <div class="lab-actions">
+      <span class="lab-status-pill">本地自评估</span>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button>
+    </div>
+  </header>
+
+  <main class="lab-shell" id="main-content" data-lab-report>
+    <section class="lab-hero">
+      <div class="lab-hero-copy">
+        <p class="lesson-kicker">Report · <span data-report-scenario>人行道避让</span></p>
+        <h1>优化前后<span>对比报告</span></h1>
+        <p>报告由实验运行数据、channel 记录和本地评估结果组成。当前页面使用 MVP 演示数据，接入 Apollo Claw Harness 与 apollo-eval 后将替换为真实实验输出。</p>
+        <div class="lab-hero-actions">
+          <button class="button-primary" type="button" data-download-report>下载 Markdown 报告</button>
+          <a class="button-secondary" href="crosswalk.html">返回实验台</a>
+        </div>
+      </div>
+      <div class="lab-hero-board">
+        <p class="lab-board-label">SCORE</p>
+        <div class="lab-score-ring"><strong data-report-score-after>94</strong><span>优化后</span></div>
+        <div class="lab-flow"><li><b>82</b><span>优化前得分</span><em>BASELINE</em></li><li><b>94</b><span>优化后得分</span><em>IMPROVED</em></li></div>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Metric Comparison</p><h2>关键指标对比</h2></div>
+        <p>橙色表示优化前，绿色表示优化后。指标为 MVP 演示数据，不替代官方评测。</p>
+      </div>
+      <div class="lab-report-card" data-report-bars></div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Evidence Chain</p><h2>实验证据链</h2></div>
+        <p>每个结论都应能追溯到环境、源码、record、图表或评分结果。</p>
+      </div>
+      <div class="lab-report-grid">
+        <article class="lab-report-card">
+          <h3>Apollo Claw 参与记录</h3>
+          <ul class="lab-reported-list">
+            <li><span><code>apollo-env</code> 环境检查</span><b>通过</b></li>
+            <li><span><code>apollo-dev</code> 代码和配置定位</span><b>4 项建议</b></li>
+            <li><span><code>apollo-test</code> record 与 channel 报告</span><b>已生成</b></li>
+            <li><span><code>apollo-eval</code> 场景评分和弱项解释</span><b>82→94</b></li>
+          </ul>
+        </article>
+        <article class="lab-report-card">
+          <h3>学生学习闭环</h3>
+          <ol>
+            <li>发现人行道前减速急、TTC 偏低。</li>
+            <li>使用 Apollo Claw 定位 TrafficRule 和速度边界。</li>
+            <li>录制数据，对比速度、加速度和 Jerk。</li>
+            <li>调整参数并重新运行场景。</li>
+            <li>确认急刹减少并完成实验报告。</li>
+          </ol>
+        </article>
+        <article class="lab-report-card">
+          <h3>结论</h3>
+          <p>优化后 TTC 提高，纵向加速度、Jerk 和急刹次数下降，安全性与舒适性均有改善。学生能够解释参数变化与场景得分之间的关系。</p>
+          <div class="lab-notice">本地自评估不等于官方评分。最终结果以赛事平台或课程教师评价为准。</div>
+        </article>
+        <article class="lab-report-card">
+          <h3>后续建设</h3>
+          <ul>
+            <li>接入真实 Agent API 和服务端模型网关。</li>
+            <li>调用真实 apollo-test 与 apollo-eval 脚本。</li>
+            <li>上传 record 和生成 CSV、PNG、JSON 报告。</li>
+            <li>增加教师复核、学习记录和能力画像。</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容">
+    <div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div>
+  </div>
+  <script src="../assets/js/search-index.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script src="../assets/js/lab.js"></script>
+</body>
+</html>

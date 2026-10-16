@@ -2206,5 +2206,23 @@ window.COURSE_INDEX = [
     "href": "lesson-20.html#16-最终过关检查",
     "text": "小型限速功能实战",
     "keywords": "SpeedLimitDecider region_speed_cap Proto 限速 capstone 对照实验"
+  },
+  {
+    "title": "实验中心 · 城市道路自动驾驶综合仿真实验",
+    "href": "lab/index.html",
+    "text": "Apollo Claw 四技能、MVP 范围和实验路线",
+    "keywords": "实验中心 Apollo Claw MVP 人行道 避让"
+  },
+  {
+    "title": "实验 · 人行道避让综合实验",
+    "href": "lab/crosswalk.html",
+    "text": "环境检查、场景运行、代码定位、录包、评分与优化闭环",
+    "keywords": "人行道 避让 apollo-env apollo-dev apollo-test apollo-eval"
+  },
+  {
+    "title": "实验报告 · 人行道避让优化前后对比",
+    "href": "lab/report.html",
+    "text": "TTC、纵向加速度、Jerk、急刹次数和场景得分对比",
+    "keywords": "实验报告 评分 TTC Jerk 急刹"
   }
 ];

@@ -253,3 +253,45 @@ site/assets/images/*.webp
 ```
 
 原始 PNG 和生图提示词保留在本地 `generated/`，不进入公开仓库。所有插图均不放中文文字，避免图像模型中文字乱码；具体含义由网页标题、正文和图注解释。
+## MVP 实验中心
+
+实验中心已经加入静态网站：
+
+```text
+site/lab/index.html
+site/lab/crosswalk.html
+site/lab/report.html
+```
+
+包含：
+
+- 实验中心首页与 MVP 范围。
+- 人行道避让实验台。
+- Apollo Claw 四技能入口。
+- 场景演示控制台。
+- 优化前后指标对比。
+- Markdown 实验报告下载。
+
+当前默认为明确标注的演示模式，不连接真实模型和仿真。接入真实后端时，在 `crosswalk.html` 中配置：
+
+```javascript
+window.APOLLO_LAB_CONFIG = {
+  apiBase: "https://api.example.com",
+  simulationUrl: "https://studio.example.com",
+  demoMode: false
+};
+```
+
+后端接口约定：
+
+```text
+POST /api/agent
+body: { skill, message, experiment, stage }
+response: { message, evidence? }
+```
+
+实验中心浏览器检查：
+
+```powershell
+& 'C:\Users\FQX\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\test-lab.cjs
+```

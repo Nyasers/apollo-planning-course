@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Apollo Planning Lab：城市道路自动驾驶综合仿真实验中心 MVP。">
+  <title>实验中心 | Apollo Planning Lab</title>
+  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/lab.css">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>实验中心 · MVP 原型</span></span>
+    </a>
+    <nav class="lab-nav" aria-label="实验中心导航">
+      <a href="./" aria-current="page">实验中心</a>
+      <a href="crosswalk.html">人行道避让</a>
+      <a href="report.html">实验报告</a>
+      <a href="../index.html">返回课程</a>
+    </nav>
+    <div class="lab-actions">
+      <span class="lab-status-pill">MVP 演示模式</span>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button>
+    </div>
+  </header>
+
+  <main class="lab-shell" id="main-content">
+    <section class="lab-hero">
+      <div class="lab-hero-copy">
+        <p class="lesson-kicker">AI + Virtual Simulation</p>
+        <h1>城市道路自动驾驶<span>综合仿真实验</span></h1>
+        <p>实验中心把现有 Apollo Planning 课程连接到仿真任务、Apollo Claw 智能辅助、实验数据和评分报告。当前为申请阶段 MVP，优先验证一条真实教学闭环，不宣称已经完成全面上线。</p>
+        <div class="lab-hero-actions">
+          <a class="button-primary" href="crosswalk.html">进入人行道避让实验</a>
+          <a class="button-secondary" href="report.html">查看示例报告</a>
+        </div>
+      </div>
+      <div class="lab-hero-board">
+        <p class="lab-board-label">ONE-LOOP MVP FLOW</p>
+        <ol class="lab-flow">
+          <li><b>01</b><span>环境检查</span><em>apollo-env</em></li>
+          <li><b>02</b><span>场景运行</span><em>SimControl</em></li>
+          <li><b>03</b><span>问题定位</span><em>apollo-dev</em></li>
+          <li><b>04</b><span>数据录制</span><em>apollo-test</em></li>
+          <li><b>05</b><span>评分优化</span><em>apollo-eval</em></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">MVP Boundary</p><h2>先跑通一条闭环</h2></div>
+        <p>不先实现所有 24 步，而是把人行道避让做成完整样板：能运行、能采集、能评分、能优化、能形成报告。</p>
+      </div>
+      <div class="lab-metrics-grid">
+        <article class="lab-card"><span class="lab-number">01</span><h3>核心场景</h3><p>人行道避让，后续扩展到交通灯、借道和泊车。</p></article>
+        <article class="lab-card"><span class="lab-number">04</span><h3>Apollo Claw Skills</h3><p>env、dev、test、eval 四个技能进入同一条实验链。</p></article>
+        <article class="lab-card"><span class="lab-number">08</span><h3>教学阶段</h3><p>从环境准备、运行、诊断、录包到评分和报告。</p></article>
+        <article class="lab-card"><span class="lab-number">24</span><h3>完整课程目标</h3><p>当前先实现关键路径，其余步骤列入持续建设计划。</p></article>
+      </div>
+      <div class="lab-notice"><strong>原型声明：</strong>本页面用于申报和教学演示。未配置真实 Agent API 与仿真入口时，交互使用演示数据，不替代官方评分。</div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Apollo Claw</p><h2>四个技能如何进入实验</h2></div>
+        <p>模型密钥和后端由平台统一管理，学生只需要使用实验助手的四个能力入口。</p>
+      </div>
+      <div class="lab-skill-grid">
+        <article class="lab-card"><div class="lab-skill-head"><code>apollo-env</code><span class="lab-chip">实验前</span></div><h3>环境检查与排错</h3><p>检查 Docker、aem、buildtool、磁盘和网络，生成环境状态报告。</p></article>
+        <article class="lab-card"><div class="lab-skill-head"><code>apollo-dev</code><span class="lab-chip">实验中</span></div><h3>代码、配置与日志定位</h3><p>检索 PnC 知识库，解释 Task、Scenario、TrafficRule 和参数位置。</p></article>
+        <article class="lab-card"><div class="lab-skill-head"><code>apollo-test</code><span class="lab-chip">实验中</span></div><h3>数据录制与可视化</h3><p>录制 record、盘点 channel、生成 CSV、PNG 和 Markdown 报告。</p></article>
+        <article class="lab-card"><div class="lab-skill-head"><code>apollo-eval</code><span class="lab-chip">实验后</span></div><h3>评分与优化建议</h3><p>解释 TTC、加速度、Jerk、碰撞和限速，给出下一轮优化方向。</p></article>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Scenario</p><h2>当前只开放一个主场景</h2></div>
+        <p>优先把一个人行道避让场景做深，避免 MVP 范围失控。</p>
+      </div>
+      <div class="lab-scenario-grid">
+        <article class="lab-card is-primary">
+          <img class="lab-scenario-image" src="../assets/images/scenario-stage-task-comic.webp" alt="人行道避让场景漫画示意">
+          <div class="lab-skill-head" style="margin-top:16px"><span class="lab-chip">MVP READY</span><span class="lab-chip">约 45 分钟</span></div>
+          <h3>人行道避让综合实验</h3>
+          <p>从环境检查开始，运行行人横穿场景，定位减速和路径问题，录制数据，解释评分并完成一次优化。</p>
+          <a class="button-primary" href="crosswalk.html">进入实验</a>
+        </article>
+        <div>
+          <article class="lab-card is-muted"><h3>交通灯停走</h3><p>下一阶段场景，用于讲解 Scenario、TrafficRule 和交通灯决策。</p><span class="lab-chip">后续建设</span></article>
+          <article class="lab-card is-muted" style="margin-top:14px"><h3>自主泊车</h3><p>后续接入开放空间、ROI 和泊车轨迹评分。</p><span class="lab-chip">后续建设</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Experiment Roadmap</p><h2>24 步实验的当前状态</h2></div>
+        <p>MVP 先覆盖环境、通信、规划、数据、评分的关键路径，其余功能明确标记为后续建设。</p>
+      </div>
+      <table class="lab-table">
+        <thead><tr><th>实验组</th><th>对应步骤</th><th>当前状态</th><th>下一步</th></tr></thead>
+        <tbody>
+          <tr><td>环境与通信</td><td>3-9</td><td>环境页与 cyber_monitor 说明</td><td>补齐录包、talker、Timer 和调度实验</td></tr>
+          <tr><td>感知与定位</td><td>10-11</td><td>架构与数据概念</td><td>新增点云、检测结果和字段解析</td></tr>
+          <tr><td>规划与速度</td><td>12-18</td><td>人行道场景先跑通</td><td>扩展参考线、借道、U 型弯和 ST 图</td></tr>
+          <tr><td>控制与泊车</td><td>19-21</td><td>暂未实现</td><td>接入 PID、LQR 和开放空间实验</td></tr>
+          <tr><td>综合与评价</td><td>22-24</td><td>报告页原型</td><td>接入真实评分脚本和综合场景</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容">
+    <div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div>
+  </div>
+  <script src="../assets/js/search-index.js"></script>
+  <script src="../assets/js/site.js"></script>
+  <script src="../assets/js/lab.js"></script>
+</body>
+</html>
