@@ -24,7 +24,7 @@ def empty_evidence(task: str, scenario: str = "") -> Dict[str, Any]:
             "scenario": scenario or task,
             "created_at": datetime.now().astimezone().isoformat(),
             "source": "local-harness",
-            "mode": "real",
+            "mode": "planned",
         },
         "environment": {},
         "record": {},

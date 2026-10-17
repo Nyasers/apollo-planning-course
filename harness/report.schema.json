@@ -2,15 +2,173 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Apollo Claw Experiment Report",
   "type": "object",
-  "required": ["meta", "environment", "record", "metrics", "ai", "verification", "evidence", "capability"],
+  "additionalProperties": true,
+  "required": [
+    "meta",
+    "environment",
+    "record",
+    "metrics",
+    "ai",
+    "verification",
+    "evidence",
+    "capability"
+  ],
   "properties": {
-    "meta": {"type": "object"},
-    "environment": {"type": "object"},
-    "record": {"type": "object"},
-    "metrics": {"type": "object"},
-    "ai": {"type": "object"},
-    "verification": {"type": "object"},
-    "evidence": {"type": "array"},
-    "capability": {"type": "object"}
+    "meta": {
+      "type": "object",
+      "required": [
+        "experiment_id",
+        "task",
+        "scenario",
+        "created_at",
+        "source",
+        "mode"
+      ],
+      "properties": {
+        "experiment_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "local-harness",
+            "demo",
+            "imported"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "planned",
+            "real",
+            "demo",
+            "replay"
+          ]
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "environment": {
+      "type": "object"
+    },
+    "record": {
+      "type": "object"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "null"
+        ]
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "source",
+        "value",
+        "is_official"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "is_official": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "student_confirmed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verification": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "path"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array"
+    },
+    "errors": {
+      "type": "array"
+    },
+    "capability": {
+      "type": "object"
+    }
   }
 }

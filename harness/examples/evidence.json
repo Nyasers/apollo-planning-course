@@ -5,23 +5,81 @@
     "scenario": "人行道避让",
     "created_at": "2026-10-17T01:00:00+08:00",
     "source": "local-harness",
-    "mode": "real"
+    "mode": "demo"
   },
-  "environment": {"wsl": true, "docker": true, "aem": true, "apollo_container": "apollo_neo_dev_edu"},
-  "record": {"duration_sec": 25, "channel_count": 6, "message_count": 128430},
-  "metrics": {"min_ttc": 1.4, "max_acceleration": 3.6, "max_jerk": 4.8, "hard_brake": 2, "collision": false, "reach_end": true},
+  "environment": {
+    "wsl": true,
+    "docker": true,
+    "aem": true,
+    "apollo_container": "apollo_neo_dev_edu"
+  },
+  "record": {
+    "duration_sec": 25,
+    "channel_count": 6,
+    "message_count": 128430
+  },
+  "metrics": {
+    "min_ttc": 1.4,
+    "max_acceleration": 3.6,
+    "max_jerk": 4.8,
+    "hard_brake": 2,
+    "collision": false,
+    "reach_end": true
+  },
   "ai": {
-    "skills": ["apollo-dev", "apollo-eval"],
-    "facts": ["TTC 最低 1.4 秒", "急刹 2 次"],
-    "hypotheses": ["通过人行道前减速偏晚"],
-    "suggestions": ["检查 crosswalk 速度边界和停止线参数"],
+    "skills": [
+      "apollo-dev",
+      "apollo-eval"
+    ],
+    "facts": [
+      "TTC 最低 1.4 秒",
+      "急刹 2 次"
+    ],
+    "hypotheses": [
+      "通过人行道前减速偏晚"
+    ],
+    "suggestions": [
+      "检查 crosswalk 速度边界和停止线参数"
+    ],
     "student_confirmed": true
   },
-  "verification": {"min_ttc": 2.3, "max_jerk": 2.8, "hard_brake": 0, "score_before": 82, "score_after": 94},
+  "verification": {
+    "min_ttc": 2.3,
+    "max_jerk": 2.8,
+    "hard_brake": 0,
+    "score_before": 82,
+    "score_after": 94
+  },
   "evidence": [
-    {"type": "record", "path": "outputs/experiments/20261017-crosswalk-01/crosswalk.record", "summary": "25 秒，6 个核心 channel"},
-    {"type": "csv", "path": "outputs/experiments/20261017-crosswalk-01/channel_summary.csv", "summary": "planning、control、localization 均有消息"},
-    {"type": "png", "path": "outputs/experiments/20261017-crosswalk-01/plots/speed.png", "summary": "优化前后速度曲线对比"}
+    {
+      "type": "record",
+      "path": "outputs/experiments/20261017-crosswalk-01/crosswalk.record",
+      "summary": "25 秒，6 个核心 channel"
+    },
+    {
+      "type": "csv",
+      "path": "outputs/experiments/20261017-crosswalk-01/channel_summary.csv",
+      "summary": "planning、control、localization 均有消息"
+    },
+    {
+      "type": "png",
+      "path": "outputs/experiments/20261017-crosswalk-01/plots/speed.png",
+      "summary": "优化前后速度曲线对比"
+    }
   ],
-  "capability": {"environment": 82, "log_analysis": 76, "data_capture": 88, "parameter_tuning": 69, "reporting": 74, "ai_usage": 92}
+  "capability": {
+    "environment": 82,
+    "log_analysis": 76,
+    "data_capture": 88,
+    "parameter_tuning": 69,
+    "reporting": 74,
+    "ai_usage": 92
+  },
+  "score": {
+    "source": "apollo-eval",
+    "value": 94,
+    "is_official": false
+  },
+  "commands": [],
+  "errors": []
 }

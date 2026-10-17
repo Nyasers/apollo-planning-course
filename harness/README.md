@@ -6,6 +6,8 @@ Apollo Claw Harness 是运行在学生本地 WSL2 / Ubuntu 环境中的轻量实
 
 > 脚本产出事实，模型解释事实，学生确认操作，系统保存证据。
 
+设计说明见 [docs/harness-design.md](docs/harness-design.md)，技术选型见 [docs/technical-route.md](docs/technical-route.md)。
+
 ## 命令
 
 ```bash
@@ -15,20 +17,29 @@ apollo-claw advise --evidence <report.json>
 apollo-claw test record --tag crosswalk --seconds 25
 apollo-claw test report --record <record-dir>
 apollo-claw eval --scenario <scenario.json> --bag <output.bag>
-apollo-claw report export --evidence <evidence.json>
+apollo-claw report export --experiment <experiment-id>
+apollo-claw experiment list
+apollo-claw experiment show --id <experiment-id>
 apollo-claw serve --port 8765
 ```
+
+`test record`、`test report`、`eval` 默认 dry-run；只有加 `--execute` 才进入 Apollo 容器执行。
 
 ## 目录
 
 ```text
 harness/
   apollo_claw/        Python package
-  docs/               技术路线和交接说明
+    experiment.py     实验 manifest 和目录
+    runner.py         白名单命令执行器
+    report.py         报告契约、脱敏和导出
+    server.py         127.0.0.1 本地只读面板
+  docs/               技术路线和设计稿
   examples/           示例报告
-  scripts/            启动和安装脚本
-  skills/             四个 Apollo Claw skill 的放置说明
+  scripts/            安装、启动和检查脚本
+  skills/             四个 Apollo Claw skill 的放置位置
   report.schema.json  统一报告数据契约
+  tests/              轻量单元测试
 ```
 
 ## 环境
@@ -37,11 +48,31 @@ harness/
 - Apollo 容器默认名：`apollo_neo_dev_edu`。
 - 本地面板默认：`http://127.0.0.1:8765/`。
 - DeepSeek Key 仅保存在 `~/.apollo-claw/.env`。
+- 技能目录默认：`~/.apollo-claw/skills/{apollo-env,apollo-dev,apollo-test,apollo-eval}`。
+
+## 安装
+
+```bash
+cd harness
+bash scripts/install-harness.sh
+```
+
+如果四个技能已经在 `~/.openclaw/skills`：
+
+```bash
+APOLLO_SKILLS_SOURCE="$HOME/.openclaw/skills" bash scripts/install-harness.sh
+```
+
+## 测试
+
+```bash
+python3 -m unittest discover -v
+```
 
 ## 安全边界
 
-- 不自动执行 `sudo`。
-- 不自动删除数据或覆盖配置。
+- 不自动执行 `sudo`、删除数据、覆盖配置或大规模修改 Apollo 源码。
 - 不自动修改 Apollo 源码。
 - 不把 API Key、record 原始数据和隐私信息提交到 Git。
 - 模型只生成建议，不直接执行命令。
+- 本地面板只监听 `127.0.0.1`，只读展示。
