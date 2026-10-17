@@ -40,6 +40,20 @@
           <div class="manual-box"><strong>真实执行开关</strong><p>关闭时只生成 dry-run 计划，不接触 Apollo 容器。开启后才实际执行容器命令。</p></div>
         </section>
         <section class="panel wide">
+          <div class="panel-head"><div><span class="kicker">CONFIG</span><h3>DeepSeek API 设置</h3></div><span id="deepseek-config-status" class="pill">未配置</span></div>
+          <div class="settings-grid">
+            <label class="field">API Key<input id="deepseek-key" type="password" autocomplete="new-password" placeholder="留空则保留现有 Key"></label>
+            <label class="field">Base URL<input id="deepseek-base" type="text" placeholder="https://api.deepseek.com"></label>
+            <label class="field">模型<input id="deepseek-model" type="text" placeholder="deepseek-chat"></label>
+            <div class="settings-actions">
+              <button id="deepseek-save" class="button">保存配置</button>
+              <button id="deepseek-test" class="button secondary">测试连接</button>
+              <button id="deepseek-clear" class="button secondary">清除 Key</button>
+            </div>
+          </div>
+          <div id="deepseek-message" class="settings-message">Key 只发送到本机 Harness，并保存到 WSL 的 ~/.apollo-claw/.env，不写入网页存储。</div>
+        </section>
+        <section class="panel wide">
           <div class="panel-head"><div><span class="kicker">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
           <div class="ai-grid">
             <label class="field">问题<input id="ai-question" type="text" placeholder="例如：为什么人行道前 TTC 偏低？"></label>

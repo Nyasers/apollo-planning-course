@@ -15,7 +15,7 @@ Harness 的 P0/P1 骨架和本地服务已经通过实际运行验证；真实�
 | 测试 | 结果 | 说明 |
 |---|---|---|
 | Python 编译 | 通过 | `compileall` 无错误 |
-| 单元测试 | 通过 | 10 个测试全部通过 |
+| 单元测试 | 通过 | 11 个测试全部通过 |
 | WSL `doctor` | 通过 | Docker、aem、Apollo 容器、DreamView、技能目录均识别 |
 | 20 秒 record | 部分成功 | record 文件生成，但 0 channels |
 | channel 报告 | 通过 | 生成 CSV、module summary、Markdown |

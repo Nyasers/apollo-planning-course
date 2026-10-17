@@ -18,6 +18,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from .config import Settings
+from .deepseek import DeepSeekUnavailable, test_connection
 from .experiment import ExperimentStore
 
 WEB_ROOT = Path(__file__).resolve().parent / "web"
@@ -78,6 +79,9 @@ class JobManager:
             "APOLLO_WORKSPACE_HOST": self.settings.apollo_workspace_host,
             "APOLLO_WORKSPACE_CONTAINER": self.settings.apollo_workspace_container,
             "APOLLO_DREAMVIEW_URL": self.settings.dreamview_url,
+            "DEEPSEEK_API_KEY": self.settings.deepseek_api_key,
+            "DEEPSEEK_BASE_URL": self.settings.deepseek_base_url,
+            "DEEPSEEK_MODEL": self.settings.deepseek_model,
         })
         stdout = open(job.stdout_path, "w", encoding="utf-8")
         stderr = open(job.stderr_path, "w", encoding="utf-8")
@@ -139,6 +143,52 @@ def _report(store: ExperimentStore, experiment_id: str):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _deepseek_settings_path() -> Path:
+    return Path.home() / ".apollo-claw" / ".env"
+
+
+def _mask_key(value: str) -> str:
+    if not value:
+        return ""
+    if len(value) <= 8:
+        return "****"
+    return value[:3] + "****" + value[-2:]
+
+
+def _update_env(updates: Dict[str, str]) -> None:
+    path = _deepseek_settings_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    seen = set()
+    output = []
+    for raw in lines:
+        stripped = raw.strip()
+        if "=" in stripped and not stripped.startswith("#"):
+            key = stripped.split("=", 1)[0].strip()
+            if key in updates:
+                output.append(f"{key}={updates[key]}")
+                seen.add(key)
+                continue
+        output.append(raw)
+    for key, value in updates.items():
+        if key not in seen:
+            output.append(f"{key}={value}")
+    path.write_text("\n".join(output) + "\n", encoding="utf-8")
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        pass
+
+
+def _deepseek_status(settings: Settings) -> Dict[str, Any]:
+    return {
+        "configured": bool(settings.deepseek_api_key),
+        "base_url": settings.deepseek_base_url,
+        "model": settings.deepseek_model,
+        "masked_key": _mask_key(settings.deepseek_api_key),
+    }
+
+
 def make_handler(settings: Settings, token: Optional[str] = None):
     token = token or secrets.token_urlsafe(24)
     store = ExperimentStore(Path(settings.output_dir))
@@ -172,6 +222,45 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(403, {"error": "missing or invalid token"})
                 return
             path = urlparse(self.path).path
+            if path == "/api/settings/deepseek":
+                try:
+                    body = self._read_json()
+                    api_key = str(body.get("api_key", "")).strip()
+                    base_url = str(body.get("base_url", settings.deepseek_base_url)).strip().rstrip("/")
+                    model = str(body.get("model", settings.deepseek_model)).strip()
+                    parsed = urlparse(base_url)
+                    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                        raise ValueError("base_url must be an http(s) URL")
+                    updates = {"DEEPSEEK_BASE_URL": base_url, "DEEPSEEK_MODEL": model}
+                    if api_key:
+                        updates["DEEPSEEK_API_KEY"] = api_key
+                    _update_env(updates)
+                    if api_key:
+                        settings.deepseek_api_key = api_key
+                        os.environ["DEEPSEEK_API_KEY"] = api_key
+                    settings.deepseek_base_url = base_url
+                    settings.deepseek_model = model
+                    os.environ["DEEPSEEK_BASE_URL"] = base_url
+                    os.environ["DEEPSEEK_MODEL"] = model
+                    self._json(200, _deepseek_status(settings))
+                except Exception as exc:
+                    self._json(400, {"error": str(exc)})
+                return
+            if path == "/api/settings/deepseek/clear":
+                try:
+                    _update_env({"DEEPSEEK_API_KEY": ""})
+                    settings.deepseek_api_key = ""
+                    os.environ.pop("DEEPSEEK_API_KEY", None)
+                    self._json(200, _deepseek_status(settings))
+                except Exception as exc:
+                    self._json(400, {"error": str(exc)})
+                return
+            if path == "/api/settings/deepseek/test":
+                try:
+                    self._json(200, test_connection(settings))
+                except Exception as exc:
+                    self._json(400, {"error": str(exc)})
+                return
             if not path.startswith("/api/actions/"):
                 self._json(404, {"error": "not found"})
                 return
@@ -224,11 +313,14 @@ def make_handler(settings: Settings, token: Optional[str] = None):
 
         def do_GET(self):
             path = urlparse(self.path).path
+            if path == "/api/settings/deepseek":
+                self._json(200, _deepseek_status(settings))
+                return
             if path == "/health" or path == "/api/health":
                 self._json(200, {
                     "ok": True,
                     "service": "apollo-claw-harness",
-                    "version": "0.3.1",
+                    "version": "0.3.2",
                     "settings": {
                         "container": settings.apollo_container_name,
                         "workspace": settings.apollo_workspace_host,
@@ -239,7 +331,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 })
                 return
             if path == "/api/session":
-                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.1"})
+                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.2"})
                 return
             if path == "/api/tasks":
                 self._json(200, _load_tasks(settings))

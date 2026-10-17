@@ -1,9 +1,11 @@
 import json
+import os
 import tempfile
 import threading
 import time
 import unittest
 import urllib.request
+from unittest.mock import patch
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -120,3 +122,40 @@ class WebActionTest(unittest.TestCase):
                 server.shutdown()
                 server.server_close()
                 thread.join(timeout=2)
+
+    def test_deepseek_settings_can_be_saved_and_cleared(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp) / "tasks.json"
+            tasks.write_text(json.dumps({"tasks": [{"id": "crosswalk", "title": "人行道避让"}]}), encoding="utf-8")
+            env_path = Path(tmp) / ".env"
+            settings = Settings(tasks_file=str(tasks), output_dir=tmp, deepseek_api_key="")
+            old_key = os.environ.pop("DEEPSEEK_API_KEY", None)
+            server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                base = f"http://127.0.0.1:{server.server_port}"
+                with urllib.request.urlopen(base + "/api/session", timeout=5) as response:
+                    token = json.loads(response.read().decode("utf-8"))["token"]
+                headers = {"Content-Type": "application/json", "X-Apollo-Claw-Token": token}
+                body = json.dumps({"api_key": "sk-test-1234567890", "base_url": "https://api.deepseek.com", "model": "deepseek-chat"}).encode("utf-8")
+                with patch("apollo_claw.server._deepseek_settings_path", return_value=env_path):
+                    request = urllib.request.Request(base + "/api/settings/deepseek", data=body, method="POST", headers=headers)
+                    with urllib.request.urlopen(request, timeout=5) as response:
+                        saved = json.loads(response.read().decode("utf-8"))
+                self.assertTrue(saved["configured"])
+                self.assertNotIn("sk-test-1234567890", saved["masked_key"])
+                self.assertIn("DEEPSEEK_API_KEY=sk-test-1234567890", env_path.read_text(encoding="utf-8"))
+                with patch("apollo_claw.server._deepseek_settings_path", return_value=env_path):
+                    request = urllib.request.Request(base + "/api/settings/deepseek/clear", data=b"{}", method="POST", headers=headers)
+                    with urllib.request.urlopen(request, timeout=5) as response:
+                        cleared = json.loads(response.read().decode("utf-8"))
+                self.assertFalse(cleared["configured"])
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=2)
+                if old_key is not None:
+                    os.environ["DEEPSEEK_API_KEY"] = old_key
+                else:
+                    os.environ.pop("DEEPSEEK_API_KEY", None)

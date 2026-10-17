@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apollo-claw-harness"
-version = "0.3.1"
+version = "0.3.2"
 description = "Thin local harness for Apollo Claw experiment workflow"
 requires-python = ">=3.9"
 dependencies = []

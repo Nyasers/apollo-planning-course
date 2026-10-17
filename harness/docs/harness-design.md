@@ -1,6 +1,6 @@
 # Apollo Claw Harness 设计稿
 
-> 版本：0.3.1（设计 + P0 骨架 + 本地图形面板 + DeepSeek 诊断）
+> 版本：0.3.2（设计 + P0 骨架 + 本地图形面板 + DeepSeek 自主配置）
 > 日期：2026-10-17
 > 目标：在学生本地 WSL2 / Ubuntu 中，把“环境检查 → 仿真运行 → record → channel 报告 → 自评估 → AI 解释 → 实验报告”组织成可审计的确定性流程。
 
@@ -146,7 +146,7 @@ apc.nyase.ru
 - 白名单 runner、命令输出落盘。
 - `explain` / `advise` 的 DeepSeek 与规则降级。
 - 报告契约校验、路径脱敏、`report.json` / `report.md` 导出。
-- 本地图形面板、任务流程、受控动作、实验列表、报告查看和 DeepSeek 诊断。
+- 本地图形面板、任务流程、受控动作、实验列表、报告查看、DeepSeek API 本地配置和 AI 诊断。
 - 单元测试：manifest、证据路径、报告契约、API Key 防泄漏、模型输入脱敏、后台动作和静态前端。
 
 仍需在独立 Ubuntu/Apollo 机器上验证：

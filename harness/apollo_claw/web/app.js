@@ -128,6 +128,66 @@ function renderAI(ai) {
   });
 }
 
+function setDeepSeekStatus(configured, masked = "") {
+  const text = configured ? `DeepSeek 已配置${masked ? " · " + masked : ""}` : "规则降级模式";
+  setPill("deepseek-config-status", text, configured ? "ok" : "");
+  setPill("deepseek-status", text, configured ? "ok" : "");
+}
+
+async function loadDeepSeekSettings() {
+  try {
+    const data = await api("/api/settings/deepseek");
+    if ($("deepseek-base")) $("deepseek-base").value = data.base_url || "";
+    if ($("deepseek-model")) $("deepseek-model").value = data.model || "";
+    setDeepSeekStatus(Boolean(data.configured), data.masked_key || "");
+  } catch (error) {
+    if ($("deepseek-message")) $("deepseek-message").textContent = `读取 DeepSeek 配置失败：${error.message}`;
+  }
+}
+
+function setSettingsMessage(text, kind = "") {
+  const box = $("deepseek-message");
+  box.textContent = text;
+  box.className = "settings-message" + (kind ? " " + kind : "");
+}
+
+async function saveDeepSeekSettings() {
+  try {
+    setSettingsMessage("保存中...");
+    const body = {
+      api_key: $("deepseek-key").value.trim(),
+      base_url: $("deepseek-base").value.trim(),
+      model: $("deepseek-model").value.trim(),
+    };
+    const data = await api("/api/settings/deepseek", { method: "POST", body });
+    $("deepseek-key").value = "";
+    setDeepSeekStatus(Boolean(data.configured), data.masked_key || "");
+    setSettingsMessage("配置已保存。下一次 AI 诊断会使用新配置。", "ok");
+  } catch (error) {
+    setSettingsMessage(`保存失败：${error.message}`, "bad");
+  }
+}
+
+async function testDeepSeekConnection() {
+  try {
+    setSettingsMessage("正在测试 DeepSeek 连接...");
+    const data = await api("/api/settings/deepseek/test", { method: "POST", body: {} });
+    setSettingsMessage(`连接成功：${data.model || "deepseek"} 返回 ${data.response || "OK"}`, "ok");
+  } catch (error) {
+    setSettingsMessage(`连接失败：${error.message}`, "bad");
+  }
+}
+
+async function clearDeepSeekKey() {
+  try {
+    const data = await api("/api/settings/deepseek/clear", { method: "POST", body: {} });
+    setDeepSeekStatus(Boolean(data.configured), data.masked_key || "");
+    setSettingsMessage("API Key 已清除。后续诊断会使用规则降级模式。", "ok");
+  } catch (error) {
+    setSettingsMessage(`清除失败：${error.message}`, "bad");
+  }
+}
+
 function renderReport(report) {
   const box = $("report-view");
   if (!report) {
@@ -231,7 +291,8 @@ async function init() {
   try {
     const session = await api("/api/session");
     state.tasks = session.tasks?.tasks || [];
-    setPill("deepseek-status", session.deepseek_configured ? "DeepSeek 已配置" : "规则降级模式", session.deepseek_configured ? "ok" : "");
+    setDeepSeekStatus(Boolean(session.deepseek_configured));
+    await loadDeepSeekSettings();
     const params = new URLSearchParams(location.search);
     const wanted = params.get("task");
     selectTask(state.tasks.find((task) => task.id === wanted) || state.tasks[0] || { id: "crosswalk", title: "人行道避让" });
@@ -249,5 +310,8 @@ document.addEventListener("DOMContentLoaded", () => {
   $("refresh").addEventListener("click", async () => { await loadExperiments(); await loadExperiment(state.experimentId); });
   $("refresh-exp").addEventListener("click", async () => { await loadExperiments(); });
   $("experiment-select").addEventListener("change", (event) => loadExperiment(event.target.value).catch((error) => { $("console").textContent = error.message; }));
+  $("deepseek-save").addEventListener("click", saveDeepSeekSettings);
+  $("deepseek-test").addEventListener("click", testDeepSeekConnection);
+  $("deepseek-clear").addEventListener("click", clearDeepSeekKey);
   init();
 });

@@ -57,6 +57,21 @@ def _post_json(url: str, payload: Dict[str, Any], api_key: str, timeout: int = 4
         return json.loads(resp.read().decode("utf-8"))
 
 
+def test_connection(settings: Settings, timeout: int = 20) -> Dict[str, Any]:
+    if not settings.deepseek_api_key:
+        raise DeepSeekUnavailable("DEEPSEEK_API_KEY is not configured")
+    base = settings.deepseek_base_url.rstrip("/")
+    payload = {
+        "model": settings.deepseek_model,
+        "messages": [{"role": "user", "content": "只回复 OK"}],
+        "temperature": 0,
+        "max_tokens": 4,
+    }
+    data = _post_json(base + "/chat/completions", payload, settings.deepseek_api_key, timeout=timeout)
+    content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    return {"ok": True, "model": settings.deepseek_model, "response": content}
+
+
 def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") -> Dict[str, Any]:
     if not settings.deepseek_api_key:
         raise DeepSeekUnavailable("DEEPSEEK_API_KEY is not configured")
