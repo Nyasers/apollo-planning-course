@@ -220,7 +220,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(200, {
                     "ok": True,
                     "service": "apollo-claw-harness",
-                    "version": "0.2.0",
+                    "version": "0.3.0",
                     "settings": {
                         "container": settings.apollo_container_name,
                         "workspace": settings.apollo_workspace_host,
