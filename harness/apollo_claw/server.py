@@ -176,7 +176,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(404, {"error": "not found"})
                 return
             action = path.rsplit("/", 1)[-1]
-            if action not in {"doctor", "record", "report", "eval", "export"}:
+            if action not in {"doctor", "record", "report", "eval", "export", "explain"}:
                 self._json(404, {"error": "unknown action"})
                 return
             try:
@@ -203,6 +203,14 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                     argv = ["eval", "--experiment", experiment_id, "--scenario", body["scenario_path"], "--bag", body["bag"], "--scenario-name", body.get("scenario", "人行道避让")]
                     if body.get("execute"):
                         argv.append("--execute")
+                elif action == "explain":
+                    if not experiment_id:
+                        raise ValueError("explain requires experiment_id")
+                    argv = ["explain", "--experiment", experiment_id]
+                    if body.get("question"):
+                        argv.extend(["--question", body["question"]])
+                    if body.get("log"):
+                        argv.extend(["--log", body["log"]])
                 else:
                     if not experiment_id:
                         raise ValueError("export requires experiment_id")
@@ -231,7 +239,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 })
                 return
             if path == "/api/session":
-                self._json(200, {"token": token, "tasks": _load_tasks(settings)})
+                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.0"})
                 return
             if path == "/api/tasks":
                 self._json(200, _load_tasks(settings))

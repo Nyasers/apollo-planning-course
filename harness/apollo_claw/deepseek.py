@@ -1,7 +1,9 @@
 """DeepSeek adapter using the OpenAI-compatible chat completions API."""
 from __future__ import annotations
 
+import copy
 import json
+import re
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List
@@ -22,6 +24,30 @@ class DeepSeekUnavailable(RuntimeError):
     pass
 
 
+def _redact_text(value: str) -> str:
+    text = value
+    text = re.sub(r"C:\\Users\\[^\\\s]+(?:\\[^\\\s]+)*", "<local-home>", text, flags=re.IGNORECASE)
+    text = re.sub(r"/home/[^/\s]+", "~", text)
+    text = re.sub(r"sk-[A-Za-z0-9_-]{8,}", "<redacted-api-key>", text)
+    text = re.sub(r"(?i)(DEEPSEEK_API_KEY\s*=\s*)\S+", r"\1<redacted>", text)
+    return text
+
+
+def redact_for_model(evidence: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep model input useful while removing raw commands and local secrets."""
+    data = copy.deepcopy(evidence)
+    data.pop("commands", None)
+    def walk(value):
+        if isinstance(value, str):
+            return _redact_text(value)
+        if isinstance(value, list):
+            return [walk(item) for item in value]
+        if isinstance(value, dict):
+            return {key: walk(item) for key, item in value.items()}
+        return value
+    return walk(data)
+
+
 def _post_json(url: str, payload: Dict[str, Any], api_key: str, timeout: int = 45) -> Dict[str, Any]:
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, method="POST")
@@ -36,7 +62,7 @@ def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") ->
         raise DeepSeekUnavailable("DEEPSEEK_API_KEY is not configured")
     base = settings.deepseek_base_url.rstrip("/")
     url = base + "/chat/completions"
-    user = "请解释下面的 Apollo 实验证据。\n" + json.dumps(evidence, ensure_ascii=False, indent=2)
+    user = "请解释下面的 Apollo 实验证据。\n" + json.dumps(redact_for_model(evidence), ensure_ascii=False, indent=2)
     if question:
         user += "\n学生问题：" + question
     payload = {

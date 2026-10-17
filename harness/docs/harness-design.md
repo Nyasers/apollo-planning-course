@@ -146,8 +146,8 @@ apc.nyase.ru
 - 白名单 runner、命令输出落盘。
 - `explain` / `advise` 的 DeepSeek 与规则降级。
 - 报告契约校验、路径脱敏、`report.json` / `report.md` 导出。
-- 本地图形面板、任务流程、受控动作、实验列表和报告查看。
-- 单元测试：manifest、证据路径、报告契约、API Key 防泄漏、后台动作和静态前端。
+- 本地图形面板、任务流程、受控动作、实验列表、报告查看和 DeepSeek 诊断。
+- 单元测试：manifest、证据路径、报告契约、API Key 防泄漏、模型输入脱敏、后台动作和静态前端。
 
 仍需在独立 Ubuntu/Apollo 机器上验证：
 

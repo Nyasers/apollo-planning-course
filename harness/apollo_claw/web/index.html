@@ -40,6 +40,15 @@
           <div class="manual-box"><strong>真实执行开关</strong><p>关闭时只生成 dry-run 计划，不接触 Apollo 容器。开启后才实际执行容器命令。</p></div>
         </section>
         <section class="panel wide">
+          <div class="panel-head"><div><span class="kicker">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
+          <div class="ai-grid">
+            <label class="field">问题<input id="ai-question" type="text" placeholder="例如：为什么人行道前 TTC 偏低？"></label>
+            <label class="field">日志路径（可选）<input id="ai-log" type="text" placeholder="/home/fqx/application-pnc/data/log/planning.INFO"></label>
+            <button class="button" data-action="explain">开始诊断</button>
+          </div>
+          <div id="ai-view" class="ai-view">选择实验后，可让 DeepSeek 解释当前证据；未配置 Key 时自动使用规则降级。</div>
+        </section>
+        <section class="panel wide">
           <div class="panel-head"><div><span class="kicker">CONSOLE</span><h3>任务控制台</h3></div><span id="job-status" class="pill">空闲</span></div>
           <pre id="console" class="console">等待操作...</pre>
         </section>

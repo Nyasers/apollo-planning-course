@@ -52,6 +52,7 @@ function selectTask(task) {
   renderTasks();
   renderExperiments();
   renderExperiment();
+  renderAI(null);
   renderReport(null);
 }
 
@@ -79,6 +80,7 @@ async function loadExperiment(id) {
   state.experiment = await api(`/api/experiments/${encodeURIComponent(id)}`);
   renderExperiments();
   renderExperiment();
+  renderAI(state.experiment.ai);
   try {
     const report = await api(`/api/experiments/${encodeURIComponent(id)}/report`);
     renderReport(report);
@@ -98,6 +100,32 @@ function renderExperiment() {
   const status = exp.meta?.status || "created";
   box.innerHTML = `<strong>${esc(status)}</strong><div>实验：${esc(exp.meta?.scenario || exp.meta?.task || "-")}</div><div>record：${esc(record.channel_count ?? "-")} channels · ${esc(record.size_bytes ?? "-")} bytes</div><div>记录状态：${esc(record.status || "-")}</div>`;
   setPill("report-status", status, status === "empty_record" || status.includes("failed") ? "bad" : "ok");
+}
+
+function renderAI(ai) {
+  const box = $("ai-view");
+  if (!ai || Object.keys(ai).length === 0) {
+    box.textContent = "选择实验后，可让 DeepSeek 解释当前证据；未配置 Key 时自动使用规则降级。";
+    return;
+  }
+  box.innerHTML = "";
+  const mode = document.createElement("div");
+  mode.className = "summary";
+  mode.innerHTML = `<strong>诊断模式：${esc(ai.mode || "-")}</strong><div>技能：${esc(ai.skill || "-")}</div>${ai.note ? `<div>${esc(ai.note)}</div>` : ""}`;
+  box.appendChild(mode);
+  const sections = [["事实", ai.facts], ["推测", ai.hypotheses], ["建议", ai.suggestions], ["引用", ai.source_refs]];
+  sections.forEach(([title, values]) => {
+    const card = document.createElement("div");
+    card.className = "summary";
+    const strong = document.createElement("strong"); strong.textContent = title; card.appendChild(strong);
+    const list = document.createElement("div"); list.className = "ai-list";
+    if ((values || []).length) {
+      values.forEach((value) => { const row = document.createElement("div"); row.textContent = value; list.appendChild(row); });
+    } else {
+      const row = document.createElement("div"); row.textContent = "暂无"; list.appendChild(row);
+    }
+    card.appendChild(list); box.appendChild(card);
+  });
 }
 
 function renderReport(report) {
@@ -154,6 +182,7 @@ async function actionBody(action) {
   if (action === "record") return { experiment_id: state.experimentId || undefined, task: task.id, scenario: task.title, tag: task.id, seconds: Number($("seconds").value || 25), execute };
   if (action === "report") return { experiment_id: state.experimentId, record: state.experiment?.record?.path, execute };
   if (action === "export") return { experiment_id: state.experimentId };
+  if (action === "explain") return { experiment_id: state.experimentId, question: $("ai-question").value.trim() || "请分析当前实验证据并给出下一步建议。", log: $("ai-log").value.trim() };
   return {};
 }
 
@@ -163,7 +192,7 @@ async function runAction(action) {
     setPill("job-status", "提交中");
     const payload = await actionBody(action);
     if (action === "report" && !payload.record) throw new Error("请先完成一次 record，或选择已有实验");
-    if ((action === "report" || action === "export") && !payload.experiment_id) throw new Error("请先选择实验记录");
+    if ((action === "report" || action === "export" || action === "explain") && !payload.experiment_id) throw new Error("请先选择或创建实验记录");
     const data = await api(`/api/actions/${action}`, { method: "POST", body: payload });
     state.jobId = data.job.job_id;
     state.experimentId = data.experiment_id;
@@ -202,6 +231,7 @@ async function init() {
   try {
     const session = await api("/api/session");
     state.tasks = session.tasks?.tasks || [];
+    setPill("deepseek-status", session.deepseek_configured ? "DeepSeek 已配置" : "规则降级模式", session.deepseek_configured ? "ok" : "");
     const params = new URLSearchParams(location.search);
     const wanted = params.get("task");
     selectTask(state.tasks.find((task) => task.id === wanted) || state.tasks[0] || { id: "crosswalk", title: "人行道避让" });
