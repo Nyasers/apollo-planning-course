@@ -2208,10 +2208,10 @@ window.COURSE_INDEX = [
     "keywords": "SpeedLimitDecider region_speed_cap Proto 限速 capstone 对照实验"
   },
   {
-    "title": "实验中心 · 城市道路自动驾驶综合仿真实验",
+    "title": "实验中心 · 实验导学与教学引导",
     "href": "lab/index.html",
-    "text": "Apollo Claw 四技能、MVP 范围和实验路线",
-    "keywords": "实验中心 Apollo Claw MVP 人行道 避让"
+    "text": "实验介绍、适用对象、五步教学引导、交付物和实验路线图",
+    "keywords": "实验中心 实验导学 教学引导 实验介绍 交付物 人行道 避让"
   },
   {
     "title": "实验 · 人行道避让综合实验",
@@ -2226,10 +2226,10 @@ window.COURSE_INDEX = [
     "keywords": "实验报告 评分 TTC Jerk 急刹"
   },
   {
-    "title": "实验中心 · AI 辅助实验闭环",
+    "title": "实验中心 · AI 教学引导",
     "href": "lab/ai-loop.html",
-    "text": "AI 在环境检查、场景运行、日志定位、录包、评分和报告复盘中的介入点。",
-    "keywords": "AI 辅助 闭环 Apollo Claw apollo-env apollo-dev apollo-test apollo-eval"
+    "text": "学生任务、AI 技能、输入证据、输出结果和确认动作。",
+    "keywords": "AI 教学 引导 Apollo Claw apollo-env apollo-dev apollo-test apollo-eval"
   },
   {
     "title": "实验中心 · AI 证据链",

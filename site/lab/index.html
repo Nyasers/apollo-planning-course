@@ -18,7 +18,7 @@
     </a>
     <nav class="lab-nav" aria-label="实验中心导航">
       <a href="./" aria-current="page">实验中心</a>
-      <a href="ai-loop.html">AI 闭环</a>
+      <a href="ai-loop.html">AI 引导</a>
       <a href="crosswalk.html">人行道避让</a>
       <a href="report.html">实验报告</a>
       <a href="evidence.html">证据链</a>
@@ -36,10 +36,10 @@
       <div class="lab-hero-copy">
         <p class="lesson-kicker">AI + Virtual Simulation</p>
         <h1>城市道路自动驾驶<span>综合仿真实验</span></h1>
-        <p>实验中心把 Apollo Planning 课程连接到仿真任务、Apollo Claw 智能辅助、实验数据和评分报告。实验过程中，Apollo Claw 会提供环境检查、日志定位、数据解释和优化建议，并保存每一步的证据。真实 record、评分和 DeepSeek 解释在本地 Harness 中完成，网页负责学习引导、任务展示和报告摘要。</p>
+        <p>本页用于实验导学：先了解实验目标、适用对象和交付物，再按五步教学引导完成环境准备、场景运行、record、AI 诊断和报告复盘。网页负责介绍与引导，真实仿真、数据和评分在本地 Harness 中完成。</p>
         <div class="lab-hero-actions">
           <a class="button-primary" href="crosswalk.html">进入人行道避让实验</a>
-          <a class="button-secondary" href="ai-loop.html">查看 AI 辅助闭环</a>
+          <a class="button-secondary" href="ai-loop.html">查看 AI 教学引导</a>
           <a class="button-secondary" href="../setup/index.html">配置本地环境</a>
         </div>
       </div>
@@ -57,56 +57,39 @@
 
     <section class="lab-section">
       <div class="lab-section-head">
-        <div><p class="section-kicker">AI Assistance Loop</p><h2>AI 辅助实验闭环</h2></div>
-        <p>从环境检查到报告复盘，Apollo Claw 在 8 个阶段留下可追溯的技能、证据和验证结果。</p>
-      </div>
-      <div class="lab-ai-timeline">
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>实验准备</h3><p>生成预习检查清单，明确实验目标、场景和交付证据。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：预习检查清单</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>环境检查</h3><p>检查 Ubuntu、WSL2、Docker、aem、磁盘和 Apollo 容器状态，解释失败原因。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：doctor.json / 环境报告</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>场景运行</h3><p>提示 DreamView 入口、场景状态和运行前检查项。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：运行状态记录</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">04</div><div><h3>观察问题</h3><p>从 planning、control 日志中提取减速偏晚、急刹和 TTC 偏低等线索。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：日志摘要</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">05</div><div><h3>诊断定位</h3><p>定位 crosswalk 场景、TrafficRule、速度边界和任务管线中的相关配置。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：代码/配置位置</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">06</div><div><h3>录制与可视化</h3><p>按 pnc profile 录制 record，盘点 channel，生成 CSV、PNG 和 Markdown 报告。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test</span><small>产出：record / CSV / PNG</small></div></article>
-        <article class="lab-ai-stage is-priority"><div class="lab-ai-stage-marker">07</div><div><h3>评分与优化</h3><p>解释 TTC、加速度、Jerk、急刹和场景得分，给出下一轮最小改动建议。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-eval</span><small>产出：评分解释与优化建议</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">08</div><div><h3>报告与复盘</h3><p>汇总 AI 建议、学生操作、证据链和优化前后对比，形成实验报告和能力画像。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>产出：report.md / 能力画像</small></div></article>
-      </div>
-      <div class="lab-local-banner" style="margin-top:18px">
-        <div><strong>演示模式 / 本地实验模式</strong><p>网页展示 AI 辅助闭环；真实 record、评分和 DeepSeek 调用在本地 Harness 完成，API Key 不进入网页。</p></div>
-        <div class="lab-card-actions"><a class="button-primary" href="../setup/index.html">配置本地环境</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
-      </div>
-    </section>
-
-    <section class="lab-section">
-      <div class="lab-section-head">
-        <div><p class="section-kicker">Experiment Loop</p><h2>人行道避让实验闭环</h2></div>
-        <p>本实验以人行道避让为主线，完整经历环境检查、场景运行、数据采集、评分与报告复盘。</p>
+        <div><p class="section-kicker">Experiment Brief</p><h2>实验介绍</h2></div>
+        <p>本实验不是只看演示，而是完成一条可复核的自动驾驶实验闭环。</p>
       </div>
       <div class="lab-metrics-grid">
-        <article class="lab-card"><span class="lab-number">01</span><h3>核心场景</h3><p>人行道避让，后续扩展到交通灯、借道和泊车。</p></article>
-        <article class="lab-card"><span class="lab-number">04</span><h3>Apollo Claw Skills</h3><p>env、dev、test、eval 四个技能进入同一条实验链。</p></article>
-        <article class="lab-card"><span class="lab-number">08</span><h3>教学阶段</h3><p>从环境准备、运行、诊断、录包到评分和报告。</p></article>
-        <article class="lab-card"><span class="lab-number">24</span><h3>实验步骤</h3><p>当前开放人行道避让闭环，其余步骤按路线图分阶段建设，覆盖环境、通信、感知、规划、控制和评价。</p></article>
-      </div>
-      <div class="lab-notice"><strong>教学模式说明：</strong>演示模式使用示例数据；连接本地 Harness 后，使用真实 record、评分和报告。评分以脚本和教师评价为准。</div>
-    </section>
-
-    <section class="lab-section">
-      <div class="lab-section-head">
-        <div><p class="section-kicker">Apollo Claw</p><h2>四个技能如何进入实验</h2></div>
-        <p>Harness 运行在学生本地 Linux 环境，DeepSeek API Key 只保存在本地 <code>~/.apollo-claw/.env</code>。网页只负责展示技能、证据和结果，不接收私密密钥。</p>
-      </div>
-      <div class="lab-skill-grid">
-        <article class="lab-card"><div class="lab-skill-head"><code>apollo-env</code><span class="lab-chip">实验前</span></div><h3>环境检查与排错</h3><p>检查 Docker、aem、buildtool、磁盘和网络，生成环境状态报告。</p></article>
-        <article class="lab-card"><div class="lab-skill-head"><code>apollo-dev</code><span class="lab-chip">实验中</span></div><h3>代码、配置与日志定位</h3><p>检索 PnC 知识库，解释 Task、Scenario、TrafficRule 和参数位置。</p></article>
-        <article class="lab-card"><div class="lab-skill-head"><code>apollo-test</code><span class="lab-chip">实验中</span></div><h3>数据录制与可视化</h3><p>录制 record、盘点 channel、生成 CSV、PNG 和 Markdown 报告。</p></article>
-        <article class="lab-card"><div class="lab-skill-head"><code>apollo-eval</code><span class="lab-chip">实验后</span></div><h3>评分与优化建议</h3><p>解释 TTC、加速度、Jerk、碰撞和限速，给出下一轮优化方向。</p></article>
+        <article class="lab-card"><span class="lab-number">01</span><h3>实验目标</h3><p>理解 Planning 在城市道路场景中的作用，完成环境检查、场景运行、record 采集、数据分析与一次参数优化。</p></article>
+        <article class="lab-card"><span class="lab-number">02</span><h3>适用对象</h3><p>智能车辆工程、车辆工程、自动化、计算机等专业本科二年级及以上学生；具备 Linux 和 C++/Python 基础更佳。</p></article>
+        <article class="lab-card"><span class="lab-number">03</span><h3>核心任务</h3><p>以人行道避让为首个场景，完成“环境检查—场景运行—日志定位—录制—评分—优化—报告”的闭环。</p></article>
+        <article class="lab-card"><span class="lab-number">04</span><h3>学习成果</h3><p>形成 record、channel 报告、指标图表、report.json 和实验报告，并能解释参数变化与场景表现之间的关系。</p></article>
       </div>
     </section>
 
     <section class="lab-section">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Scenario</p><h2>当前只开放一个主场景</h2></div>
-        <p>当前先开放人行道避让场景，后续再扩展交通灯、借道绕行和自主泊车。</p>
+        <div><p class="section-kicker">Teaching Guide</p><h2>教学引导</h2></div>
+        <p>按五步完成实验。每一步都说明学生做什么、AI 如何辅助、完成后留下什么证据。</p>
+      </div>
+      <div class="lab-ai-timeline">
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>准备环境</h3><p>学生准备 WSL2/Ubuntu、Docker 和 Apollo；AI 通过 apollo-env 检查环境并解释失败原因。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：doctor.json</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>运行场景</h3><p>学生在 DreamView/SimControl 选择地图和场景，启动 Planning/Control/Routing；AI 提示运行前检查项。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：运行状态记录</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>录制数据</h3><p>学生录制 20-30 秒核心 channel；AI 通过 apollo-test 盘点 channel，确认 planning/control/localization 是否有消息。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test</span><small>产出：record / channel_summary.csv</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">04</div><div><h3>分析与诊断</h3><p>学生观察 TTC、加速度、Jerk、急刹和日志；AI 定位 crosswalk 配置，给出下一步最小改动建议。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev + apollo-eval</span><small>产出：评分解释 / 优化建议</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">05</div><div><h3>复盘与提交</h3><p>学生完成第二轮验证，比较优化前后指标，提交 report.json / report.md，并说明参数变化与结果之间的关系。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>产出：report.json / report.md</small></div></article>
+      </div>
+      <div class="lab-local-banner" style="margin-top:18px">
+        <div><strong>AI 是教学引导，不是评分裁判</strong><p>脚本产出事实，模型解释事实，学生确认操作，教师保留最终评价。未配置 DeepSeek 时仍可使用规则降级完成实验。</p></div>
+        <div class="lab-card-actions"><a class="button-primary" href="ai-loop.html">查看详细 AI 引导</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Current Experiment</p><h2>本次实验与交付物</h2></div>
+        <p>当前开放人行道避让单场景，交通灯和自主泊车按路线图建设。</p>
       </div>
       <div class="lab-scenario-grid">
         <article class="lab-card is-primary">
@@ -116,10 +99,11 @@
           <p>从环境检查开始，运行行人横穿场景，定位减速和路径问题，录制数据，解释评分并完成一次优化。</p>
           <a class="button-primary" href="crosswalk.html">进入实验</a>
         </article>
-        <div>
-          <article class="lab-card is-muted"><h3>交通灯停走</h3><p>下一阶段场景，用于讲解 Scenario、TrafficRule 和交通灯决策。</p><span class="lab-chip">后续建设</span></article>
-          <article class="lab-card is-muted" style="margin-top:14px"><h3>自主泊车</h3><p>后续接入开放空间、ROI 和泊车轨迹评分。</p><span class="lab-chip">后续建设</span></article>
-        </div>
+        <article class="lab-card">
+          <h3>需要提交</h3>
+          <ul class="lab-report-list"><li>一次有效 record</li><li>channel_summary.csv / plots</li><li>评分结果与优化前后对比</li><li>report.json / report.md</li><li>实验报告与个人反思</li></ul>
+          <div class="lab-notice" style="margin-top:14px">评分以脚本和教师评价为准；本地自评估不替代官方评分。</div>
+        </article>
       </div>
     </section>
 

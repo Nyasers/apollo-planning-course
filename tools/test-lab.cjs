@@ -17,7 +17,9 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
 
   await page.goto(url("lab/index.html"), { waitUntil: "networkidle" });
   if (!(await page.title()).includes("实验中心")) throw new Error("Lab title missing");
-  if ((await page.locator(".lab-skill-grid .lab-card").count()) !== 4) throw new Error("Four skill cards expected");
+  if ((await page.locator(".lab-metrics-grid .lab-card").count()) < 4) throw new Error("Experiment introduction cards expected");
+  if ((await page.locator(".lab-ai-timeline .lab-ai-stage").count()) !== 5) throw new Error("Five teaching guide stages expected");
+  if ((await page.locator('a[href="ai-loop.html"]').count()) < 1) throw new Error("AI teaching guide entry missing");
   if ((await page.locator('a[href="crosswalk.html"]').count()) < 1) throw new Error("Crosswalk entry missing");
 
   await page.locator('a[href="crosswalk.html"]').first().click();

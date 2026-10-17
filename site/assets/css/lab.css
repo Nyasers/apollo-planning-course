@@ -1197,3 +1197,25 @@
   .lab-ai-stage-side { grid-column: auto; }
   .lab-evidence-row { grid-template-columns: 1fr; gap: 4px; }
 }
+
+.lab-report-list {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: .86rem;
+  line-height: 1.55;
+}
+
+.lab-report-list li::marker {
+  color: var(--blue);
+}
+
+.lab-board-note {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: .82rem;
+  line-height: 1.6;
+}

@@ -18,7 +18,7 @@
     </a>
     <nav class="lab-nav" aria-label="实验中心导航">
       <a href="./">实验中心</a>
-      <a href="ai-loop.html">AI 闭环</a>
+      <a href="ai-loop.html">AI 引导</a>
       <a href="crosswalk.html" aria-current="page">人行道避让</a>
       <a href="report.html">实验报告</a>
       <a href="evidence.html">证据链</a>
@@ -115,39 +115,11 @@
 
         <section class="lab-section">
           <div class="lab-section-head">
-            <div><p class="section-kicker">AI Evidence Chain</p><h2>AI 建议如何变成可验证结果</h2></div>
-            <p>每个 AI 结论都必须绑定日志、record、CSV、PNG 或评分结果，不能只停留在对话。</p>
+            <div><p class="section-kicker">AI Teaching Guide</p><h2>实验台保留操作，AI 引导单独查看</h2></div>
+            <p>本页聚焦场景控制、record 和指标观察。AI 在 8 个阶段的具体介入点、输出格式、责任边界和证据链，集中放在教学引导与证据链页面，避免重复。</p>
           </div>
-          <div class="lab-evidence-flow">
-            <article class="lab-evidence-step"><span>01 输入</span><strong>日志与 record</strong><small>planning.INFO、TTC 1.4s、急刹 2 次</small></article>
-            <article class="lab-evidence-step"><span>02 AI 判断</span><strong>减速偏晚</strong><small>apollo-dev 关联人行道停止区和速度边界</small></article>
-            <article class="lab-evidence-step"><span>03 建议</span><strong>降低速度上限</strong><small>给出最小改动和验证方法</small></article>
-            <article class="lab-evidence-step"><span>04 学生确认</span><strong>修改参数</strong><small>学生确认后再次运行仿真</small></article>
-            <article class="lab-evidence-step"><span>05 验证</span><strong>指标改善</strong><small>TTC 1.4 → 2.3s，急刹 2 → 0</small></article>
-          </div>
-          <div class="lab-evidence" style="margin-top:18px">
-            <article class="lab-evidence-card">
-              <h3>本次 AI 辅助记录</h3>
-              <div class="lab-evidence-row"><strong>使用技能</strong><span><code>apollo-dev</code> + <code>apollo-eval</code></span></div>
-              <div class="lab-evidence-row"><strong>输入证据</strong><span>planning 日志、record、channel_summary.csv、评分结果</span></div>
-              <div class="lab-evidence-row"><strong>AI 判断</strong><span>通过人行道前减速偏晚，TTC 偏低</span></div>
-              <div class="lab-evidence-row"><strong>建议操作</strong><span>检查 crosswalk 场景和速度边界配置</span></div>
-              <div class="lab-evidence-row"><strong>学生确认</strong><span>已确认修改，并完成第二轮仿真</span></div>
-              <div class="lab-evidence-row"><strong>验证结果</strong><span>TTC 1.4 → 2.3s，急刹 2 → 0，Jerk 下降</span></div>
-              <div class="lab-evidence-row"><strong>证据文件</strong><span>record、CSV、PNG、report.md</span></div>
-            </article>
-          </div>
-        </section>
-
-        <section class="lab-section">
-          <div class="lab-section-head">
-            <div><p class="section-kicker">AI Boundary</p><h2>AI 做什么，不做什么</h2></div>
-            <p>AI 辅助必须可解释、可追溯、可复核，不能替代学生判断和教师评价。</p>
-          </div>
-          <div class="lab-ai-boundary">
-            <article><h3>AI 负责</h3><ul><li>解释环境检查、日志和评分</li><li>定位相关配置、源码和知识库</li><li>生成结构化优化建议</li><li>汇总证据链和实验报告</li></ul></article>
-            <article><h3>AI 不负责</h3><ul><li>不直接修改代码或执行危险命令</li><li>不把模型输出当作评分裁判</li><li>不上传本地 API Key 和隐私数据</li><li>不替代感知、定位算法教学</li></ul></article>
-          </div>
+          <div class="lab-notice"><strong>建议学习顺序：</strong>先在实验中心阅读实验介绍和五步教学引导，再进入本页操作；遇到问题时可切换到 AI 教学引导查看诊断思路。</div>
+          <div class="lab-hero-actions" style="margin-top:16px"><a class="button-primary" href="ai-loop.html">查看 AI 教学引导</a><a class="button-secondary" href="evidence.html">查看证据链</a><a class="button-secondary" href="report.html">查看实验报告</a></div>
         </section>
       </div>
     </div>
