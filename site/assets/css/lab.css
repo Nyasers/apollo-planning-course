@@ -593,13 +593,43 @@
 .lab-person {
   right: 38%;
   top: 42%;
-  width: 18px;
-  height: 34px;
-  border: 2px solid rgba(255,255,255,.75);
-  border-radius: 9px 9px 5px 5px;
-  background: var(--amber);
+  width: 20px;
+  height: 38px;
+  border: 0;
+  background: transparent;
   transition: right 800ms ease, opacity 500ms ease;
   z-index: 3;
+}
+.lab-person::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 5px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 50%;
+  background: var(--amber);
+}
+.lab-person::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 16px;
+  height: 27px;
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 7px 7px 4px 4px;
+  background: var(--amber);
+}
+.lab-scene[data-state="stopping"] .lab-person,
+.lab-scene[data-state="waiting"] .lab-person,
+.lab-scene[data-state="cleared"] .lab-person {
+  animation: pedestrian-step .42s ease-in-out infinite alternate;
+}
+@keyframes pedestrian-step {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
 }
 .lab-path {
   inset: 0;
@@ -619,11 +649,13 @@
 }
 .lab-scene[data-state="running"] .lab-car { left: 61%; bottom: 18%; }
 .lab-scene[data-state="stopping"] .lab-car { left: 61%; bottom: 21%; box-shadow: 0 0 0 6px rgba(255,204,122,.22); }
-.lab-scene[data-state="waiting"] .lab-car { left: 61%; bottom: 21%; box-shadow: 0 0 0 6px rgba(255,123,138,.24); }
+.lab-scene[data-state="waiting"] .lab-car,
+.lab-scene[data-state="cleared"] .lab-car { left: 61%; bottom: 21%; box-shadow: 0 0 0 6px rgba(255,123,138,.24); }
 .lab-scene[data-state="passed"] .lab-car { left: 61%; bottom: 58%; }
 .lab-scene[data-state="stopping"] .lab-person { right: 48%; }
 .lab-scene[data-state="waiting"] .lab-person { right: 65%; }
-.lab-scene[data-state="passed"] .lab-person { right: 72%; opacity: .35; }
+.lab-scene[data-state="cleared"] .lab-person { right: 86%; opacity: 0; }
+.lab-scene[data-state="passed"] .lab-person { right: 86%; opacity: 0; }
 .lab-console {
   display: grid;
   gap: 8px;

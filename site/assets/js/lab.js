@@ -14,9 +14,9 @@
     { title: "实验准备", desc: "确认课程、实验目标和运行环境，进入人行道避让任务。" },
     { title: "环境检查", desc: "使用 apollo-env 检查 Docker、aem、buildtool、磁盘和网络。" },
     { title: "运行场景", desc: "在 DreamView/SimControl 中启动人行道避让场景。" },
-    { title: "观察问题", desc: "观察规划轨迹、速度曲线和车辆对行人的避让行为。" },
-    { title: "AI 辅助诊断", desc: "使用 apollo-dev 定位相关配置、源码和日志。" },
-    { title: "录制与可视化", desc: "使用 apollo-test 录制 record，生成 channel 和图表报告。" },
+    { title: "观察问题", desc: "观察车辆减速并在停止线前停车，等待行人通过。" },
+    { title: "AI 辅助诊断", desc: "确认车辆停车等待的原因是行人仍在人行横道内。" },
+    { title: "录制与可视化", desc: "行人离开后车辆继续通行，使用 apollo-test 采集数据。" },
     { title: "评分与优化", desc: "使用 apollo-eval 查看 TTC、加速度、Jerk 和场景评分。" },
     { title: "报告与复盘", desc: "形成优化前后对比、实验结论和能力反馈。" }
   ];
@@ -24,8 +24,8 @@
   const demoMetrics = {
     scenario: "crosswalk",
     scenarioName: "人行道避让",
-    before: { ttc: 1.8, lonAccel: 3.6, jerk: 4.8, hardBrake: 2, score: 82 },
-    after: { ttc: 2.7, lonAccel: 2.1, jerk: 2.8, hardBrake: 0, score: 94 },
+    before: { ttc: 1.4, lonAccel: 3.6, jerk: 4.8, hardBrake: 2, score: 82 },
+    after: { ttc: 2.3, lonAccel: 2.1, jerk: 2.8, hardBrake: 0, score: 94 },
     updatedAt: new Date().toISOString()
   };
 
@@ -189,8 +189,8 @@
           [2, "启动场景：行人从右侧进入人行横道", "running", "接近人行横道"],
           [3, "车辆开始减速，目标是在停止线前停车", "stopping", "减速停车"],
           [4, "车辆在停止线前停车，等待行人通过", "waiting", "等待行人通过"],
-          [5, "行人继续通过人行横道，车辆保持等待", "waiting", "行人通过中"],
-          [6, "行人离开，车辆继续通行；apollo-test 生成数据", "passed", "继续行驶"],
+          [5, "行人走出人行横道，车辆仍保持停车", "cleared", "行人离开"],
+          [6, "确认前方安全，车辆继续直线通行；apollo-test 生成数据", "passed", "车辆继续行驶"],
           [7, "报告已生成：优化前后指标对比完成", "passed", "实验完成"]
         ];
         for (const item of sequence) {
