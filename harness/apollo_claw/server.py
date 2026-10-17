@@ -320,7 +320,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(200, {
                     "ok": True,
                     "service": "apollo-claw-harness",
-                    "version": "0.3.2",
+                    "version": "0.3.3",
                     "settings": {
                         "container": settings.apollo_container_name,
                         "workspace": settings.apollo_workspace_host,
@@ -331,7 +331,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 })
                 return
             if path == "/api/session":
-                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.2"})
+                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.3"})
                 return
             if path == "/api/tasks":
                 self._json(200, _load_tasks(settings))

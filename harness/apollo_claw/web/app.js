@@ -105,7 +105,8 @@ function renderExperiment() {
   const record = exp.record || {};
   const status = exp.meta?.status || "created";
   box.innerHTML = `<strong>${esc(status)}</strong><div>实验：${esc(exp.meta?.scenario || exp.meta?.task || "-")}</div><div>record：${esc(record.channel_count ?? "-")} channels · ${esc(record.size_bytes ?? "-")} bytes</div><div>记录状态：${esc(record.status || "-")}</div>`;
-  setPill("report-status", status, status === "empty_record" || status.includes("failed") ? "bad" : "ok");
+  if ($("metric-status")) $("metric-status").textContent = status;
+  if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
 }
 
 function renderAI(ai) {
@@ -138,6 +139,7 @@ function setDeepSeekStatus(configured, masked = "") {
   const text = configured ? `DeepSeek 已配置${masked ? " · " + masked : ""}` : "规则降级模式";
   setPill("deepseek-config-status", text, configured ? "ok" : "");
   setPill("deepseek-status", text, configured ? "ok" : "");
+  if ($("deepseek-side-status")) $("deepseek-side-status").textContent = configured ? "已配置" : "规则降级";
 }
 
 async function loadDeepSeekSettings() {
@@ -210,6 +212,8 @@ function renderReport(report) {
   if (!report) {
     box.textContent = "选择已有实验并导出报告后，这里显示状态、指标和证据。";
     setPill("report-status", "尚无报告");
+    if ($("metric-score")) $("metric-score").textContent = "—";
+    if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
   }
   const meta = report.meta || {};
@@ -250,6 +254,10 @@ function renderReport(report) {
   });
   box.appendChild(evidence);
   setPill("report-status", meta.mode === "real" ? "真实数据" : "演示/计划", meta.mode === "real" ? "ok" : "");
+  if ($("metric-status")) $("metric-status").textContent = meta.status || "—";
+  if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
+  if ($("metric-score")) $("metric-score").textContent = score.value ?? "—";
+  if ($("metric-evidence")) $("metric-evidence").textContent = (report.evidence || []).length;
 }
 
 async function actionBody(action) {

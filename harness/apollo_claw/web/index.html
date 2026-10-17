@@ -8,53 +8,73 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="brand-mark">A</span><div><strong>APOLLO CLAW</strong><small>LOCAL HARNESS</small></div></div>
-    <div class="top-status"><span id="service-status" class="pill">连接中</span><span class="muted">仅 127.0.0.1</span></div>
+    <a class="brand" href="/">
+      <span class="brand-mark">A</span>
+      <span class="brand-copy"><strong>APOLLO CLAW</strong><small>LOCAL HARNESS</small></span>
+    </a>
+    <div class="topbar-context"><span class="eyebrow">APOLLO / PLANNING LAB</span><span class="divider"></span><span class="muted">城市道路自动驾驶综合仿真实验</span></div>
+    <div class="topbar-actions"><span id="service-status" class="pill">连接中</span><span class="local-chip">127.0.0.1</span></div>
   </header>
-  <main class="shell">
+
+  <main class="app-shell">
     <aside class="sidebar">
-      <div class="side-head"><span class="kicker">EXPERIMENT</span><h1>实验任务</h1></div>
+      <div class="sidebar-head"><span class="eyebrow">EXPERIMENTS</span><h1>实验任务</h1><p>选择一个任务，按流程完成实验闭环。</p></div>
       <div id="task-list" class="task-list"></div>
-      <div class="side-note">网页只发出受控的 Harness 动作；真实仿真仍在本地 Apollo 容器执行。</div>
-    </aside>
-    <section class="workspace">
-      <div class="hero">
-        <div><span class="kicker">AI + VIRTUAL SIMULATION</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
-        <div class="hero-actions"><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a><button id="refresh" class="button secondary">刷新</button></div>
+      <div class="sidebar-card">
+        <span class="eyebrow">RUNTIME</span>
+        <div class="side-stat"><span>Harness</span><b>LOCAL</b></div>
+        <div class="side-stat"><span>DreamView</span><a href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 ↗</a></div>
+        <div class="side-stat"><span>DeepSeek</span><b id="deepseek-side-status">规则降级</b></div>
       </div>
-      <div class="grid">
-        <section class="panel flow-panel">
-          <div class="panel-head"><div><span class="kicker">WORKFLOW</span><h3>实验流程</h3></div><span id="active-task" class="pill">未选择</span></div>
+      <div class="side-note">网页只发出受控动作，真实仿真、record 和模型调用都在本地执行。</div>
+    </aside>
+
+    <section class="workspace">
+      <section class="hero">
+        <div class="hero-copy"><span class="eyebrow">AI + VIRTUAL SIMULATION</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
+        <div class="hero-actions"><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a><button id="refresh" class="button secondary">刷新状态</button></div>
+      </section>
+
+      <section class="metric-row">
+        <article class="metric"><span>实验状态</span><strong id="metric-status">—</strong></article>
+        <article class="metric"><span>Record Channels</span><strong id="metric-channels">—</strong></article>
+        <article class="metric"><span>场景得分</span><strong id="metric-score">—</strong></article>
+        <article class="metric"><span>证据文件</span><strong id="metric-evidence">—</strong></article>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="panel workflow-panel">
+          <div class="panel-head"><div><span class="eyebrow">WORKFLOW</span><h3>实验流程</h3></div><span id="active-task" class="pill">未选择</span></div>
           <div class="step-list">
-            <div class="step"><span class="step-no">01</span><div><strong>环境检查</strong><small>Docker / aem / Apollo / DreamView</small></div><button class="button" data-action="doctor">检查环境</button></div>
-            <div class="step"><span class="step-no">02</span><div><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
-            <div class="step"><span class="step-no">03</span><div><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check"><input id="execute" type="checkbox">真实执行</label><button class="button" data-action="record">开始录制</button></div></div>
-            <div class="step"><span class="step-no">04</span><div><strong>生成 channel 报告</strong><small>读取 record，生成 CSV / PNG / Markdown</small></div><button class="button" data-action="report">生成报告</button></div>
-            <div class="step"><span class="step-no">05</span><div><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
+            <div class="step"><span class="step-no">01</span><div class="step-copy"><strong>环境检查</strong><small>Docker / aem / Apollo / DreamView</small></div><button class="button" data-action="doctor">检查环境</button></div>
+            <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
+            <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check"><input id="execute" type="checkbox">真实执行</label><button class="button" data-action="record">开始录制</button></div></div>
+            <div class="step"><span class="step-no">04</span><div class="step-copy"><strong>生成 channel 报告</strong><small>读取 record，生成 CSV / PNG / Markdown</small></div><button class="button" data-action="report">生成报告</button></div>
+            <div class="step"><span class="step-no">05</span><div class="step-copy"><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
           </div>
         </section>
-        <section class="panel">
-          <div class="panel-head"><div><span class="kicker">RUN</span><h3>当前实验</h3></div><button id="refresh-exp" class="text-button">刷新</button></div>
+
+        <section class="panel run-panel">
+          <div class="panel-head"><div><span class="eyebrow">RUN</span><h3>当前实验</h3></div><button id="refresh-exp" class="text-button">刷新</button></div>
           <label class="field">实验记录<select id="experiment-select"><option value="">新建实验</option></select></label>
           <div id="experiment-summary" class="summary">尚无实验记录</div>
           <div class="manual-box"><strong>真实执行开关</strong><p>关闭时只生成 dry-run 计划，不接触 Apollo 容器。开启后才实际执行容器命令。</p></div>
+          <div class="run-note"><span class="eyebrow">NEXT</span><p>先完成环境检查和场景启动，再录制 record。没有场景时 channel 会是 0。</p></div>
         </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><span class="kicker">CONFIG</span><h3>DeepSeek API 设置</h3></div><span id="deepseek-config-status" class="pill">未配置</span></div>
+
+        <section class="panel settings-panel">
+          <div class="panel-head"><div><span class="eyebrow">CONFIG</span><h3>DeepSeek API 设置</h3></div><span id="deepseek-config-status" class="pill">未配置</span></div>
           <div class="settings-grid">
             <label class="field">API Key<input id="deepseek-key" type="password" autocomplete="new-password" placeholder="留空则保留现有 Key"></label>
             <label class="field">Base URL<input id="deepseek-base" type="text" placeholder="https://api.deepseek.com"></label>
             <label class="field">模型<input id="deepseek-model" type="text" placeholder="deepseek-chat"></label>
-            <div class="settings-actions">
-              <button id="deepseek-save" class="button">保存配置</button>
-              <button id="deepseek-test" class="button secondary">测试连接</button>
-              <button id="deepseek-clear" class="button secondary">清除 Key</button>
-            </div>
+            <div class="settings-actions"><button id="deepseek-save" class="button">保存</button><button id="deepseek-test" class="button secondary">测试连接</button><button id="deepseek-clear" class="button secondary">清除</button></div>
           </div>
-          <div id="deepseek-message" class="settings-message">Key 只发送到本机 Harness，并保存到 WSL 的 ~/.apollo-claw/.env，不写入网页存储。</div>
+          <div id="deepseek-message" class="settings-message">Key 只发送到本机 Harness，并保存到 ~/.apollo-claw/.env，不写入网页存储。</div>
         </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><span class="kicker">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
+
+        <section class="panel ai-panel">
+          <div class="panel-head"><div><span class="eyebrow">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
           <div class="ai-grid">
             <label class="field">问题<input id="ai-question" type="text" placeholder="例如：为什么人行道前 TTC 偏低？"></label>
             <label class="field">日志路径（可选）<input id="ai-log" type="text" placeholder="/home/fqx/application-pnc/data/log/planning.INFO"></label>
@@ -62,12 +82,14 @@
           </div>
           <div id="ai-view" class="ai-view">选择实验后，可让 DeepSeek 解释当前证据；未配置 Key 时自动使用规则降级。</div>
         </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><span class="kicker">CONSOLE</span><h3>任务控制台</h3></div><span id="job-status" class="pill">空闲</span></div>
+
+        <section class="panel console-panel wide">
+          <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h3>任务控制台</h3></div><span id="job-status" class="pill">空闲</span></div>
           <pre id="console" class="console">等待操作...</pre>
         </section>
-        <section class="panel wide">
-          <div class="panel-head"><div><span class="kicker">REPORT</span><h3>报告摘要</h3></div><span id="report-status" class="pill">尚无报告</span></div>
+
+        <section class="panel report-panel wide">
+          <div class="panel-head"><div><span class="eyebrow">REPORT</span><h3>报告摘要</h3></div><span id="report-status" class="pill">尚无报告</span></div>
           <div id="report-view" class="report-view">选择已有实验并导出报告后，这里显示状态、指标和证据。</div>
         </section>
       </div>
