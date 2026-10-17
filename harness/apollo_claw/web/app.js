@@ -170,7 +170,18 @@ async function saveDeepSeekSettings() {
 
 async function testDeepSeekConnection() {
   try {
-    setSettingsMessage("正在测试 DeepSeek 连接...");
+    setSettingsMessage("正在保存并测试 DeepSeek 连接...");
+    const saved = await api("/api/settings/deepseek", { method: "POST", body: {
+      api_key: $("deepseek-key").value.trim(),
+      base_url: $("deepseek-base").value.trim(),
+      model: $("deepseek-model").value.trim(),
+    }});
+    $("deepseek-key").value = "";
+    setDeepSeekStatus(Boolean(saved.configured), saved.masked_key || "");
+    if (!saved.configured) {
+      setSettingsMessage("请先填写 API Key 并保存，再测试连接。", "bad");
+      return;
+    }
     const data = await api("/api/settings/deepseek/test", { method: "POST", body: {} });
     setSettingsMessage(`连接成功：${data.model || "deepseek"} 返回 ${data.response || "OK"}`, "ok");
   } catch (error) {
