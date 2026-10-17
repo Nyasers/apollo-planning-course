@@ -1,5 +1,5 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -9,8 +9,14 @@ async function api(path, options = {}) {
     opts.headers["Content-Type"] = "application/json";
     opts.body = JSON.stringify(opts.body);
   }
-  if (opts.method === "POST") opts.headers["X-Apollo-Claw-Token"] = token;
-  const response = await fetch(path, opts);
+  if (opts.method === "POST") opts.headers["X-Apollo-Claw-Token"] = state.token || token;
+  let response = await fetch(path, opts);
+  if (response.status === 403 && path !== "/api/session") {
+    const session = await fetch("/api/session").then((item) => item.json());
+    state.token = session.token || "";
+    opts.headers["X-Apollo-Claw-Token"] = state.token;
+    response = await fetch(path, opts);
+  }
   const text = await response.text();
   let data = null;
   try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
@@ -301,6 +307,7 @@ async function pollJob(jobId) {
 async function init() {
   try {
     const session = await api("/api/session");
+    state.token = session.token || "";
     state.tasks = session.tasks?.tasks || [];
     setDeepSeekStatus(Boolean(session.deepseek_configured));
     await loadDeepSeekSettings();
