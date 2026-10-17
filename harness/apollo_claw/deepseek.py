@@ -63,7 +63,9 @@ def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") ->
 
 
 def fallback_explain(evidence: Dict[str, Any]) -> Dict[str, Any]:
-    metrics = evidence.get("metrics", {})
+    metrics = evidence.get("metrics", {}) or {}
+    record = evidence.get("record", {}) or {}
+    errors = evidence.get("errors", []) or []
     facts = []
     suggestions = []
     if metrics.get("min_ttc") is not None:
@@ -72,12 +74,21 @@ def fallback_explain(evidence: Dict[str, Any]) -> Dict[str, Any]:
         facts.append(f"急刹次数：{metrics['hard_brake']}")
     if metrics.get("max_jerk") is not None:
         facts.append(f"最大 Jerk：{metrics['max_jerk']}")
+    if record.get("channel_count") is not None:
+        facts.append(f"record 核心 channel 数量：{record['channel_count']}")
+    if record.get("status"):
+        facts.append(f"record 状态：{record['status']}")
+    if record.get("channel_count") == 0:
+        suggestions.append("先启动 SimControl 场景和 Planning/Control/Routing 模块，确认 channel 有消息后重新录制。")
     if metrics.get("min_ttc") is not None and metrics["min_ttc"] < 2.0:
         suggestions.append("检查人行道前速度边界和停止线参数，确认是否需要提前减速。")
+    refs = ["local-rule-fallback"]
+    if errors:
+        refs.append("experiment.errors")
     return {
         "facts": facts,
         "hypotheses": [],
         "suggestions": suggestions,
         "need_student_confirm": True,
-        "source_refs": ["local-rule-fallback"],
+        "source_refs": refs,
     }

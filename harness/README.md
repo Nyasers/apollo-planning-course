@@ -6,7 +6,7 @@ Apollo Claw Harness 是运行在学生本地 WSL2 / Ubuntu 环境中的轻量实
 
 > 脚本产出事实，模型解释事实，学生确认操作，系统保存证据。
 
-设计说明见 [docs/harness-design.md](docs/harness-design.md)，技术选型见 [docs/technical-route.md](docs/technical-route.md)。
+设计说明见 [docs/harness-design.md](docs/harness-design.md)，技术选型见 [docs/technical-route.md](docs/technical-route.md)，实际运行记录见 [docs/runtime-test-2026-10-18.md](docs/runtime-test-2026-10-18.md)。
 
 ## 命令
 

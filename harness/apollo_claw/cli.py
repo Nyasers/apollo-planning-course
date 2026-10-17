@@ -47,12 +47,12 @@ def _get_or_create_experiment(settings: Settings, args) -> Dict[str, Any]:
     return store.create(getattr(args, "task", "crosswalk"), scenario)
 
 
-def _save_command(settings: Settings, experiment: Dict[str, Any], purpose: str, argv: list[str], result: CommandResult) -> None:
+def _save_command(settings: Settings, experiment: Dict[str, Any], purpose: str, argv: list[str], result: CommandResult, add_error_on_failure: bool = True) -> None:
     store = _store(settings)
     directory = store.experiment_dir(experiment["meta"]["experiment_id"]) / "commands"
     save_command_output(result, directory, purpose)
     store.add_command(experiment, purpose, argv, result.to_dict())
-    if not result.ok:
+    if add_error_on_failure and not result.ok:
         store.add_error(experiment, purpose, "command failed", result.stderr)
     store.save(experiment)
 
@@ -72,6 +72,38 @@ def _host_to_container(settings: Settings, path: str) -> str:
         return settings.skills_container_dir + "/" + str(candidate.relative_to(skills_root)).replace("\\", "/")
     except ValueError:
         return path
+
+
+def _container_to_host(settings: Settings, path: str) -> Path:
+    text = str(path)
+    prefix = settings.apollo_workspace_container.rstrip("/") + "/"
+    if text.startswith(prefix):
+        return Path(settings.apollo_workspace_host).expanduser() / text[len(prefix):]
+    return Path(text).expanduser()
+
+
+def _record_artifacts(settings: Settings, record_path: str):
+    host_path = _container_to_host(settings, record_path)
+    parent = host_path.parent
+    pattern = host_path.name + "*"
+    files = sorted(parent.glob(pattern)) if parent.exists() else []
+    files = [path for path in files if path.is_file()]
+    return files, sum(path.stat().st_size for path in files)
+
+
+def _parse_record_report(settings: Settings, output: str) -> Dict[str, Optional[int]]:
+    report_dir = _container_to_host(settings, output)
+    report_md = report_dir / "record_report.md"
+    result = {"channel_count": None, "message_count": None}
+    if not report_md.exists():
+        return result
+    text = report_md.read_text(encoding="utf-8", errors="ignore")
+    for key, pattern in (("channel_count", r"Total channels:\s*(\d+)"), ("message_count", r"Total indexed messages:\s*(\d+)")):
+        import re
+        match = re.search(pattern, text)
+        if match:
+            result[key] = int(match.group(1))
+    return result
 
 
 def _dreamview_check(settings: Settings) -> Dict[str, Any]:
@@ -102,7 +134,7 @@ def cmd_doctor(settings: Settings, args) -> int:
         "checks": {
             "docker_version": _host_probe(["docker", "--version"]),
             "docker_info": _host_probe(["docker", "info", "--format", "{{.ServerVersion}}"]),
-            "aem_version": _host_probe(["aem", "--version"]),
+            "aem_version": _host_probe(["aem", "version"]),
         },
         "dreamview": _dreamview_check(settings),
         "skills": {
@@ -171,7 +203,9 @@ def cmd_explain(settings: Settings, args) -> int:
     if experiment:
         store = _store(settings)
         experiment["ai"] = result
-        experiment["meta"]["status"] = "ai_explained"
+        for key in ("knowledge", "logs"):
+            if evidence.get(key):
+                experiment[key] = evidence[key]
         store.save(experiment)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
@@ -233,17 +267,33 @@ def cmd_test_record(settings: Settings, args) -> int:
         print("dry-run: add --execute to record inside the Apollo container")
         return 0
     experiment["meta"]["mode"] = "real"
+    mkdir_argv = ["mkdir", "-p", record_dir]
+    mkdir_result = docker_exec(settings, mkdir_argv, timeout=30)
+    _save_command(settings, experiment, "test-record-mkdir", mkdir_argv, mkdir_result)
+    if not mkdir_result.ok:
+        experiment["meta"]["status"] = "record_failed"
+        experiment["record"]["status"] = "failed"
+        store.save(experiment)
+        print(mkdir_result.stderr, file=sys.stderr)
+        return mkdir_result.returncode
     result = docker_exec(settings, argv, timeout=args.seconds + 30)
-    _save_command(settings, experiment, "test-record", argv, result)
-    experiment["record"]["status"] = "recorded" if result.ok else "failed"
+    _save_command(settings, experiment, "test-record", argv, result, add_error_on_failure=False)
+    files, total_bytes = _record_artifacts(settings, record_path)
+    has_record = bool(files) and total_bytes > 0
+    experiment["record"]["status"] = "recorded" if has_record else "failed"
     experiment["record"]["path"] = record_path
+    experiment["record"]["file_count"] = len(files)
+    experiment["record"]["size_bytes"] = total_bytes
+    experiment["record"]["stop_reason"] = "timeout" if result.returncode == 124 else "command_exit"
     store.add_evidence(experiment, "record", record_path, f"{args.seconds} 秒，6 个核心 channel 请求")
-    experiment["meta"]["status"] = "recorded" if result.ok else "record_failed"
+    experiment["meta"]["status"] = "recorded" if has_record else "record_failed"
+    if not has_record:
+        store.add_error(experiment, "test-record", "record file was not created or is empty", result.stderr)
     store.save(experiment)
     print(result.stdout)
     if result.stderr:
         print(result.stderr, file=sys.stderr)
-    return 0 if result.ok else result.returncode
+    return 0 if has_record else result.returncode
 
 
 def _resolve_container_script(settings: Settings, script: Optional[str], skill_script: Optional[Path]) -> Optional[str]:
@@ -272,9 +322,18 @@ def cmd_test_report(settings: Settings, args) -> int:
     result = docker_exec(settings, argv, timeout=args.timeout, env={"MPLCONFIGDIR": "/tmp/matplotlib", "PYTHONPATH": "/opt/apollo/neo/python"})
     _save_command(settings, experiment, "test-report", argv, result)
     experiment["record"]["report_path"] = output
+    summary = _parse_record_report(settings, output)
+    experiment["record"]["channel_count"] = summary["channel_count"]
+    experiment["record"]["message_count"] = summary["message_count"]
     store = _store(settings)
     store.add_evidence(experiment, "channel_report", output, "channel_summary.csv / record_report.md / plots")
-    experiment["meta"]["status"] = "reported" if result.ok else "report_failed"
+    if result.ok and summary.get("channel_count") == 0:
+        experiment["record"]["status"] = "empty"
+        experiment["meta"]["status"] = "empty_record"
+        store.add_error(experiment, "record", "record contains 0 channels; start a simulation scenario and record again", "")
+    else:
+        experiment["record"]["status"] = "reported" if result.ok else "report_failed"
+        experiment["meta"]["status"] = "reported" if result.ok else "report_failed"
     store.save(experiment)
     print(result.stdout)
     if result.stderr:
