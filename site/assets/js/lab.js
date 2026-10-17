@@ -70,6 +70,7 @@
     const runButton = run.querySelector("[data-run-demo]");
     const reportLink = run.querySelector("[data-report-link]");
     const results = run.querySelector("[data-lab-results]");
+    const sceneStatus = run.querySelector("[data-lab-scene-status]");
     const progress = run.querySelector("[data-lab-progress]");
     const agentLog = run.querySelector("[data-agent-log]");
     const agentInput = run.querySelector("[data-agent-input]");
@@ -183,20 +184,21 @@
         if (consoleBox) consoleBox.textContent = "";
         if (results) results.classList.add("is-hidden");
         const sequence = [
-          [0, "初始化实验任务：人行道避让", "idle"],
-          [1, "apollo-env：环境检查通过", "running"],
-          [2, "启动场景：行人横穿 + 静态障碍物", "running"],
-          [3, "检测到通过人行道前减速偏急，TTC 偏低", "avoiding"],
-          [4, "apollo-dev：定位 crosswalk 规则和速度边界参数", "avoiding"],
-          [5, "apollo-test：生成 channel 清单、轨迹和速度图表", "avoiding"],
-          [6, "apollo-eval：场景得分 82 → 94，急刹 2 → 0", "passed"],
-          [7, "报告已生成：优化前后指标对比完成", "passed"]
+          [0, "初始化实验任务：人行道避让", "idle", "准备"],
+          [1, "apollo-env：环境检查通过", "idle", "环境就绪"],
+          [2, "启动场景：行人从右侧进入人行横道", "running", "接近人行横道"],
+          [3, "车辆开始减速，目标是在停止线前停车", "stopping", "减速停车"],
+          [4, "车辆在停止线前停车，等待行人通过", "waiting", "等待行人通过"],
+          [5, "行人继续通过人行横道，车辆保持等待", "waiting", "行人通过中"],
+          [6, "行人离开，车辆继续通行；apollo-test 生成数据", "passed", "继续行驶"],
+          [7, "报告已生成：优化前后指标对比完成", "passed", "实验完成"]
         ];
         for (const item of sequence) {
           renderStage(item[0]);
           appendConsole(item[1]);
           if (scene) scene.dataset.state = item[2];
-          await new Promise((resolve) => window.setTimeout(resolve, 520));
+          if (sceneStatus) sceneStatus.textContent = item[3];
+          await new Promise((resolve) => window.setTimeout(resolve, 620));
         }
         writeMetrics({ ...demoMetrics, updatedAt: new Date().toISOString() });
         if (results) results.classList.remove("is-hidden");

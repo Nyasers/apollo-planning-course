@@ -547,6 +547,19 @@
   font-family: var(--font-mono);
   font-size: .65rem;
 }
+.lab-scene-status {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 4;
+  padding: 6px 9px;
+  border: 1px solid rgba(255,204,122,.4);
+  border-radius: 999px;
+  background: rgba(7, 14, 20, .7);
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: .65rem;
+}
 .lab-car,
 .lab-person,
 .lab-path {
@@ -585,7 +598,7 @@
   border: 2px solid rgba(255,255,255,.75);
   border-radius: 9px 9px 5px 5px;
   background: var(--amber);
-  transition: opacity 500ms ease;
+  transition: right 800ms ease, opacity 500ms ease;
   z-index: 3;
 }
 .lab-path {
@@ -604,10 +617,13 @@
   stroke-linejoin: round;
   opacity: .9;
 }
-.lab-scene[data-state="running"] .lab-car { left: 61%; bottom: 28%; }
-.lab-scene[data-state="avoiding"] .lab-car { left: 53%; bottom: 48%; }
-.lab-scene[data-state="passed"] .lab-car { left: 56%; bottom: 72%; }
-.lab-scene[data-state="passed"] .lab-person { opacity: .45; }
+.lab-scene[data-state="running"] .lab-car { left: 61%; bottom: 18%; }
+.lab-scene[data-state="stopping"] .lab-car { left: 61%; bottom: 21%; box-shadow: 0 0 0 6px rgba(255,204,122,.22); }
+.lab-scene[data-state="waiting"] .lab-car { left: 61%; bottom: 21%; box-shadow: 0 0 0 6px rgba(255,123,138,.24); }
+.lab-scene[data-state="passed"] .lab-car { left: 61%; bottom: 58%; }
+.lab-scene[data-state="stopping"] .lab-person { right: 48%; }
+.lab-scene[data-state="waiting"] .lab-person { right: 65%; }
+.lab-scene[data-state="passed"] .lab-person { right: 72%; opacity: .35; }
 .lab-console {
   display: grid;
   gap: 8px;

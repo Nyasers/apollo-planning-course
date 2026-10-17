@@ -33,8 +33,9 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
   if ((await page.locator(".lab-message").count()) <= messagesBefore) throw new Error("Agent demo interaction failed");
 
   await page.locator("[data-run-demo]").click();
-  await page.waitForTimeout(4700);
+  await page.waitForTimeout(5600);
   if (!(await page.locator("[data-lab-results]").isVisible())) throw new Error("Results were not revealed after run");
+  if (!(await page.locator("[data-lab-scene-status]").innerText()).includes("实验完成")) throw new Error("Scene did not finish the stop-and-wait sequence");
   if ((await page.locator("[data-report-link]").getAttribute("aria-disabled")) === "true") throw new Error("Report was not enabled after run");
   const metrics = await page.evaluate(() => JSON.parse(localStorage.getItem("apollo-lab-metrics-v1") || "null"));
   if (!metrics || metrics.after.score !== 94) throw new Error("Metrics were not persisted");
