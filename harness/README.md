@@ -33,6 +33,22 @@ python3 -m apollo_claw serve --port 8765
 
 打开 `http://127.0.0.1:8765/`。面板提供任务选择、环境检查、record、channel 报告、报告导出、DeepSeek API 配置、DeepSeek 诊断、任务控制台和实验报告摘要。面板只监听本机，并通过启动时生成的一次性 token 保护受控动作；不提供任意命令输入。
 
+## 与课程网站配合
+
+课程实验台通过以下参数打开本地面板：
+
+```text
+http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc&return=<课程页面>
+```
+
+Harness 会自动选择任务，并校验 `return` 是否属于课程站点。导出报告后，面板显示：
+
+- 下载 `report.json`
+- 下载 `report.md`
+- 返回课程报告页
+
+网站不会直接请求 `http://127.0.0.1:8765`，避免 HTTPS 页面访问 HTTP 本地服务时被浏览器拦截。学生下载 `report.json` 后，在课程“实验报告”页本地导入；网站校验报告结构、任务、评分来源和证据字段，再标记为 Harness 报告或真实 Harness 报告。空 record 不会被标记为有效真实结果。
+
 
 ## 目录
 

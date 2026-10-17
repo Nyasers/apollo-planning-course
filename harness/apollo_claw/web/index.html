@@ -30,6 +30,15 @@
     </aside>
 
     <section class="workspace">
+      <div id="course-context" class="course-context" hidden>
+        <div class="course-context-copy">
+          <span class="eyebrow">COURSE CONTEXT</span>
+          <strong id="course-context-text">来自课程网站</strong>
+          <small id="course-context-detail"></small>
+        </div>
+        <a id="course-return" class="button secondary" href="#">返回课程实验台 ↗</a>
+      </div>
+
       <section class="hero">
         <div class="hero-copy"><span class="eyebrow">AI + VIRTUAL SIMULATION</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
         <div class="hero-actions"><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a><button id="refresh" class="button secondary">刷新状态</button></div>
@@ -90,6 +99,11 @@
 
         <section class="panel report-panel wide">
           <div class="panel-head"><div><span class="eyebrow">REPORT</span><h3>报告摘要</h3></div><span id="report-status" class="pill">尚无报告</span></div>
+          <div id="report-actions" class="report-actions" hidden>
+            <a id="download-report-json" class="button" href="#" download>下载 report.json</a>
+            <a id="download-report-md" class="button secondary" href="#" download>下载 report.md</a>
+            <a id="return-report-course" class="button secondary" href="#" hidden>返回课程报告页 ↗</a>
+          </div>
           <div id="report-view" class="report-view">选择已有实验并导出报告后，这里显示状态、指标和证据。</div>
         </section>
       </div>

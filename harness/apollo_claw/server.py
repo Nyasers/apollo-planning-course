@@ -195,11 +195,13 @@ def make_handler(settings: Settings, token: Optional[str] = None):
     jobs = JobManager(settings)
 
     class Handler(BaseHTTPRequestHandler):
-        def _send(self, code: int, body: bytes, content_type: str = "text/html; charset=utf-8"):
+        def _send(self, code: int, body: bytes, content_type: str = "text/html; charset=utf-8", headers: Optional[Dict[str, str]] = None):
             self.send_response(code)
             self.send_header("Content-Type", content_type)
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
+            for key, value in (headers or {}).items():
+                self.send_header(key, value)
             self.end_headers()
             self.wfile.write(body)
 
@@ -363,6 +365,20 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path.startswith("/api/experiments/"):
                 suffix = path[len("/api/experiments/"):]
+                if suffix.endswith("/report.json") or suffix.endswith("/report.md"):
+                    filename = "report.json" if suffix.endswith("/report.json") else "report.md"
+                    exp_id = suffix[:-(len(filename) + 1)]
+                    try:
+                        path_obj = store.report_path(exp_id) if filename == "report.json" else store.experiment_dir(exp_id) / filename
+                    except Exception:
+                        self._json(404, {"error": "experiment not found"})
+                        return
+                    if not path_obj.exists():
+                        self._json(404, {"error": f"{filename} not found"})
+                        return
+                    content_type = "application/json; charset=utf-8" if filename == "report.json" else "text/markdown; charset=utf-8"
+                    self._send(200, path_obj.read_bytes(), content_type, {"Content-Disposition": f'attachment; filename="{exp_id}-{filename}"'})
+                    return
                 if suffix.endswith("/report"):
                     exp_id = suffix[:-7]
                     report = _report(store, exp_id)
