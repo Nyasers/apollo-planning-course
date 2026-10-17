@@ -378,7 +378,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path in ("/", "/index.html"):
                 index = WEB_ROOT / "index.html"
-                body = index.read_text(encoding="utf-8").replace("__APOLLO_CLAW_TOKEN__", token)
+                body = index.read_text(encoding="utf-8").replace("__APC_TOKEN__", token)
                 self._send(200, body.encode("utf-8"))
                 return
             if path in ("/app.css", "/app.js"):

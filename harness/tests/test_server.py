@@ -31,6 +31,8 @@ class ServerTest(unittest.TestCase):
                     page = response.read().decode("utf-8")
                 self.assertIn("APOLLO CLAW", page)
                 self.assertIn("task-list", page)
+                self.assertIn('window.__APOLLO_CLAW_TOKEN__ = "', page)
+                self.assertNotIn("__APC_TOKEN__", page)
                 with urllib.request.urlopen(base + "/app.js", timeout=5) as response:
                     self.assertEqual(response.status, 200)
             finally:
