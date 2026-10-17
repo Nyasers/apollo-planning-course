@@ -9,6 +9,7 @@
     demoMode: true
   }, window.APOLLO_LAB_CONFIG || {});
   const metricsKey = "apollo-lab-metrics-v1";
+  const harnessReportKey = "apollo-lab-harness-report-v1";
 
   const stages = [
     { title: "实验准备", desc: "确认课程、实验目标和运行环境，进入人行道避让任务。" },
@@ -24,6 +25,8 @@
   const demoMetrics = {
     scenario: "crosswalk",
     scenarioName: "人行道避让",
+    source: "site-demo",
+    mode: "demo",
     before: { ttc: 1.4, lonAccel: 3.6, jerk: 4.8, hardBrake: 2, score: 82 },
     after: { ttc: 2.3, lonAccel: 2.1, jerk: 2.8, hardBrake: 0, score: 94 },
     updatedAt: new Date().toISOString()
@@ -218,70 +221,438 @@
     }
   }
 
-  function initReportPage() {
-    const report = document.querySelector("[data-lab-report]");
-    if (!report) return;
-    const data = readMetrics() || demoMetrics;
-    const rows = [
-      ["TTC", "s", data.before.ttc, data.after.ttc, 3],
-      ["纵向加速度", "m/s²", data.before.lonAccel, data.after.lonAccel, 4],
-      ["Jerk", "m/s³", data.before.jerk, data.after.jerk, 5],
-      ["急刹次数", "次", data.before.hardBrake, data.after.hardBrake, 3]
-    ];
+  function readHarnessReport() {
+    try {
+      const report = JSON.parse(localStorage.getItem(harnessReportKey) || "null");
+      return report && validateHarnessReport(report).length === 0 ? report : null;
+    } catch (error) {
+      return null;
+    }
+  }
 
-    rows.forEach(([label, unit, before, after, max]) => {
-      const row = document.createElement("div");
-      row.className = "lab-bar-row";
-      const name = document.createElement("span");
-      name.textContent = label;
-      const bars = document.createElement("div");
-      const barBefore = document.createElement("div");
-      barBefore.className = "lab-bar before";
-      const fillBefore = document.createElement("i");
-      fillBefore.style.width = Math.min(100, (before / max) * 100) + "%";
-      barBefore.appendChild(fillBefore);
-      const barAfter = document.createElement("div");
-      barAfter.className = "lab-bar after";
-      const fillAfter = document.createElement("i");
-      fillAfter.style.width = Math.min(100, (after / max) * 100) + "%";
-      barAfter.appendChild(fillAfter);
-      bars.append(barBefore, barAfter);
-      const value = document.createElement("span");
-      value.textContent = before + " → " + after + " " + unit;
-      row.append(name, bars, value);
-      report.querySelector("[data-report-bars]")?.appendChild(row);
+  function writeHarnessReport(report) {
+    localStorage.setItem(harnessReportKey, JSON.stringify(report));
+  }
+
+  function validateHarnessReport(report) {
+    const errors = [];
+    if (!report || typeof report !== "object" || Array.isArray(report)) return ["文件内容不是 JSON 对象"];
+    ["meta", "environment", "record", "metrics", "ai", "verification", "evidence", "capability"].forEach((key) => {
+      if (!(key in report)) errors.push("缺少 " + key + " 字段");
     });
+    const meta = report.meta || {};
+    ["experiment_id", "task", "created_at", "source", "mode"].forEach((key) => {
+      if (!meta[key]) errors.push("缺少 meta." + key);
+    });
+    if (meta.mode && !["planned", "real", "demo", "replay"].includes(meta.mode)) errors.push("meta.mode 无效");
+    if (meta.task && config.taskId && meta.task !== config.taskId) errors.push("报告任务 " + meta.task + " 与当前实验 " + config.taskId + " 不一致");
+    if (!report.metrics || typeof report.metrics !== "object" || Array.isArray(report.metrics)) errors.push("metrics 必须是对象");
+    if (report.score && typeof report.score.is_official !== "boolean") errors.push("score.is_official 必须是布尔值");
+    if (!Array.isArray(report.evidence)) errors.push("evidence 必须是数组");
+    (Array.isArray(report.evidence) ? report.evidence : []).forEach((item, index) => {
+      if (!item || typeof item !== "object" || !item.type || !item.path) errors.push("evidence[" + index + "] 缺少 type 或 path");
+    });
+    const raw = JSON.stringify(report);
+    if (/sk-[A-Za-z0-9_-]{8,}/.test(raw) || /DEEPSEEK_API_KEY\s*=/i.test(raw)) errors.push("报告中疑似包含 API Key 或密钥配置");
+    return errors;
+  }
 
-    setText(report, "[data-report-score-before]", String(data.before.score));
-    setText(report, "[data-report-score-after]", String(data.after.score));
-    setText(report, "[data-report-scenario]", data.scenarioName || "人行道避让");
+  function demoReportData() {
+    const saved = readMetrics() || demoMetrics;
+    const before = Object.assign({}, demoMetrics.before, saved.before || {});
+    const after = Object.assign({}, demoMetrics.after, saved.after || {});
+    return {
+      meta: {
+        experiment_id: "SITE-DEMO-CROSSWALK",
+        task: "crosswalk",
+        scenario: saved.scenarioName || demoMetrics.scenarioName,
+        created_at: saved.updatedAt || demoMetrics.updatedAt,
+        source: "site-demo",
+        mode: "demo",
+        status: "demo"
+      },
+      environment: { demo: true },
+      record: { duration_sec: 25, channel_count: 6, message_count: 128430 },
+      metrics: {
+        min_ttc: before.ttc,
+        max_acceleration: before.lonAccel,
+        max_jerk: before.jerk,
+        hard_brake: before.hardBrake
+      },
+      verification: {
+        min_ttc: after.ttc,
+        max_acceleration: after.lonAccel,
+        max_jerk: after.jerk,
+        hard_brake: after.hardBrake,
+        score_before: before.score,
+        score_after: after.score
+      },
+      score: { source: "网站演示，不替代官方评测", value: after.score, is_official: false },
+      ai: {
+        skills: ["apollo-env", "apollo-dev", "apollo-test", "apollo-eval"],
+        facts: ["演示中最低 TTC 为 1.4 秒", "演示中发生 2 次急刹", "车辆在停止线前等待行人通过"],
+        hypotheses: ["通过人行道前减速偏晚，导致安全距离不足"],
+        suggestions: ["降低人行道前速度上限", "检查 crosswalk TrafficRule 和停止线参数", "重新 record 并对比加速度与 Jerk"],
+        source_refs: ["网站内人行道演示序列", "课程实验台指标卡片"],
+        student_confirmed: false
+      },
+      evidence: [
+        { type: "demo-run", path: "site/lab/crosswalk.html", summary: "网站内车辆停车等待行人的演示过程" },
+        { type: "demo-metrics", path: "浏览器 localStorage", summary: "TTC、加速度、Jerk 和急刹次数演示指标" }
+      ],
+      capability: { environment: 82, log_analysis: 76, data_capture: 88, parameter_tuning: 69, reporting: 74, ai_usage: 92 },
+      errors: []
+    };
+  }
 
-    const download = report.querySelector("[data-download-report]");
-    if (download) {
-      download.addEventListener("click", () => {
-        const lines = [
-          "# Apollo Claw 实验报告（MVP 演示）",
-          "",
-          "实验场景：" + (data.scenarioName || "人行道避让"),
-          "",
-          "| 指标 | 优化前 | 优化后 |",
-          "| --- | ---: | ---: |",
-          "| 场景得分 | " + data.before.score + " | " + data.after.score + " |",
-          "| TTC | " + data.before.ttc + " s | " + data.after.ttc + " s |",
-          "| 纵向加速度 | " + data.before.lonAccel + " m/s² | " + data.after.lonAccel + " m/s² |",
-          "| Jerk | " + data.before.jerk + " m/s³ | " + data.after.jerk + " m/s³ |",
-          "| 急刹次数 | " + data.before.hardBrake + " | " + data.after.hardBrake + " |",
-          "",
-          "结论：通过 Apollo Claw 辅助定位和参数优化，急刹显著减少，舒适性和安全性提升。"
+  function incomingRunSummary() {
+    const params = new URLSearchParams(window.location.search);
+    const run = params.get("apc_run");
+    if (!run) return null;
+    return {
+      run,
+      status: params.get("apc_status") || "",
+      score: params.get("apc_score") || "",
+      source: params.get("apc_source") || ""
+    };
+  }
+
+  function numberOrNull(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function formatNumber(value, digits) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+    const number = Number(value);
+    if (Number.isInteger(number)) return String(number);
+    return number.toFixed(digits ?? 2).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function formatDateTime(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function metricValue(section, keys) {
+    if (!section || typeof section !== "object") return null;
+    for (const key of keys) {
+      const value = numberOrNull(section[key]);
+      if (value !== null) return value;
+    }
+    return null;
+  }
+
+  function setImportStatus(root, text, kind) {
+    const el = root.querySelector("[data-report-import-status]");
+    if (!el) return;
+    el.textContent = text;
+    el.className = kind || "";
+  }
+
+  function fillList(root, selector, values, emptyText) {
+    const list = root.querySelector(selector);
+    if (!list) return;
+    list.innerHTML = "";
+    const items = Array.isArray(values) ? values.filter((value) => String(value ?? "").trim()) : [];
+    if (!items.length) {
+      const li = document.createElement("li");
+      li.className = "is-empty";
+      li.textContent = emptyText || "暂无";
+      list.appendChild(li);
+      return;
+    }
+    items.forEach((value) => {
+      const li = document.createElement("li");
+      li.textContent = String(value);
+      list.appendChild(li);
+    });
+  }
+
+  function renderEvidence(root, evidence) {
+    const list = root.querySelector("[data-report-evidence]");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!Array.isArray(evidence) || !evidence.length) {
+      const li = document.createElement("li");
+      li.className = "is-empty";
+      li.textContent = "暂无证据文件";
+      list.appendChild(li);
+      return;
+    }
+    evidence.forEach((item) => {
+      const li = document.createElement("li");
+      const copy = document.createElement("span");
+      const type = document.createElement("strong");
+      type.textContent = item.type || "file";
+      const summary = document.createElement("small");
+      summary.textContent = item.summary || "未提供摘要";
+      copy.append(type, summary);
+      const path = document.createElement("code");
+      path.textContent = item.path || "—";
+      li.append(copy, path);
+      list.appendChild(li);
+    });
+  }
+
+  function renderCapability(root, capability) {
+    const box = root.querySelector("[data-report-capability]");
+    if (!box) return;
+    box.innerHTML = "";
+    const labels = {
+      environment: "环境诊断",
+      log_analysis: "日志定位",
+      data_capture: "数据采集",
+      parameter_tuning: "参数优化",
+      reporting: "报告表达",
+      ai_usage: "AI 使用规范"
+    };
+    const entries = Object.entries(capability || {}).filter(([key, value]) => key in labels && numberOrNull(value) !== null);
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "lab-report-empty";
+      empty.textContent = "当前报告没有能力画像数据。";
+      box.appendChild(empty);
+      return;
+    }
+    entries.forEach(([key, value]) => {
+      const score = Math.max(0, Math.min(100, Number(value)));
+      const row = document.createElement("div");
+      row.className = "lab-capability-row";
+      const label = document.createElement("span");
+      label.textContent = labels[key];
+      const bar = document.createElement("div");
+      bar.className = "lab-capability-bar";
+      const fill = document.createElement("i");
+      fill.style.width = score + "%";
+      bar.appendChild(fill);
+      const strong = document.createElement("strong");
+      strong.textContent = formatNumber(score, 0);
+      row.append(label, bar, strong);
+      box.appendChild(row);
+    });
+  }
+
+  function reportConclusion(report) {
+    const record = report.record || {};
+    const metrics = report.metrics || {};
+    const verify = report.verification || {};
+    const score = report.score || {};
+    if (record.channel_count === 0 || record.status === "empty") {
+      return "本报告的 record channels 为 0，说明场景或模块尚未产生有效数据。应先启动 DreamView/SimControl 场景，再重新 record。";
+    }
+    const ttcBefore = metricValue(metrics, ["min_ttc", "ttc"]);
+    const ttcAfter = metricValue(verify, ["min_ttc", "ttc"]);
+    const brakeBefore = metricValue(metrics, ["hard_brake"]);
+    const brakeAfter = metricValue(verify, ["hard_brake"]);
+    if (ttcBefore !== null && ttcAfter !== null) {
+      const trend = ttcAfter >= ttcBefore ? "提高" : "下降";
+      const brakeText = brakeBefore !== null && brakeAfter !== null ? "，急刹次数由 " + formatNumber(brakeBefore, 0) + " 次变为 " + formatNumber(brakeAfter, 0) + " 次" : "";
+      return "最小 TTC 由 " + formatNumber(ttcBefore) + " 秒" + trend + "至 " + formatNumber(ttcAfter) + " 秒" + brakeText + "。需结合 trajectory、channel 曲线和教师复核判断改进是否成立。";
+    }
+    if (score.value !== null && score.value !== undefined) {
+      return "当前报告得分为 " + formatNumber(score.value) + "，评分来源为 " + (score.source || "未知") + (score.is_official ? "。该分数标记为官方评分。" : "。该分数不是官方评分。");
+    }
+    return "报告已生成，但尚无可比较的优化前后指标。请检查 record、apollo-eval 和 verification 字段。";
+  }
+
+  function reportToMarkdown(report) {
+    const meta = report.meta || {};
+    const record = report.record || {};
+    const metrics = report.metrics || {};
+    const verification = report.verification || {};
+    const score = report.score || {};
+    const ai = report.ai || {};
+    const lines = [
+      "# Apollo Claw 实验报告摘要",
+      "",
+      "- 实验编号：" + (meta.experiment_id || "—"),
+      "- 实验任务：" + (meta.scenario || meta.task || "—"),
+      "- 数据来源：" + (meta.source || "—"),
+      "- 数据模式：" + (meta.mode || "—"),
+      "- 生成时间：" + formatDateTime(meta.created_at),
+      "- record：" + (record.channel_count ?? "—") + " channels / " + (record.message_count ?? "—") + " messages",
+      "- 场景得分：" + (score.value ?? "—") + "（" + (score.source || "未评分") + "，官方=" + (score.is_official ? "是" : "否") + "）",
+      "",
+      "## 关键指标",
+      "",
+      "| 指标 | 优化前 | 当前报告 |",
+      "| --- | ---: | ---: |",
+      "| 最小 TTC（s） | " + formatNumber(metricValue(metrics, ["min_ttc", "ttc"])) + " | " + formatNumber(metricValue(verification, ["min_ttc", "ttc"])) + " |",
+      "| 最大纵向加速度（m/s²） | " + formatNumber(metricValue(metrics, ["max_acceleration", "lon_accel"])) + " | " + formatNumber(metricValue(verification, ["max_acceleration", "lon_accel"])) + " |",
+      "| 最大 Jerk（m/s³） | " + formatNumber(metricValue(metrics, ["max_jerk", "jerk"])) + " | " + formatNumber(metricValue(verification, ["max_jerk", "jerk"])) + " |",
+      "| 急刹次数 | " + formatNumber(metricValue(metrics, ["hard_brake"]), 0) + " | " + formatNumber(metricValue(verification, ["hard_brake"]), 0) + " |",
+      "",
+      "## AI 事实",
+      "",
+      ...(ai.facts || []).map((item) => "- " + item),
+      "",
+      "## AI 推测",
+      "",
+      ...(ai.hypotheses || []).map((item) => "- " + item),
+      "",
+      "## AI 建议",
+      "",
+      ...(ai.suggestions || []).map((item) => "- " + item),
+      "",
+      "## 证据",
+      "",
+      ...(report.evidence || []).map((item) => "- " + (item.type || "file") + "：" + (item.summary || "") + "（" + (item.path || "") + "）"),
+      "",
+      "> 本地自评估不等于官方评分。"
+    ];
+    return lines.join("\n");
+  }
+
+  function initReportPage() {
+    const root = document.querySelector("[data-lab-report]");
+    if (!root) return;
+    const fileInput = root.querySelector("[data-report-file]");
+    const resetButton = root.querySelector("[data-report-reset]");
+    const summary = incomingRunSummary();
+
+    function render(noticeOverride, noticeKind) {
+      const imported = readHarnessReport();
+      const report = imported || demoReportData();
+      const meta = report.meta || {};
+      const record = report.record || {};
+      const metrics = report.metrics || {};
+      const verify = report.verification || {};
+      const score = report.score || {};
+      const ai = report.ai || {};
+      const isHarness = meta.source === "local-harness";
+      const emptyRecord = record.channel_count === 0 || record.status === "empty" || String(meta.status || "").includes("empty");
+      const isReal = isHarness && meta.mode === "real" && !emptyRecord;
+      const badge = root.querySelector("[data-report-mode-badge]");
+      const badgeText = isReal ? "真实 Harness 报告" : isHarness ? (emptyRecord ? "Harness · 空 record" : "Harness " + (meta.mode || "报告")) : "演示数据";
+      if (badge) {
+        badge.textContent = badgeText;
+        badge.className = "lab-source-badge " + (isReal ? "is-real" : "is-demo");
+      }
+
+      const defaultNotice = imported
+        ? "已载入保存在当前浏览器中的本地 Harness 报告。"
+        : summary
+          ? "已收到本地运行摘要 " + summary.run + "。摘要不能替代原始报告，请导入对应的 report.json 核验。"
+          : "当前显示网站内置演示数据，不代表真实仿真结果。";
+      setImportStatus(root, noticeOverride || defaultNotice, noticeKind || (isReal ? "is-ok" : "is-warn"));
+
+      const intro = isReal
+        ? "本页显示从本地 Harness 导入的真实 report.json。数据只保存在当前浏览器，网站不会上传文件。"
+        : isHarness
+          ? emptyRecord
+            ? "本报告来自本地 Harness，但 record channels 为 0（状态：" + (meta.status || "empty") + "）。该报告不能作为有效驾驶指标，请先启动仿真场景并重新 record。"
+            : "本页显示本地 Harness 报告，但报告模式为 " + (meta.mode || "未知") + "；请结合状态和 record 判断是否可用于正式结论。"
+          : "当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。";
+      setText(root, "[data-report-intro]", intro);
+      setText(root, "[data-report-scenario]", meta.scenario || meta.task || "人行道避让");
+      setText(root, "[data-report-run-id]", meta.experiment_id || "—");
+      setText(root, "[data-report-task]", (meta.scenario || meta.task || "—") + (meta.status ? " · " + meta.status : ""));
+      setText(root, "[data-report-created-at]", formatDateTime(meta.created_at));
+      setText(root, "[data-report-record]", (record.channel_count ?? "—") + " channels · " + (record.message_count ?? "—") + " messages · " + (record.duration_sec ?? "—") + " s");
+      setText(root, "[data-report-score-source]", score.source || "未运行评分");
+      setText(root, "[data-report-ai-skills]", (ai.skills || []).join(", ") || "—");
+
+      const scoreBefore = numberOrNull(verify.score_before);
+      const scoreAfter = numberOrNull(score.value) ?? numberOrNull(verify.score_after);
+      setText(root, "[data-report-score-after]", scoreAfter === null ? "—" : formatNumber(scoreAfter, 0));
+      setText(root, "[data-report-score-current]", scoreAfter === null ? "—" : formatNumber(scoreAfter, 0));
+      setText(root, "[data-report-score-before]", scoreBefore === null ? "—" : formatNumber(scoreBefore, 0));
+      setText(root, "[data-report-score-label]", scoreAfter === null ? "未评分" : "场景得分");
+      setText(root, "[data-report-official]", score.value === null || score.value === undefined
+        ? "当前报告没有评分结果。"
+        : score.is_official ? "官方评分。" : "本地自评估，不替代官方评分。");
+
+      const bars = root.querySelector("[data-report-bars]");
+      if (bars) {
+        bars.innerHTML = "";
+        const configs = [
+          { label: "最小 TTC", unit: "s", before: ["min_ttc", "ttc"], after: ["min_ttc", "ttc"], max: 3 },
+          { label: "最大纵向加速度", unit: "m/s²", before: ["max_acceleration", "lon_accel"], after: ["max_acceleration", "lon_accel"], max: 4 },
+          { label: "最大 Jerk", unit: "m/s³", before: ["max_jerk", "jerk"], after: ["max_jerk", "jerk"], max: 5 },
+          { label: "急刹次数", unit: "次", before: ["hard_brake"], after: ["hard_brake"], max: 3 }
         ];
-        const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "apollo-claw-mvp-report.md";
-        link.click();
-        URL.revokeObjectURL(link.href);
+        configs.forEach((item) => {
+          const beforeValue = metricValue(metrics, item.before);
+          const afterValue = metricValue(verify, item.after);
+          const row = document.createElement("div");
+          row.className = "lab-bar-row" + (beforeValue === null && afterValue === null ? " is-empty" : "");
+          const name = document.createElement("span");
+          name.textContent = item.label;
+          const barGroup = document.createElement("div");
+          barGroup.className = "lab-report-bars";
+          [["before", beforeValue], ["after", afterValue]].forEach(([kind, value]) => {
+            const bar = document.createElement("div");
+            bar.className = "lab-bar " + kind;
+            const fill = document.createElement("i");
+            fill.style.width = value === null ? "0%" : Math.min(100, (Math.max(0, value) / item.max) * 100) + "%";
+            bar.appendChild(fill);
+            barGroup.appendChild(bar);
+          });
+          const value = document.createElement("span");
+          value.textContent = beforeValue === null && afterValue === null ? "无数据" : formatNumber(beforeValue) + " → " + formatNumber(afterValue) + " " + item.unit;
+          row.append(name, barGroup, value);
+          bars.appendChild(row);
+        });
+      }
+      setText(root, "[data-report-metrics-note]", imported
+        ? "本区来自导入的 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
+        : "橙色表示优化前，绿色表示当前报告。当前为演示数据，不替代官方评测。");
+
+      fillList(root, "[data-report-ai-facts]", ai.facts, "暂无 AI 事实");
+      fillList(root, "[data-report-ai-hypotheses]", ai.hypotheses, "暂无 AI 推测");
+      fillList(root, "[data-report-ai-suggestions]", ai.suggestions, "暂无 AI 建议");
+      fillList(root, "[data-report-ai-source-refs]", ai.source_refs, "暂无引用");
+      setText(root, "[data-report-ai-confirmed]", ai.student_confirmed === true ? "学生确认状态：已确认" : ai.student_confirmed === false ? "学生确认状态：未确认" : "报告未记录学生确认状态");
+      renderEvidence(root, report.evidence);
+      const errorValues = (report.errors || []).map((item) => typeof item === "string" ? item : (item.message || JSON.stringify(item)));
+      fillList(root, "[data-report-errors]", errorValues, "无错误或阻塞");
+      setText(root, "[data-report-conclusion]", reportConclusion(report));
+      renderCapability(root, report.capability);
+
+      const download = root.querySelector("[data-download-report]");
+      if (download) {
+        download.onclick = () => {
+          const blob = new Blob([reportToMarkdown(report)], { type: "text/markdown;charset=utf-8" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = (isHarness ? "apollo-claw-" + (meta.experiment_id || "report") : "apollo-lab-demo-report") + ".md";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        };
+      }
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        try {
+          if (file.size > 5 * 1024 * 1024) throw new Error("文件超过 5 MB，请确认选择的是 report.json");
+          const parsed = JSON.parse(await file.text());
+          const errors = validateHarnessReport(parsed);
+          if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
+          writeHarnessReport(parsed);
+          render("导入成功：已读取 " + file.name + "，数据只保存在当前浏览器。", "is-ok");
+        } catch (error) {
+          setImportStatus(root, "导入失败：" + error.message, "is-error");
+        } finally {
+          fileInput.value = "";
+        }
       });
     }
+
+    if (resetButton) {
+      resetButton.addEventListener("click", () => {
+        localStorage.removeItem(harnessReportKey);
+        render("已恢复网站内置演示数据。", "is-warn");
+      });
+    }
+
+    render();
   }
 
   syncLocalPanelLinks();
