@@ -577,19 +577,30 @@
   box-shadow: 0 0 0 6px rgba(11,92,255,.14);
   transition: left 900ms ease, bottom 900ms ease;
 }
-.lab-car::before,
-.lab-car::after {
-  content: "";
+.lab-wheel {
   position: absolute;
-  bottom: 10px;
-  width: 8px;
-  height: 16px;
+  width: 7px;
+  height: 15px;
   border: 2px solid rgba(255,255,255,.66);
   border-radius: 4px;
   background: #101a23;
+  box-sizing: border-box;
+  z-index: 2;
 }
-.lab-car::before { left: -6px; }
-.lab-car::after { right: -6px; }
+.lab-wheel-front-left { top: 10px; left: -6px; }
+.lab-wheel-front-right { top: 10px; right: -6px; }
+.lab-wheel-rear-left { bottom: 10px; left: -6px; }
+.lab-wheel-rear-right { bottom: 10px; right: -6px; }
+.lab-windshield {
+  position: absolute;
+  top: 9px;
+  left: 6px;
+  right: 6px;
+  height: 12px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 4px;
+  background: rgba(255,255,255,.24);
+}
 .lab-person {
   right: 38%;
   top: 42%;

@@ -24,6 +24,8 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
 
   await page.locator('a[href="crosswalk.html"]').first().click();
   await page.waitForLoadState("networkidle");
+  if ((await page.locator(".lab-car .lab-wheel").count()) !== 4) throw new Error("Vehicle should show four wheels");
+  if ((await page.locator(".lab-car .lab-windshield").count()) !== 1) throw new Error("Vehicle windshield missing");
   if (await page.locator("[data-lab-results]").isVisible()) throw new Error("Results should stay hidden before the experiment");
   await page.locator('[data-lab-stage="2"]').click();
   if (!(await page.locator("[data-stage-title]").innerText()).includes("运行场景")) throw new Error("Stage switch failed");

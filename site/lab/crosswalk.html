@@ -6,7 +6,7 @@
   <meta name="description" content="人行道避让综合仿真实验：Apollo Claw 综合实验台。">
   <title>人行道避让实验 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261018-stopwait">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261018-fourwheels">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -81,7 +81,13 @@
               <span class="lab-crosswalk" aria-hidden="true"></span>
               <span class="lab-stop-line" aria-hidden="true"></span>
               <svg class="lab-path" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true"><path d="M 610 690 L 610 20"></path></svg>
-              <span class="lab-car" aria-label="自车示意"></span>
+              <span class="lab-car" aria-label="自车示意">
+                <span class="lab-wheel lab-wheel-front-left"></span>
+                <span class="lab-wheel lab-wheel-front-right"></span>
+                <span class="lab-wheel lab-wheel-rear-left"></span>
+                <span class="lab-wheel lab-wheel-rear-right"></span>
+                <span class="lab-windshield" aria-hidden="true"></span>
+              </span>
               <span class="lab-person" aria-label="横穿行人示意"></span>
             </div>
             <div class="lab-console" data-lab-console><div class="lab-console-line">实验控制台已就绪。点击“运行演示流程”观察完整教学链。</div></div>
