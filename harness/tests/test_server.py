@@ -27,6 +27,12 @@ class ServerTest(unittest.TestCase):
                 with urllib.request.urlopen(base + "/api/tasks", timeout=5) as response:
                     data = json.loads(response.read().decode("utf-8"))
                 self.assertEqual(data["tasks"][0]["id"], "crosswalk")
+                with urllib.request.urlopen(base + "/", timeout=5) as response:
+                    page = response.read().decode("utf-8")
+                self.assertIn("APOLLO CLAW", page)
+                self.assertIn("task-list", page)
+                with urllib.request.urlopen(base + "/app.js", timeout=5) as response:
+                    self.assertEqual(response.status, 200)
             finally:
                 server.shutdown()
                 server.server_close()

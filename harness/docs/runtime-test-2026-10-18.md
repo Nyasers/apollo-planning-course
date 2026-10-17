@@ -15,13 +15,13 @@ Harness 的 P0/P1 骨架和本地服务已经通过实际运行验证；真实�
 | 测试 | 结果 | 说明 |
 |---|---|---|
 | Python 编译 | 通过 | `compileall` 无错误 |
-| 单元测试 | 通过 | 5 个测试全部通过 |
+| 单元测试 | 通过 | 8 个测试全部通过 |
 | WSL `doctor` | 通过 | Docker、aem、Apollo 容器、DreamView、技能目录均识别 |
 | 20 秒 record | 部分成功 | record 文件生成，但 0 channels |
 | channel 报告 | 通过 | 生成 CSV、module summary、Markdown |
 | report export | 通过 | 生成 `report.json` / `report.md` |
 | 无 Key explain | 通过 | 自动规则降级，并能读取知识库和日志 |
-| 本地 HTTP 面板 | 通过 | `/health`、`/api/tasks`、`/api/experiments`、`/api/latest` 正常 |
+| 本地图形面板 | 通过 | `/`、`/app.css`、`/app.js`、`/api/session`、`/api/actions/doctor` 正常 |
 | DeepSeek 实际调用 | 未执行 | WSL 中未配置 `DEEPSEEK_API_KEY` |
 
 ## 2. 实际测试记录

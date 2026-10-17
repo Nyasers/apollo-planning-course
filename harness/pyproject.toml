@@ -17,3 +17,6 @@ apollo-claw = "apollo_claw.cli:main"
 
 [tool.setuptools]
 packages = ["apollo_claw"]
+
+[tool.setuptools.package-data]
+apollo_claw = ["web/*"]

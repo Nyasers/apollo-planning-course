@@ -117,8 +117,8 @@ apollo-claw report export --experiment <id>
 - 默认不执行 `sudo`、`rm`、`git push`、容器重建。
 - API Key 只从 `~/.apollo-claw/.env` 读取。
 - 报告导出会脱敏 `sk-...`、`DEEPSEEK_API_KEY=...`、用户 home 绝对路径。
-- 本地面板只读，只监听 `127.0.0.1:8765`。
-- 网页不直接请求本地 Harness API；通过链接打开本地面板，或导入本地 `report.json`。
+- 本地图形面板只监听 `127.0.0.1:8765`，使用一次性 token 调用白名单动作；不提供任意命令输入。
+- 静态课程网站不直接请求本地 Harness API；通过链接打开本地图形面板，或导入本地 `report.json`。
 
 ## 8. 与网站的关系
 
@@ -146,8 +146,8 @@ apc.nyase.ru
 - 白名单 runner、命令输出落盘。
 - `explain` / `advise` 的 DeepSeek 与规则降级。
 - 报告契约校验、路径脱敏、`report.json` / `report.md` 导出。
-- 本地只读面板和实验列表。
-- 单元测试：manifest、证据路径、报告契约、API Key 防泄漏。
+- 本地图形面板、任务流程、受控动作、实验列表和报告查看。
+- 单元测试：manifest、证据路径、报告契约、API Key 防泄漏、后台动作和静态前端。
 
 仍需在独立 Ubuntu/Apollo 机器上验证：
 

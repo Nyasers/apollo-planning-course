@@ -25,6 +25,15 @@ apollo-claw serve --port 8765
 
 `test record`、`test report`、`eval` 默认 dry-run；只有加 `--execute` 才进入 Apollo 容器执行。
 
+## 图形化面板
+
+```bash
+python3 -m apollo_claw serve --port 8765
+```
+
+打开 `http://127.0.0.1:8765/`。面板提供任务选择、环境检查、record、channel 报告、报告导出、任务控制台和实验报告摘要。面板只监听本机，并通过启动时生成的一次性 token 保护受控动作；不提供任意命令输入。
+
+
 ## 目录
 
 ```text
@@ -33,7 +42,7 @@ harness/
     experiment.py     实验 manifest 和目录
     runner.py         白名单命令执行器
     report.py         报告契约、脱敏和导出
-    server.py         127.0.0.1 本地只读面板
+    server.py         本地图形化面板和受控动作 API
   docs/               技术路线和设计稿
   examples/           示例报告
   scripts/            安装、启动和检查脚本
@@ -46,7 +55,7 @@ harness/
 
 - 目标环境：WSL2 Ubuntu 22.04 / Ubuntu 主机。
 - Apollo 容器默认名：`apollo_neo_dev_edu`。
-- 本地面板默认：`http://127.0.0.1:8765/`。
+- 本地图形面板默认：`http://127.0.0.1:8765/`。
 - DeepSeek Key 仅保存在 `~/.apollo-claw/.env`。
 - 技能目录默认：`~/.apollo-claw/skills/{apollo-env,apollo-dev,apollo-test,apollo-eval}`。
 
@@ -75,4 +84,4 @@ python3 -m unittest discover -v
 - 不自动修改 Apollo 源码。
 - 不把 API Key、record 原始数据和隐私信息提交到 Git。
 - 模型只生成建议，不直接执行命令。
-- 本地面板只监听 `127.0.0.1`，只读展示。
+- 本地面板只监听 `127.0.0.1`，使用启动时生成的一次性 token 调用受控动作，不提供任意命令输入。
