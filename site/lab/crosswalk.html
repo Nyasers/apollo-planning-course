@@ -75,7 +75,11 @@
             <div class="lab-panel-head"><h2>场景运行台</h2><span class="lab-chip">Schematic Demo</span></div>
             <div class="lab-scene" data-lab-scene data-state="idle">
               <span class="lab-road-label">行人横穿 · 静态障碍物 · 人行道停止区</span>
-              <span class="lab-path" aria-hidden="true"></span>
+              <span class="lab-lane lab-lane-left" aria-hidden="true"></span>
+              <span class="lab-lane lab-lane-right" aria-hidden="true"></span>
+              <span class="lab-crosswalk" aria-hidden="true"></span>
+              <span class="lab-stop-line" aria-hidden="true"></span>
+              <svg class="lab-path" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true"><path d="M 610 690 C 610 590 610 530 560 470 S 520 330 550 170 L 560 20"></path></svg>
               <span class="lab-car" aria-label="自车示意"></span>
               <span class="lab-person" aria-label="横穿行人示意"></span>
             </div>
@@ -104,14 +108,17 @@
           </aside>
         </div>
 
-        <div class="lab-metrics-strip">
-          <div class="lab-metric"><span>TTC</span><strong>1.4 → 2.3 s</strong><small>演示数据</small></div>
-          <div class="lab-metric"><span>纵向加速度</span><strong>3.6 → 2.1</strong><small>m/s²</small></div>
-          <div class="lab-metric"><span>Jerk</span><strong>4.8 → 2.8</strong><small>m/s³</small></div>
-          <div class="lab-metric"><span>急刹次数</span><strong>2 → 0</strong><small>次</small></div>
-          <div class="lab-metric"><span>场景得分</span><strong>82 → 94</strong><small>本地自评估</small></div>
-          <div class="lab-metric"><span>证据</span><strong>record</strong><small>CSV / PNG / Report</small></div>
-        </div>
+        <section class="lab-results is-hidden" data-lab-results>
+          <div class="lab-result-head"><div><p class="section-kicker">Experiment Result</p><h3>实验完成后的优化结果</h3></div><p>点击“运行演示流程”后生成，用于展示评分、指标和证据。</p></div>
+          <div class="lab-metrics-strip">
+            <div class="lab-metric"><span>TTC</span><strong>1.4 → 2.3 s</strong><small>演示结果</small></div>
+            <div class="lab-metric"><span>纵向加速度</span><strong>3.6 → 2.1</strong><small>m/s²</small></div>
+            <div class="lab-metric"><span>Jerk</span><strong>4.8 → 2.8</strong><small>m/s³</small></div>
+            <div class="lab-metric"><span>急刹次数</span><strong>2 → 0</strong><small>次</small></div>
+            <div class="lab-metric"><span>场景得分</span><strong>82 → 94</strong><small>本地自评估</small></div>
+            <div class="lab-metric"><span>证据</span><strong>record</strong><small>CSV / PNG / Report</small></div>
+          </div>
+        </section>
 
         <section class="lab-section">
           <div class="lab-section-head">

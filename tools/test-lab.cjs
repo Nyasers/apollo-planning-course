@@ -24,6 +24,7 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
 
   await page.locator('a[href="crosswalk.html"]').first().click();
   await page.waitForLoadState("networkidle");
+  if (await page.locator("[data-lab-results]").isVisible()) throw new Error("Results should stay hidden before the experiment");
   await page.locator('[data-lab-stage="2"]').click();
   if (!(await page.locator("[data-stage-title]").innerText()).includes("运行场景")) throw new Error("Stage switch failed");
   const messagesBefore = await page.locator(".lab-message").count();
@@ -33,6 +34,7 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
 
   await page.locator("[data-run-demo]").click();
   await page.waitForTimeout(4700);
+  if (!(await page.locator("[data-lab-results]").isVisible())) throw new Error("Results were not revealed after run");
   if ((await page.locator("[data-report-link]").getAttribute("aria-disabled")) === "true") throw new Error("Report was not enabled after run");
   const metrics = await page.evaluate(() => JSON.parse(localStorage.getItem("apollo-lab-metrics-v1") || "null"));
   if (!metrics || metrics.after.score !== 94) throw new Error("Metrics were not persisted");

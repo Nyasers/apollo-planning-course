@@ -69,6 +69,7 @@
     const consoleBox = run.querySelector("[data-lab-console]");
     const runButton = run.querySelector("[data-run-demo]");
     const reportLink = run.querySelector("[data-report-link]");
+    const results = run.querySelector("[data-lab-results]");
     const progress = run.querySelector("[data-lab-progress]");
     const agentLog = run.querySelector("[data-agent-log]");
     const agentInput = run.querySelector("[data-agent-input]");
@@ -180,6 +181,7 @@
         runButton.disabled = true;
         runButton.textContent = "运行中…";
         if (consoleBox) consoleBox.textContent = "";
+        if (results) results.classList.add("is-hidden");
         const sequence = [
           [0, "初始化实验任务：人行道避让", "idle"],
           [1, "apollo-env：环境检查通过", "running"],
@@ -197,6 +199,7 @@
           await new Promise((resolve) => window.setTimeout(resolve, 520));
         }
         writeMetrics({ ...demoMetrics, updatedAt: new Date().toISOString() });
+        if (results) results.classList.remove("is-hidden");
         runButton.disabled = false;
         runButton.textContent = "重新运行演示";
         if (reportLink) {
