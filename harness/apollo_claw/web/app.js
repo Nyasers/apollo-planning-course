@@ -546,6 +546,7 @@ function renderReport(report) {
     const webButton = document.querySelector("#open-web-report");
     if (webButton) webButton.hidden = true;
     if ($("metric-score")) $("metric-score").textContent = "—";
+    if ($("metric-score-label")) $("metric-score-label").textContent = "场景分数";
     if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
   }
@@ -556,18 +557,36 @@ function renderReport(report) {
   box.innerHTML = "";
   const grid = document.createElement("div");
   grid.className = "report-grid";
+  const failedMetrics = (score.metrics || []).filter((item) => item && item.pass === false);
+  const scoreValue = score.value;
+  const scoreText = scoreValue === null || scoreValue === undefined
+    ? (score.passed_metrics || "未评分")
+    : String(scoreValue);
+  const scoreLabel = scoreValue === null || scoreValue === undefined ? "场景通过项" : "场景分数";
+  const scoreNote = scoreValue === null || scoreValue === undefined
+    ? (score.passed_metrics
+      ? "没有总分 · " + (failedMetrics.length ? failedMetrics.map((item) => item.name).join("、") + " 未通过" : "无失败项")
+      : "尚未生成评分结果")
+    : "评分来源：" + (score.source || "未注明");
   const cards = [
-    ["实验状态", meta.status || "-"],
-    ["channels", record.channel_count ?? "-"],
-    ["场景分数", score.value ?? "-"],
-    ["证据数", (report.evidence || []).length]
+    { label: "实验状态", value: meta.status || "-", note: "" },
+    { label: "channels", value: record.channel_count ?? "-", note: "" },
+    { label: scoreLabel, value: scoreText, note: scoreNote },
+    { label: "证据数", value: (report.evidence || []).length, note: "" }
   ];
-  cards.forEach(([label, value]) => {
+  cards.forEach((item) => {
     const card = document.createElement("div");
     card.className = "report-card";
-    const b = document.createElement("b"); b.textContent = value;
-    const small = document.createElement("small"); small.textContent = label;
-    card.append(b, small); grid.appendChild(card);
+    const b = document.createElement("b"); b.textContent = item.value;
+    const small = document.createElement("small"); small.textContent = item.label;
+    card.append(b, small);
+    if (item.note) {
+      const note = document.createElement("em");
+      note.className = "report-card-note";
+      note.textContent = item.note;
+      card.appendChild(note);
+    }
+    grid.appendChild(card);
   });
   box.appendChild(grid);
   const facts = document.createElement("div");
@@ -592,7 +611,14 @@ function renderReport(report) {
   setPill("report-status", meta.mode === "real" ? "真实数据" : "演示/计划", meta.mode === "real" ? "ok" : "");
   if ($("metric-status")) $("metric-status").textContent = meta.status || "—";
   if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
-  if ($("metric-score")) $("metric-score").textContent = score.value ?? "—";
+  if ($("metric-score")) {
+    $("metric-score").textContent = scoreValue === null || scoreValue === undefined
+      ? (score.passed_metrics ? score.passed_metrics + " 通过" : "未评分")
+      : String(scoreValue);
+  }
+  if ($("metric-score-label")) {
+    $("metric-score-label").textContent = scoreValue === null || scoreValue === undefined ? "场景通过项" : "场景分数";
+  }
   if ($("metric-evidence")) $("metric-evidence").textContent = (report.evidence || []).length;
 }
 

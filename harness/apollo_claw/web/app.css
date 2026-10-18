@@ -234,3 +234,22 @@
   .chat-form { grid-template-columns: 1fr; }
   .chat-message { max-width: 100%; }
 }
+
+
+/* Dashboard alignment and idle console theme */
+:root {
+  --surface: rgba(13, 28, 44, .82);
+  --surface-soft: rgba(7, 17, 28, .62);
+  --ink: var(--text);
+  --accent: var(--mint);
+}
+.workspace-grid { align-items: stretch; }
+.workspace-grid > .panel { height: 100%; }
+.report-card-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--faint);
+  font-size: 9px;
+  font-style: normal;
+  line-height: 1.4;
+}
