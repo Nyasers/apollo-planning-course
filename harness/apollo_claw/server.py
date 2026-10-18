@@ -398,7 +398,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 if "/files/" in suffix:
                     exp_id, filename = suffix.split("/files/", 1)
                     filename = unquote(filename)
-                    allowed = {"report.json", "report.md", "selfeval.md", "doctor.json", "comfort.json"}
+                    allowed = {"report.json", "report.md", "selfeval.md", "doctor.json", "comfort.json", "lab-report.json", "lab-report.md"}
                     if filename not in allowed or Path(filename).name != filename:
                         self._json(404, {"error": "file not found"})
                         return

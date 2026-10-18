@@ -402,7 +402,12 @@ async function openCurrentReportInWebsite() {
     return;
   }
   try {
-    const raw = await api("/api/experiments/" + encodeURIComponent(state.experimentId) + "/report");
+    let raw;
+    try {
+      raw = await api("/api/experiments/" + encodeURIComponent(state.experimentId) + "/files/lab-report.json");
+    } catch {
+      raw = await api("/api/experiments/" + encodeURIComponent(state.experimentId) + "/report");
+    }
     const payload = {
       meta: raw.meta || {},
       environment: raw.environment || {},
@@ -410,6 +415,7 @@ async function openCurrentReportInWebsite() {
       metrics: raw.metrics || {},
       score: raw.score || {},
       ai: raw.ai || {},
+      lab: raw.lab || {},
       verification: raw.verification || {},
       evidence: raw.evidence || [],
       capability: raw.capability || {},
@@ -419,7 +425,7 @@ async function openCurrentReportInWebsite() {
     let binary = "";
     bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
     const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    window.open("https://apc.nyase.ru/lab/report.html#report=" + encoded, "_blank", "noopener");
+    window.open("https://apc.nyase.ru/lab/report.html?v=20261019-report-handoff-2#report=" + encoded, "_blank", "noopener");
   } catch (error) {
     showToast("打开网站报告失败：" + error.message, "error");
   }

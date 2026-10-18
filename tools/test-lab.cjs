@@ -68,6 +68,19 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
     ai: { skills: ["apollo-dev", "apollo-eval"], facts: ["测试事实"], hypotheses: ["测试推测"], suggestions: ["测试建议"], source_refs: ["planning.INFO"], student_confirmed: true },
     evidence: [{ type: "record", path: "outputs/experiments/test/crosswalk.record", summary: "测试记录" }],
     capability: { environment: 90, log_analysis: 80, data_capture: 88, parameter_tuning: 70, reporting: 75, ai_usage: 92 },
+    lab: {
+      schema: "apollo-claw.lab-report.v1",
+      generated_at: "2026-10-18T12:30:00+08:00",
+      badge: "真实本地自评",
+      is_official: false,
+      headline: "测试基线：通过 2/2 项",
+      summary: "测试整合报告",
+      comparison: [{ id: "ttc", label: "TTC", before: "FAIL", after: "FAIL", before_detail: "29/257", after_detail: "29/267", status: "unchanged" }],
+      warnings: ["测试警告"],
+      next_actions: ["测试下一步"],
+      human_review: ["测试人工核验"],
+      files: { report_json: "report.json" }
+    },
     errors: []
   };
   await page.locator("[data-report-file]").setInputFiles({ name: "report.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(sampleReport)) });
@@ -80,6 +93,15 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
   if (!(await page.locator("[data-report-environment]").innerText()).includes("已记录")) throw new Error("Environment status missing");
   const storedReport = await page.evaluate(() => localStorage.getItem("apollo-lab-harness-report-v1"));
   if (!storedReport) throw new Error("Imported report was not persisted");
+  if (!(await page.locator("[data-report-lab-section]").isVisible())) throw new Error("Integrated lab report section missing");
+  if (!(await page.locator("[data-report-lab-headline]").innerText()).includes("测试基线")) throw new Error("Integrated lab report headline missing");
+  if ((await page.locator("[data-report-lab-comparison] tbody tr").count()) !== 1) throw new Error("Integrated lab report comparison missing");
+
+  const hashEncoded = Buffer.from(JSON.stringify(sampleReport)).toString("base64url");
+  await page.goto(url("lab/report.html") + "#report=" + hashEncoded, { waitUntil: "networkidle" });
+  if (!(await page.locator("[data-report-lab-section]").isVisible())) throw new Error("Hash report lab section missing");
+  if (!(await page.locator("[data-report-lab-headline]").innerText()).includes("测试基线")) throw new Error("Hash report lab headline missing");
+  if ((await page.locator("[data-report-score-after]").innerText()) !== "91") throw new Error("Hash report score mismatch");
 
   await page.reload({ waitUntil: "networkidle" });
   if ((await page.locator("[data-report-score-after]").innerText()) !== "91") throw new Error("Imported report did not survive reload");

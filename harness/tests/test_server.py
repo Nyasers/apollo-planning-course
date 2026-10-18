@@ -40,7 +40,12 @@ class ServerTest(unittest.TestCase):
                 exp_id = experiment["meta"]["experiment_id"]
                 report_file = store.experiment_dir(exp_id) / "report.json"
                 report_file.write_text(json.dumps({"meta": {"experiment_id": exp_id}}), encoding="utf-8")
+                lab_file = store.experiment_dir(exp_id) / "lab-report.json"
+                lab_file.write_text(json.dumps({"lab": {"experiment_id": exp_id}}), encoding="utf-8")
                 with urllib.request.urlopen(base + f"/api/experiments/{exp_id}/files/report.json", timeout=5) as response:
+                    self.assertEqual(response.status, 200)
+                    self.assertIn(exp_id, response.read().decode("utf-8"))
+                with urllib.request.urlopen(base + f"/api/experiments/{exp_id}/files/lab-report.json", timeout=5) as response:
                     self.assertEqual(response.status, 200)
                     self.assertIn(exp_id, response.read().decode("utf-8"))
             finally:
