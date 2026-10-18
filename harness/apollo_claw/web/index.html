@@ -76,13 +76,21 @@
         </section>
 
         <section class="panel ai-panel">
-          <div class="panel-head"><div><span class="eyebrow">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
-          <div class="ai-grid">
-            <label class="field">问题<input id="ai-question" type="text" placeholder="例如：为什么人行道前 TTC 偏低？"></label>
-            <label class="field">日志路径（可选）<input id="ai-log" type="text" placeholder="~/application-pnc/data/log/planning.INFO"></label>
-            <button class="button" data-action="explain">开始诊断</button>
+          <div class="panel-head"><div><span class="eyebrow">REPORT Q&amp;A</span><h3>报告问答</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
+          <div id="ai-report-context" class="ai-report-context">选择实验后，可围绕当前报告向 DeepSeek 提问。</div>
+          <div id="chat-view" class="chat-view" aria-live="polite"></div>
+          <div id="chat-prompts" class="chat-prompts">
+            <button type="button" class="chat-prompt" data-chat-prompt="这份报告为什么没有完全通过？">为什么没通过？</button>
+            <button type="button" class="chat-prompt" data-chat-prompt="这轮比基线改善了吗？">和基线比呢？</button>
+            <button type="button" class="chat-prompt" data-chat-prompt="报告没有总分，8/9 是什么意思？">8/9 是什么？</button>
+            <button type="button" class="chat-prompt" data-chat-prompt="下一轮应该先改什么？">下一步改什么？</button>
           </div>
-          <div id="ai-view" class="ai-view">选择实验后，可让 DeepSeek 解释当前证据；未配置 Key 时自动使用规则降级。</div>
+          <form id="chat-form" class="chat-form">
+            <label class="field chat-field">你的问题<textarea id="ai-question" rows="2" placeholder="例如：TTC 为什么没有通过？下一轮应该先改什么？"></textarea></label>
+            <input id="ai-log" type="hidden" value="">
+            <button id="chat-send" class="button" type="submit">发送</button>
+          </form>
+          <div class="settings-message">回答只依据当前实验报告；未配置 DeepSeek Key 时使用报告规则回答。</div>
         </section>
 
         <section class="panel console-panel wide">

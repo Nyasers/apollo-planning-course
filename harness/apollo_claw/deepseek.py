@@ -6,7 +6,7 @@ import json
 import re
 import urllib.error
 import urllib.request
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from .config import Settings
 
@@ -108,6 +108,138 @@ def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") ->
             "need_student_confirm": True,
             "source_refs": [],
         }
+
+
+REPORT_QA_SYSTEM_PROMPT = """你是 Apollo Claw 的实验报告问答助手，服务 Apollo Planning 仿真课程。
+只依据提供的当前报告和最近对话回答，不编造数字、分数、命令或执行结果。
+回答要适合初学者：先给结论，再列报告证据，最后给可执行的下一步。
+如果报告没有相关信息，要明确说“报告中没有足够证据”，并指出还需要查看什么。
+评分来自脚本，不来自你；不要说已经执行过命令。
+输出中文 JSON，字段为 answer、evidence、next_steps、needs_confirmation。answer 是自然语言回答。"""
+
+
+def report_context(report: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep only report fields useful for a grounded Q&A prompt."""
+    keys = ("meta", "record", "metrics", "score", "lab", "verification", "ai", "evidence", "errors", "capability")
+    return redact_for_model({key: report.get(key) for key in keys if key in report})
+
+
+def answer_report_question(
+    settings: Settings,
+    report: Dict[str, Any],
+    question: str,
+    history: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    if not settings.deepseek_api_key:
+        raise DeepSeekUnavailable("DEEPSEEK_API_KEY is not configured")
+    messages: List[Dict[str, str]] = [{"role": "system", "content": REPORT_QA_SYSTEM_PROMPT}]
+    for item in (history or [])[-8:]:
+        if not isinstance(item, dict):
+            continue
+        role = item.get("role")
+        content = str(item.get("content") or "").strip()
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content[:4000]})
+    messages.append({
+        "role": "user",
+        "content": "当前实验报告（只作为证据）：\n"
+        + json.dumps(report_context(report), ensure_ascii=False, indent=2)
+        + "\n\n学生问题：" + question,
+    })
+    payload = {
+        "model": settings.deepseek_model,
+        "messages": messages,
+        "temperature": 0.2,
+        "response_format": {"type": "json_object"},
+    }
+    try:
+        data = _post_json(settings.deepseek_base_url.rstrip("/") + "/chat/completions", payload, settings.deepseek_api_key)
+    except urllib.error.HTTPError as exc:
+        raise DeepSeekUnavailable(f"DeepSeek HTTP {exc.code}: {exc.reason}")
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DeepSeekUnavailable(f"DeepSeek 请求失败：{exc}")
+    except json.JSONDecodeError as exc:
+        raise DeepSeekUnavailable(f"DeepSeek 返回无法解析：{exc}")
+    content = data["choices"][0]["message"]["content"]
+    try:
+        result = json.loads(content)
+    except json.JSONDecodeError:
+        return {"answer": content, "evidence": [], "next_steps": [], "needs_confirmation": []}
+    if not isinstance(result, dict):
+        return {"answer": str(result), "evidence": [], "next_steps": [], "needs_confirmation": []}
+    result.setdefault("answer", "报告中没有足够证据回答这个问题。")
+    result.setdefault("evidence", [])
+    result.setdefault("next_steps", [])
+    result.setdefault("needs_confirmation", [])
+    return result
+
+
+def fallback_report_answer(report: Dict[str, Any], question: str, history: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """Answer report questions without a model, using only report fields."""
+    meta = report.get("meta", {}) or {}
+    record = report.get("record", {}) or {}
+    score = report.get("score", {}) or {}
+    lab = report.get("lab", {}) or {}
+    metrics = report.get("metrics", {}) or {}
+    text = (question or "").lower()
+    failed = [item for item in (score.get("metrics") or []) if isinstance(item, dict) and item.get("pass") is False]
+    failed_names = [str(item.get("name")) for item in failed]
+    passed = score.get("passed_metrics") or "—"
+    evidence: List[str] = []
+    next_steps: List[str] = []
+
+    if record.get("channel_count") == 0 or record.get("status") == "empty":
+        return {
+            "answer": "当前报告的 record 没有有效 channel，不能据此判断车辆行为。先启动 DreamView/SimControl 场景，再重新录制。",
+            "evidence": ["record.channel_count = 0 或 status = empty"],
+            "next_steps": ["启动场景和 Planning/Control 模块", "确认 channel 有消息后重新 record"],
+            "needs_confirmation": [],
+        }
+
+    if any(word in text for word in ("ttc", "行人", "碰撞", "礼让", "没通过", "未通过", "没有完全通过", "失败")):
+        answer = f"这份报告场景自评通过 {passed} 项，TTC 仍未通过。"
+        for item in failed:
+            evidence.append(f"{item.get('name')} 未通过：{item.get('fail')}/{item.get('total')} 帧")
+        comparison = lab.get("comparison") or []
+        for item in comparison:
+            if str(item.get("id", "")).lower() == "ttc":
+                evidence.append(f"TTC 基线 {item.get('before')} → 本轮 {item.get('after')}（{item.get('before_detail')} → {item.get('after_detail')}）")
+        review = lab.get("human_review") or []
+        if review:
+            evidence.append(str(review[0]))
+        answer += " 当前报告只能证明 TTC 低于阈值，不能仅凭报告判断是合理礼让还是减速过晚；需要结合行人和车辆轨迹确认。"
+        next_steps = ["回放 TTC 时间窗", "确认目标对象是否为行人", "检查人行横道前是否提前减速"]
+    elif any(word in text for word in ("基线", "对比", "改善", "变化", "优化")):
+        comparison = lab.get("comparison") or []
+        answer = "这轮相对基线有改善，但还没有完全通过。"
+        for item in comparison[:8]:
+            evidence.append(f"{item.get('label')}: {item.get('before')} → {item.get('after')}（{item.get('status')}）")
+        next_steps = [str(item) for item in (lab.get("next_actions") or [])[:3]]
+    elif any(word in text for word in ("分数", "得分", "多少", "评分", "8/9", "通过项")):
+        answer = f"报告没有总分，score.value 为空；当前可用的结果是场景自评通过 {passed} 项。"
+        evidence.append("score.value = null，is_official = false")
+        if failed_names:
+            evidence.append("未通过项：" + "、".join(failed_names))
+        next_steps = ["以九项指标和证据为准，不要把通过项当成官方总分"]
+    else:
+        answer = f"当前报告是 {meta.get('scenario') or meta.get('task') or 'Apollo 实验'}，场景自评通过 {passed} 项。"
+        if failed_names:
+            answer += " 未通过项：" + "、".join(failed_names) + "。"
+        for item in failed[:3]:
+            evidence.append(f"{item.get('name')} 未通过：{item.get('fail')}/{item.get('total')} 帧")
+        for key, label in (("max_lon_accel", "最大纵向加速度"), ("max_jerk", "最大 Jerk"), ("hard_brake", "急刹次数")):
+            if metrics.get(key) is not None:
+                evidence.append(f"{label}：{metrics.get(key)}")
+        next_steps = [str(item) for item in (lab.get("next_actions") or [])[:3]]
+
+    if not evidence:
+        evidence.append("报告中未找到与问题直接对应的指标")
+    return {
+        "answer": answer,
+        "evidence": evidence,
+        "next_steps": next_steps or ["查看报告中的场景指标和证据链"],
+        "needs_confirmation": [],
+    }
 
 
 FALLBACK_RULES = {

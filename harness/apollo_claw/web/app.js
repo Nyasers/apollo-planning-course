@@ -1,5 +1,5 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, chat: [], chatBusy: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -167,7 +167,10 @@ function selectTask(task) {
   renderTasks();
   renderExperiments();
   renderExperiment();
-  renderAI(null);
+  state.report = null;
+  state.chat = [];
+  renderChat();
+  updateReportContext();
   renderReport(null);
 }
 
@@ -189,18 +192,215 @@ async function loadExperiments() {
   renderExperiments();
 }
 
+async function fetchCurrentReport(id) {
+  try {
+    return await api(`/api/experiments/${encodeURIComponent(id)}/files/lab-report.json`);
+  } catch {
+    return await api(`/api/experiments/${encodeURIComponent(id)}/report`);
+  }
+}
+
 async function loadExperiment(id) {
-  if (!id) { state.experiment = null; state.experimentId = ""; renderExperiment(); renderReport(null); return; }
+  if (!id) {
+    state.experiment = null;
+    state.experimentId = "";
+    state.report = null;
+    state.chat = [];
+    renderExperiment();
+    renderReport(null);
+    renderChat();
+    updateReportContext();
+    return;
+  }
   state.experimentId = id;
   state.experiment = await api(`/api/experiments/${encodeURIComponent(id)}`);
   renderExperiments();
   renderExperiment();
-  renderAI(state.experiment.ai);
+  state.report = null;
   try {
-    const report = await api(`/api/experiments/${encodeURIComponent(id)}/report`);
-    renderReport(report);
+    state.report = await fetchCurrentReport(id);
+    renderReport(state.report);
   } catch {
     renderReport(null);
+  }
+  loadChatHistory();
+  updateReportContext();
+  renderChat();
+}
+
+function chatStorageKey() {
+  return "apollo-claw-report-chat-v1:" + (state.experimentId || "none");
+}
+
+function loadChatHistory() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(chatStorageKey()) || "[]");
+    state.chat = Array.isArray(parsed)
+      ? parsed.filter((item) => item && (item.role === "user" || item.role === "assistant") && item.content).slice(-30)
+      : [];
+  } catch {
+    state.chat = [];
+  }
+}
+
+function saveChatHistory() {
+  try {
+    localStorage.setItem(chatStorageKey(), JSON.stringify(state.chat.slice(-30)));
+  } catch {}
+}
+
+function updateReportContext() {
+  const box = $("ai-report-context");
+  if (!box) return;
+  if (!state.experimentId) {
+    box.textContent = "选择实验后，可围绕当前报告向 DeepSeek 提问。";
+    return;
+  }
+  if (!state.report) {
+    box.textContent = "当前实验还没有可问答的报告，请先生成自评或导出 report.json。";
+    return;
+  }
+  const meta = state.report.meta || {};
+  const score = state.report.score || {};
+  const kind = state.report.lab ? "整合报告" : "基础报告";
+  box.textContent = `当前报告：${meta.experiment_id || state.experimentId} · 自评 ${score.passed_metrics || "—"} · ${kind}`;
+}
+
+function appendChatLines(row, title, values) {
+  if (!Array.isArray(values) || !values.length) return;
+  const details = document.createElement("details");
+  details.className = "chat-evidence";
+  const summary = document.createElement("summary");
+  summary.textContent = title;
+  const list = document.createElement("ul");
+  values.forEach((value) => {
+    const item = document.createElement("li");
+    item.textContent = String(value);
+    list.appendChild(item);
+  });
+  details.append(summary, list);
+  row.appendChild(details);
+}
+
+function renderChat() {
+  const box = $("chat-view");
+  if (!box) return;
+  box.innerHTML = "";
+  const send = $("chat-send");
+  if (send) {
+    send.disabled = state.chatBusy || !state.report;
+    send.textContent = state.chatBusy ? "回答中..." : "发送";
+  }
+  if (!state.experimentId) {
+    box.textContent = "先选择一个实验，再围绕该实验的报告提问。";
+    return;
+  }
+  if (!state.report) {
+    box.textContent = "当前实验还没有报告。完成自评并导出报告后，这里会显示可追问的报告内容。";
+    return;
+  }
+  if (!state.chat.length) {
+    const empty = document.createElement("div");
+    empty.className = "chat-empty";
+    empty.textContent = "报告已加载。可以问：为什么没通过？和基线相比改善了吗？下一轮先改什么？";
+    box.appendChild(empty);
+  }
+  state.chat.forEach((message) => {
+    const row = document.createElement("article");
+    row.className = "chat-message " + (message.role === "user" ? "is-user" : "is-assistant");
+    if (message.error) row.classList.add("is-error");
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    meta.textContent = message.role === "user"
+      ? "你"
+      : "Apollo Claw" + (message.mode ? " · " + (message.mode === "deepseek" ? "DeepSeek" : "规则回答") : "");
+    const text = document.createElement("div");
+    text.className = "chat-text";
+    text.textContent = message.content || "";
+    row.append(meta, text);
+    appendChatLines(row, "报告证据", message.evidence);
+    appendChatLines(row, "下一步", message.next_steps);
+    if (message.note) {
+      const note = document.createElement("div");
+      note.className = "chat-note";
+      note.textContent = message.note;
+      row.appendChild(note);
+    }
+    box.appendChild(row);
+  });
+  if (state.chatBusy) {
+    const waiting = document.createElement("div");
+    waiting.className = "chat-waiting";
+    waiting.textContent = "正在读取当前报告并组织回答...";
+    box.appendChild(waiting);
+  }
+  box.scrollTop = box.scrollHeight;
+}
+
+async function askReport(question) {
+  const q = String(question || "").trim();
+  if (!q) return;
+  if (!state.experimentId || !state.report) {
+    showToast("请先选择一份已有报告。", "error");
+    return;
+  }
+  if (state.chatBusy) return;
+  const history = state.chat
+    .filter((item) => item && (item.role === "user" || item.role === "assistant") && item.content)
+    .slice(-8)
+    .map((item) => ({ role: item.role, content: item.content }));
+  state.chat.push({ role: "user", content: q });
+  saveChatHistory();
+  state.chatBusy = true;
+  renderChat();
+  try {
+    const data = await api(`/api/experiments/${encodeURIComponent(state.experimentId)}/ask`, {
+      method: "POST",
+      body: { question: q, history },
+    });
+    state.chat.push({
+      role: "assistant",
+      content: data.answer || "报告中没有足够证据回答这个问题。",
+      evidence: Array.isArray(data.evidence) ? data.evidence : [],
+      next_steps: Array.isArray(data.next_steps) ? data.next_steps : [],
+      mode: data.mode || "fallback",
+      note: data.note || "",
+    });
+    showToast(data.mode === "deepseek" ? "DeepSeek 已根据当前报告回答。" : "DeepSeek 未配置，已使用报告规则回答。", data.mode === "deepseek" ? "success" : "warn");
+    setWorkflowStatus("报告问答完成。", "success");
+  } catch (error) {
+    state.chat.push({ role: "assistant", content: "回答失败：" + error.message, error: true });
+    showToast("报告问答失败：" + error.message, "error");
+  } finally {
+    state.chatBusy = false;
+    saveChatHistory();
+    renderChat();
+  }
+}
+
+function initChat() {
+  const form = $("chat-form");
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = $("ai-question");
+      if (!input) return;
+      const question = input.value;
+      input.value = "";
+      askReport(question);
+    });
+  }
+  document.querySelectorAll("[data-chat-prompt]").forEach((button) => {
+    button.addEventListener("click", () => askReport(button.dataset.chatPrompt || ""));
+  });
+  const input = $("ai-question");
+  if (input) {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey) && form) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
   }
 }
 
@@ -545,5 +745,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("deepseek-clear").addEventListener("click", clearDeepSeekKey);
   const webReportButton = document.getElementById("open-web-report");
   if (webReportButton) webReportButton.addEventListener("click", openCurrentReportInWebsite);
+  initChat();
   init();
 });

@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import unquote, urlparse
 
 from .config import Settings
-from .deepseek import DeepSeekUnavailable, test_connection
+from .deepseek import DeepSeekUnavailable, answer_report_question, fallback_report_answer, test_connection
 from .experiment import ExperimentStore
 
 WEB_ROOT = Path(__file__).resolve().parent / "web"
@@ -144,6 +144,16 @@ def _report(store: ExperimentStore, experiment_id: str):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _best_report(store: ExperimentStore, experiment_id: str):
+    """Prefer the integrated website report, then the raw harness report."""
+    directory = store.experiment_dir(experiment_id)
+    for name in ("lab-report.json", "report.json"):
+        path = directory / name
+        if path.exists():
+            return json.loads(path.read_text(encoding="utf-8")), name
+    return None, ""
+
+
 def _deepseek_settings_path() -> Path:
     return Path.home() / ".apollo-claw" / ".env"
 
@@ -259,6 +269,41 @@ def make_handler(settings: Settings, token: Optional[str] = None):
             if path == "/api/settings/deepseek/test":
                 try:
                     self._json(200, test_connection(settings))
+                except Exception as exc:
+                    self._json(400, {"error": str(exc)})
+                return
+            if path.startswith("/api/experiments/") and path.endswith("/ask"):
+                try:
+                    experiment_id = unquote(path[len("/api/experiments/"):-len("/ask")]).strip("/")
+                    if not experiment_id or "/" in experiment_id:
+                        raise ValueError("invalid experiment id")
+                    body = self._read_json()
+                    question = str(body.get("question", "")).strip()
+                    if not question:
+                        raise ValueError("question is required")
+                    # Fail early with a useful message when the experiment does not exist.
+                    store.load(experiment_id)
+                    report, report_source = _best_report(store, experiment_id)
+                    if report is None:
+                        raise ValueError("当前实验还没有报告，请先生成自评报告或导出 report.json")
+                    history = body.get("history", [])
+                    if not isinstance(history, list):
+                        history = []
+                    try:
+                        result = answer_report_question(settings, report, question, history)
+                        mode = "deepseek"
+                    except DeepSeekUnavailable as exc:
+                        result = fallback_report_answer(report, question, history)
+                        reason = str(exc)
+                        if "not configured" in reason:
+                            result["note"] = "未配置 DeepSeek API Key，已使用报告规则回答。"
+                        else:
+                            result["note"] = f"DeepSeek 暂时不可用，已使用报告规则回答：{reason}"
+                        mode = "fallback"
+                    result["mode"] = mode
+                    result["experiment_id"] = experiment_id
+                    result["report_source"] = report_source
+                    self._json(200, result)
                 except Exception as exc:
                     self._json(400, {"error": str(exc)})
                 return
