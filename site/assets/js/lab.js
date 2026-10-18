@@ -4,6 +4,7 @@
     apiBase: "",
     simulationUrl: "",
     localPanelUrl: "http://127.0.0.1:8765",
+    launcherProtocol: "apollo-harness",
     taskId: "crosswalk",
     lesson: "lesson-15",
     demoMode: true
@@ -41,20 +42,31 @@
     localStorage.setItem(metricsKey, JSON.stringify(value));
   }
 
-  function localPanelHref() {
-    const base = (config.localPanelUrl || "http://127.0.0.1:8765").replace(/\/$/, "");
-    const params = new URLSearchParams({
+  function localPanelParams() {
+    return new URLSearchParams({
       task: config.taskId || "crosswalk",
       lesson: config.lesson || "lesson-15",
       source: "apc",
       return: window.location.href
     });
-    return base + "/?" + params.toString();
+  }
+
+  function localPanelHref() {
+    const protocol = config.launcherProtocol || "apollo-harness";
+    return protocol + "://open/?" + localPanelParams().toString();
+  }
+
+  function localPanelDirectHref() {
+    const base = (config.localPanelUrl || "http://127.0.0.1:8765").replace(/\/$/, "");
+    return base + "/?" + localPanelParams().toString();
   }
 
   function syncLocalPanelLinks() {
     document.querySelectorAll("[data-local-panel]").forEach((link) => {
       link.setAttribute("href", localPanelHref());
+    });
+    document.querySelectorAll("[data-local-direct]").forEach((link) => {
+      link.setAttribute("href", localPanelDirectHref());
     });
   }
 

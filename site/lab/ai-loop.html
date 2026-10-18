@@ -24,7 +24,7 @@
         <p class="lesson-kicker">AI-assisted Experiment</p>
         <h1>AI 教学引导，<span>从实验准备到结果复盘。</span></h1>
         <p>Apollo Claw 以 apollo-env、apollo-dev、apollo-test、apollo-eval 四类技能贯穿实验前、中、后。它负责解释、定位和建议，学生负责确认与操作，教师负责最终评价。</p>
-        <div class="lab-hero-actions"><a class="button-primary" href="crosswalk.html">进入人行道避让实验</a><a class="button-secondary" data-local-panel href="http://127.0.0.1:8765/">打开本地 Harness</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
+        <div class="lab-hero-actions"><a class="button-primary" href="crosswalk.html">进入人行道避让实验</a><a class="button-secondary" data-local-panel href="#">启动本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">直接打开</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
         <div class="lab-ai-hero-note"><strong>模型接入方式：</strong><span>网页不直接调用 DeepSeek。真实模型调用、record、评分和报告由本地 Harness 完成，API Key 只保存在 <code>~/.apollo-claw/.env</code>。</span></div>
       </div>
       <div class="lab-hero-board"><p class="lab-board-label">TEACHING RHYTHM</p><ol class="lab-flow"><li><b>01</b><span>实验前</span><em>环境与场景</em></li><li><b>02</b><span>实验中</span><em>诊断与记录</em></li><li><b>03</b><span>实验后</span><em>评分与复盘</em></li></ol><p class="lab-board-note">教学节奏：先确认环境和场景，再在运行中诊断与录包，最后用指标完成评分与复盘。</p></div>
@@ -64,6 +64,6 @@ verification: TTC 1.4 → 2.3s；急刹 2 → 0</pre>
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js"></script>
+  <script src="../assets/js/lab.js?v=20261019-launcher-v1"></script>
 </body>
 </html>

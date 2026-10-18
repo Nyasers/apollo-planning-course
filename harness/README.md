@@ -39,6 +39,18 @@ apollo-claw report build --experiment <id> --execute
 - 场景文件省略时，会按实验的场景名在 `~/.apollo/resources/scenario_sets` 里自动匹配；报告里会写明用了哪个文件。
 - 这份报告是**自评**，不是官方评分，阈值来自技能示例与知识库推荐值。
 
+## Windows 一键启动器
+
+Windows 用户可以在仓库根目录运行一次安装脚本，注册 `apollo-harness://` 本地协议：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install-harness-launcher.ps1
+```
+
+安装后，课程网页中的“启动并打开本地 Harness”会调用本地启动器：先检查 `http://127.0.0.1:8765/health`，未运行时启动 `python -m apollo_claw serve --port 8765`，再打开本地面板。浏览器首次会询问是否打开 Apollo_Harness，选择“打开”即可。
+
+如果 Harness 已经在运行，也可以直接访问 `http://127.0.0.1:8765/`。启动日志位于 `%LOCALAPPDATA%\ApolloHarness\launcher.log`。
+
 ## 图形化面板
 
 ```bash

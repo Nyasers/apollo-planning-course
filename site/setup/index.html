@@ -24,7 +24,7 @@
         <p class="lesson-kicker">Local Linux + Local Harness</p>
         <h1>先准备环境，<span>再开始实验。</span></h1>
         <p>推荐使用预装 Ubuntu 镜像，镜像内包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。</p>
-        <div class="lab-hero-actions"><a class="button-primary" data-local-panel href="http://127.0.0.1:8765/">打开本地 Harness</a><a class="button-secondary" href="../lesson-00.html">查看第 00 课安装指南</a><a class="button-secondary" href="../lab/ai-loop.html">查看 AI 闭环</a></div>
+        <div class="lab-hero-actions"><a class="button-primary" data-local-panel href="#">启动并打开本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">已启动？直接打开</a><a class="button-secondary" href="../lesson-00.html">查看第 00 课安装指南</a><a class="button-secondary" href="../lab/ai-loop.html">查看 AI 闭环</a></div>
       </div>
       <div class="lab-hero-board"><p class="lab-board-label">SETUP ROUTES</p><ol class="lab-flow"><li><b>A</b><span>预装 Ubuntu 镜像</span><em>推荐</em></li><li><b>B</b><span>WSL2 手动安装</span><em>需验证</em></li><li><b>C</b><span>Ubuntu 虚拟机</span><em>兼容性好</em></li></ol></div>
     </section>
@@ -47,6 +47,14 @@
         <div class="lab-evidence-row"><strong>校验值</strong><span>待补充 SHA256</span></div>
         <div class="lab-evidence-row"><strong>托管位置</strong><span>待确认：网盘、对象存储或学校服务器</span></div>
       </article></div>
+    </section>
+
+    <section class="lab-section" id="harness-launcher">
+      <div class="lab-section-head"><div><p class="section-kicker">One-click Launcher</p><h2>Windows 一键启动本地 Harness</h2></div><p>浏览器不能直接启动本地程序，需要通过一次性的本地启动器注册 <code>apollo-harness://</code> 协议。</p></div>
+      <pre class="lab-code">cd C:\path\to\apollo-planning-course\harness
+powershell -ExecutionPolicy Bypass -File scripts\install-harness-launcher.ps1</pre>
+      <div class="lab-ai-hero-note" style="margin-top:16px"><strong>安装后：</strong><span>回到实验页点击“启动并打开本地 Harness”。浏览器首次会询问是否打开 Apollo_Harness，选择“打开”即可；Harness 已在运行时，也可以直接访问 <code>http://127.0.0.1:8765/</code>。</span></div>
+      <div class="lab-card-actions" style="margin-top:16px"><a class="button-primary" data-local-panel href="#">启动并打开本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">直接打开本地页面</a></div>
     </section>
 
     <section class="lab-section">
@@ -87,6 +95,6 @@ chmod 600 ~/.apollo-claw/.env</pre>
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js"></script>
+  <script src="../assets/js/lab.js?v=20261019-launcher-v1"></script>
 </body>
 </html>

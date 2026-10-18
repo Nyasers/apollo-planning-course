@@ -1007,6 +1007,20 @@
 }
 
 .lab-local-banner strong { color: var(--ink); }
+.lab-local-hint {
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: .78rem;
+  line-height: 1.65;
+}
+
+.lab-local-hint code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-muted);
+  font-family: var(--font-mono);
+  font-size: .74rem;
+}
 
 .lab-ai-timeline {
   display: grid;
