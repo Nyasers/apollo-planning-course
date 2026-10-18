@@ -8,6 +8,7 @@ from pathlib import Path
 
 from apollo_claw.config import Settings
 from apollo_claw.server import make_handler
+from apollo_claw.experiment import ExperimentStore
 
 
 class ServerTest(unittest.TestCase):
@@ -31,8 +32,17 @@ class ServerTest(unittest.TestCase):
                     page = response.read().decode("utf-8")
                 self.assertIn("APOLLO CLAW", page)
                 self.assertIn("task-list", page)
+                self.assertIn("window.__APOLLO_CLAW_TOKEN__ = ", page)
                 with urllib.request.urlopen(base + "/app.js", timeout=5) as response:
                     self.assertEqual(response.status, 200)
+                store = ExperimentStore(Path(tmp))
+                experiment = store.create("crosswalk", "人行道避让")
+                exp_id = experiment["meta"]["experiment_id"]
+                report_file = store.experiment_dir(exp_id) / "report.json"
+                report_file.write_text(json.dumps({"meta": {"experiment_id": exp_id}}), encoding="utf-8")
+                with urllib.request.urlopen(base + f"/api/experiments/{exp_id}/files/report.json", timeout=5) as response:
+                    self.assertEqual(response.status, 200)
+                    self.assertIn(exp_id, response.read().decode("utf-8"))
             finally:
                 server.shutdown()
                 server.server_close()

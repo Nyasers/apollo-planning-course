@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import html
 import json
+import mimetypes
 import os
 import secrets
 import subprocess
@@ -15,7 +16,7 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from .config import Settings
 from .deepseek import DeepSeekUnavailable, test_connection
@@ -394,6 +395,29 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path.startswith("/api/experiments/"):
                 suffix = path[len("/api/experiments/"):]
+                if "/files/" in suffix:
+                    exp_id, filename = suffix.split("/files/", 1)
+                    filename = unquote(filename)
+                    allowed = {"report.json", "report.md", "selfeval.md", "doctor.json", "comfort.json"}
+                    if filename not in allowed or Path(filename).name != filename:
+                        self._json(404, {"error": "file not found"})
+                        return
+                    try:
+                        directory = store.experiment_dir(exp_id)
+                    except Exception:
+                        self._json(404, {"error": "experiment not found"})
+                        return
+                    file_path = directory / filename
+                    if not file_path.is_file():
+                        self._json(404, {"error": "file not found"})
+                        return
+                    ctype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+                    if filename.endswith(".md"):
+                        ctype = "text/markdown; charset=utf-8"
+                    elif filename.endswith(".json"):
+                        ctype = "application/json; charset=utf-8"
+                    self._send(200, file_path.read_bytes(), ctype)
+                    return
                 if suffix.endswith("/report"):
                     exp_id = suffix[:-7]
                     report = _report(store, exp_id)
@@ -409,7 +433,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path in ("/", "/index.html"):
                 index = WEB_ROOT / "index.html"
-                body = index.read_text(encoding="utf-8").replace("__APOLLO_CLAW_TOKEN__", token)
+                body = index.read_text(encoding="utf-8").replace("__APOLLO_CLAW_TOKEN_VALUE__", token)
                 self._send(200, body.encode("utf-8"))
                 return
             if path in ("/app.css", "/app.js"):

@@ -45,6 +45,7 @@
       <div class="workspace-grid">
         <section class="panel workflow-panel">
           <div class="panel-head"><div><span class="eyebrow">WORKFLOW</span><h3>实验流程</h3></div><span id="active-task" class="pill">未选择</span></div>
+          <div id="workflow-status" class="workflow-status" role="status" aria-live="polite">等待操作</div>
           <div class="step-list">
             <div class="step"><span class="step-no">01</span><div class="step-copy"><strong>环境检查</strong><small>Docker / aem / Apollo / DreamView</small></div><button class="button" data-action="doctor">检查环境</button></div>
             <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
@@ -86,17 +87,19 @@
 
         <section class="panel console-panel wide">
           <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h3>任务控制台</h3></div><span id="job-status" class="pill">空闲</span></div>
-          <pre id="console" class="console">等待操作...</pre>
+          <pre id="console" class="console" aria-live="polite">等待操作...</pre>
         </section>
 
         <section class="panel report-panel wide">
           <div class="panel-head"><div><span class="eyebrow">REPORT</span><h3>报告摘要</h3></div><span id="report-status" class="pill">尚无报告</span></div>
           <div id="report-view" class="report-view">选择已有实验并导出报告后，这里显示状态、指标和证据。</div>
+          <div id="report-files" class="report-files"></div>
         </section>
       </div>
     </section>
   </main>
-  <script>window.__APOLLO_CLAW_TOKEN__ = "__APOLLO_CLAW_TOKEN__";</script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>window.__APOLLO_CLAW_TOKEN__ = "__APOLLO_CLAW_TOKEN_VALUE__";</script>
   <script src="/app.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, token: "" };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -29,6 +29,68 @@ function setPill(id, text, kind = "") {
   if (!el) return;
   el.textContent = text;
   el.className = "pill" + (kind ? " " + kind : "");
+}
+
+function showToast(message, kind = "") {
+  const toast = $("toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.className = "toast is-visible" + (kind ? " is-" + kind : "");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => { toast.className = "toast" + (kind ? " is-" + kind : ""); }, 3600);
+}
+
+function setWorkflowStatus(text, kind = "") {
+  const box = $("workflow-status");
+  if (!box) return;
+  box.textContent = text;
+  box.className = "workflow-status" + (kind ? " is-" + kind : "");
+}
+
+function actionLabel(action) {
+  return ({ doctor: "检查环境", record: "开始录制", report: "生成报告", selfeval: "生成自评", export: "导出", explain: "开始诊断" })[action] || "执行中";
+}
+
+function updateActionElapsed() {
+  if (!state.activeAction) return;
+  const button = document.querySelector(`[data-action="${state.activeAction}"]`);
+  if (!button) return;
+  const elapsed = Math.max(0, Math.floor((Date.now() - state.actionStartedAt) / 1000));
+  const prefix = state.activeAction === "record" ? "录制中" : "处理中";
+  button.textContent = `${prefix} ${elapsed}s`;
+  setWorkflowStatus(state.activeAction === "record"
+    ? `正在录制，已等待 ${elapsed}s。请保持 DreamView 和仿真场景运行，不要关闭本页面。`
+    : `${actionLabel(state.activeAction)}中，已等待 ${elapsed}s。`, "running");
+}
+
+function setActionBusy(action, busy) {
+  document.querySelectorAll("[data-action]").forEach((button) => {
+    if (busy) {
+      button.disabled = true;
+      if (button.dataset.action === action) {
+        button.dataset.originalLabel = button.dataset.originalLabel || button.textContent;
+        button.classList.add("is-busy");
+        button.setAttribute("aria-busy", "true");
+        button.textContent = action === "record" ? "录制中 0s" : "处理中 0s";
+      }
+    } else {
+      button.disabled = false;
+      button.classList.remove("is-busy");
+      button.removeAttribute("aria-busy");
+      if (button.dataset.originalLabel) button.textContent = button.dataset.originalLabel;
+    }
+  });
+  if (busy) {
+    state.activeAction = action;
+    state.actionStartedAt = Date.now();
+    clearInterval(state.actionTimer);
+    state.actionTimer = setInterval(updateActionElapsed, 1000);
+    updateActionElapsed();
+  } else {
+    state.activeAction = "";
+    clearInterval(state.actionTimer);
+    state.actionTimer = null;
+  }
 }
 
 function renderTasks() {
@@ -207,11 +269,28 @@ async function clearDeepSeekKey() {
   }
 }
 
+function renderReportFiles(report) {
+  const box = $("report-files");
+  if (!box) return;
+  box.innerHTML = "";
+  const experimentId = state.experimentId || report?.meta?.experiment_id;
+  if (!report || !experimentId) return;
+  [["report.json", "打开 report.json"], ["report.md", "打开 report.md"], ["selfeval.md", "打开 selfeval.md"], ["doctor.json", "打开 doctor.json"]].forEach(([name, label]) => {
+    const link = document.createElement("a");
+    link.href = `/api/experiments/${encodeURIComponent(experimentId)}/files/${encodeURIComponent(name)}`;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = label;
+    box.appendChild(link);
+  });
+}
+
 function renderReport(report) {
   const box = $("report-view");
   if (!report) {
     box.textContent = "选择已有实验并导出报告后，这里显示状态、指标和证据。";
     setPill("report-status", "尚无报告");
+    renderReportFiles(null);
     if ($("metric-score")) $("metric-score").textContent = "—";
     if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
@@ -253,6 +332,7 @@ function renderReport(report) {
     evidence.appendChild(row);
   });
   box.appendChild(evidence);
+  renderReportFiles(report);
   setPill("report-status", meta.mode === "real" ? "真实数据" : "演示/计划", meta.mode === "real" ? "ok" : "");
   if ($("metric-status")) $("metric-status").textContent = meta.status || "—";
   if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
@@ -273,9 +353,16 @@ async function actionBody(action) {
 }
 
 async function runAction(action) {
-  if (state.jobId) return;
+  if (state.jobId) {
+    showToast("已有任务正在运行，请等待当前任务完成。", "error");
+    return;
+  }
+  const label = actionLabel(action);
+  setActionBusy(action, true);
+  setWorkflowStatus(`${label}：正在提交本地 Harness...`, "running");
+  $("console").textContent = `[${action}] 正在提交任务...\n`;
+  showToast(`${label}已开始，正在等待本地 Harness 响应。`);
   try {
-    setPill("job-status", "提交中");
     const payload = await actionBody(action);
     if (action === "report" && !payload.record) throw new Error("请先完成一次 record，或选择已有实验");
     if ((action === "report" || action === "selfeval" || action === "export" || action === "explain") && !payload.experiment_id) throw new Error("请先选择或创建实验记录");
@@ -284,9 +371,13 @@ async function runAction(action) {
     state.experimentId = data.experiment_id;
     $("console").textContent = `[${action}] 任务已启动：${state.jobId}\n`;
     setPill("job-status", "运行中", "ok");
+    setWorkflowStatus(`${label}已提交，任务编号 ${state.jobId}。`, "running");
     await pollJob(state.jobId);
   } catch (error) {
+    setActionBusy(false);
     setPill("job-status", "失败", "bad");
+    setWorkflowStatus(`${label}失败：${error.message}`, "error");
+    showToast(`${label}失败：${error.message}`, "error");
     $("console").textContent = `错误：${error.message}`;
     state.jobId = "";
   }
@@ -299,16 +390,29 @@ async function pollJob(jobId) {
     $("console").textContent = `[${job.action}] ${job.status}\n${output || "等待输出..."}\n`;
     setPill("job-status", job.status, job.status === "failed" ? "bad" : job.status === "succeeded" ? "ok" : "");
     if (job.status === "running") {
+      const elapsed = Math.max(0, Math.floor((Date.now() - state.actionStartedAt) / 1000));
+      setWorkflowStatus(`${actionLabel(job.action)}正在运行 · 已等待 ${elapsed}s`, "running");
       state.pollTimer = setTimeout(() => pollJob(jobId), 1200);
       return;
     }
+    setActionBusy(false);
     state.jobId = "";
-    if (state.jobTimer) clearTimeout(state.jobTimer);
+    if (state.pollTimer) clearTimeout(state.pollTimer);
+    if (job.status === "succeeded") {
+      setWorkflowStatus(`${actionLabel(job.action)}完成，正在刷新实验状态。`, "success");
+      showToast(`${actionLabel(job.action)}完成。`, "success");
+    } else {
+      setWorkflowStatus(`${actionLabel(job.action)}失败，请查看任务控制台。`, "error");
+      showToast(`${actionLabel(job.action)}失败，请查看任务控制台。`, "error");
+    }
     await loadExperiments();
     await loadExperiment(state.experimentId || job.experiment_id);
   } catch (error) {
+    setActionBusy(false);
     state.jobId = "";
     setPill("job-status", "失败", "bad");
+    setWorkflowStatus(`任务轮询失败：${error.message}`, "error");
+    showToast(`任务轮询失败：${error.message}`, "error");
     $("console").textContent = `轮询失败：${error.message}`;
   }
 }
