@@ -590,14 +590,54 @@ function renderReportFiles(report) {
   box.innerHTML = "";
   const experimentId = state.experimentId || report?.meta?.experiment_id;
   if (!report || !experimentId) return;
-  [["report.json", "打开 report.json"], ["report.md", "打开 report.md"], ["selfeval.md", "打开 selfeval.md"], ["doctor.json", "打开 doctor.json"]].forEach(([name, label]) => {
+  const base = location.origin + "/api/experiments/" + encodeURIComponent(experimentId) + "/files/";
+  const heading = document.createElement("div");
+  heading.className = "report-files-head";
+  heading.innerHTML = "<span class='eyebrow'>ARTIFACTS</span><strong>报告文件与地址</strong>";
+  box.appendChild(heading);
+  const files = [
+    ["report.json", "原始报告 JSON", "report.json"],
+    ["report.md", "可读报告 Markdown", "report.md"],
+    ["selfeval.md", "自评报告", "selfeval.md"],
+    ["doctor.json", "环境检查结果", "doctor.json"]
+  ];
+  if (report.lab && report.lab.schema) files.splice(2, 0, ["lab-report.json", "网站整合报告 JSON", "lab-report.json"]);
+  files.forEach(([name, label, file]) => {
+    const row = document.createElement("div");
+    row.className = "report-file-row";
+    const copy = document.createElement("div");
+    copy.className = "report-file-copy";
+    const title = document.createElement("b");
+    title.textContent = label + " · " + name;
+    const address = document.createElement("code");
+    address.textContent = base + encodeURIComponent(file);
+    copy.append(title, address);
     const link = document.createElement("a");
-    link.href = `/api/experiments/${encodeURIComponent(experimentId)}/files/${encodeURIComponent(name)}`;
+    link.href = base + encodeURIComponent(file);
     link.target = "_blank";
     link.rel = "noreferrer";
-    link.textContent = label;
-    box.appendChild(link);
+    link.textContent = "打开";
+    row.append(copy, link);
+    box.appendChild(row);
   });
+  if ((report.evidence || []).length) {
+    const evidenceHead = document.createElement("div");
+    evidenceHead.className = "report-files-head is-secondary";
+    evidenceHead.innerHTML = "<span class='eyebrow'>EVIDENCE</span><strong>证据路径</strong>";
+    box.appendChild(evidenceHead);
+    report.evidence.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "report-evidence-row";
+      const kind = document.createElement("b");
+      kind.textContent = item.type || "file";
+      const path = document.createElement("code");
+      path.textContent = item.path || "";
+      const summary = document.createElement("small");
+      summary.textContent = item.summary || "";
+      row.append(kind, path, summary);
+      box.appendChild(row);
+    });
+  }
 }
 
 function renderReport(report) {
@@ -665,14 +705,6 @@ function renderReport(report) {
   suggestions.className = "summary";
   suggestions.innerHTML = `<strong>建议</strong>${(ai.suggestions || []).length ? ai.suggestions.map((x) => `<div>• ${esc(x)}</div>`).join("") : "暂无"}`;
   box.appendChild(suggestions);
-  const evidence = document.createElement("div");
-  evidence.className = "evidence";
-  (report.evidence || []).forEach((item) => {
-    const row = document.createElement("div");
-    row.textContent = `${item.type || "file"} · ${item.path || ""}`;
-    evidence.appendChild(row);
-  });
-  box.appendChild(evidence);
   renderReportFiles(report);
   const webButton = document.querySelector("#open-web-report");
   if (webButton) webButton.hidden = !(meta.source === "local-harness" && state.experimentId);
