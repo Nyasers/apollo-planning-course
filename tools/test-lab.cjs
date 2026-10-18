@@ -54,7 +54,7 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
     environment: { docker: true },
     record: { duration_sec: 25, channel_count: 7, message_count: 2048, status: "ok" },
     metrics: { min_ttc: 1.5, max_acceleration: 3.4, max_jerk: 4.5, hard_brake: 2 },
-    verification: { min_ttc: 2.6, max_acceleration: 1.9, max_jerk: 2.4, hard_brake: 0, score_before: 80, score_after: 91 },
+    verification: { min_ttc: 2.6, max_acceleration: 1.9, max_jerk: 2.4, hard_brake: 0, score_before: null, score_after: 91 },
     score: {
       source: "apollo-eval",
       value: 91,
@@ -75,6 +75,8 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
       is_official: false,
       headline: "测试基线：通过 2/2 项",
       summary: "测试整合报告",
+      baseline: { passed_metrics: "1/2", score_value: null, metrics: { max_lon_accel: 3.6, max_jerk: 4.8, hard_brake: 2 } },
+      current: { passed_metrics: "2/2", score_value: null, metrics: { max_lon_accel: 2.1, max_jerk: 2.8, hard_brake: 0 } },
       comparison: [{ id: "ttc", label: "TTC", before: "FAIL", after: "FAIL", before_detail: "29/257", after_detail: "29/267", status: "unchanged" }],
       warnings: ["测试警告"],
       next_actions: ["测试下一步"],
@@ -96,6 +98,9 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
   if (!(await page.locator("[data-report-lab-section]").isVisible())) throw new Error("Integrated lab report section missing");
   if (!(await page.locator("[data-report-lab-headline]").innerText()).includes("测试基线")) throw new Error("Integrated lab report headline missing");
   if ((await page.locator("[data-report-lab-comparison] tbody tr").count()) !== 1) throw new Error("Integrated lab report comparison missing");
+  if ((await page.locator("[data-report-score-before]").innerText()) !== "1/2") throw new Error("Integrated baseline metric missing");
+  const integratedBars = await page.locator("[data-report-bars]").innerText();
+  if (!integratedBars.includes("2.1") || !integratedBars.includes("2.8")) throw new Error("Integrated metric bars missing");
 
   const hashEncoded = Buffer.from(JSON.stringify(sampleReport)).toString("base64url");
   await page.goto(url("lab/report.html") + "#report=" + hashEncoded, { waitUntil: "networkidle" });

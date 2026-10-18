@@ -425,7 +425,7 @@ async function openCurrentReportInWebsite() {
     let binary = "";
     bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
     const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    window.open("https://apc.nyase.ru/lab/report.html?v=20261019-report-handoff-2#report=" + encoded, "_blank", "noopener");
+    window.open("https://apc.nyase.ru/lab/report.html?v=20261019-report-handoff-3#report=" + encoded, "_blank", "noopener");
   } catch (error) {
     showToast("打开网站报告失败：" + error.message, "error");
   }

@@ -346,6 +346,14 @@
     return null;
   }
 
+  function metricValueFrom(sections, keys) {
+    for (const section of sections) {
+      const value = metricValue(section, keys);
+      if (value !== null) return value;
+    }
+    return null;
+  }
+
   function setImportStatus(root, text, kind) {
     const el = root.querySelector("[data-report-import-status]");
     if (!el) return;
@@ -712,12 +720,20 @@
       setText(root, "[data-report-score-source]", score.source || "未运行评分");
       setText(root, "[data-report-ai-skills]", (ai.skills || []).join(", ") || "—");
 
-      const scoreBefore = numberOrNull(verify.score_before);
-      const scoreValue = numberOrNull(score.value) ?? numberOrNull(verify.score_after);
-      const scoreDisplay = scoreValue === null ? (score.passed_metrics || "—") : formatNumber(scoreValue, 0);
+      const lab = report.lab || {};
+      const labBaseline = lab.baseline || {};
+      const labCurrent = lab.current || {};
+      const labBeforeMetrics = labBaseline.metrics || {};
+      const labAfterMetrics = labCurrent.metrics || {};
+      const scoreBeforeValue = numberOrNull(verify.score_before) ?? numberOrNull(labBaseline.score_value);
+      const scoreValue = numberOrNull(score.value) ?? numberOrNull(verify.score_after) ?? numberOrNull(labCurrent.score_value);
+      const scoreDisplay = scoreValue === null ? (score.passed_metrics || labCurrent.passed_metrics || "—") : formatNumber(scoreValue, 0);
+      const scoreBeforeDisplay = scoreBeforeValue === null
+        ? (labBaseline.passed_metrics || "—")
+        : formatNumber(scoreBeforeValue, 0);
       setText(root, "[data-report-score-after]", scoreDisplay);
       setText(root, "[data-report-score-current]", scoreDisplay);
-      setText(root, "[data-report-score-before]", scoreBefore === null ? "—" : formatNumber(scoreBefore, 0));
+      setText(root, "[data-report-score-before]", scoreBeforeDisplay);
       setText(root, "[data-report-score-label]", scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : "场景得分");
       setText(root, "[data-report-official]", score.value === null || score.value === undefined
         ? (score.passed_metrics ? "本地自评：通过 " + score.passed_metrics + " 项，不提供总分，不替代官方评分。" : "当前报告没有评分结果。")
@@ -727,14 +743,14 @@
       if (bars) {
         bars.innerHTML = "";
         const configs = [
-          { label: "最小 TTC", unit: "s", before: ["min_ttc", "ttc"], after: ["min_ttc", "ttc"], max: 3 },
-          { label: "最大纵向加速度", unit: "m/s²", before: ["max_acceleration", "lon_accel"], after: ["max_acceleration", "lon_accel"], max: 4 },
-          { label: "最大 Jerk", unit: "m/s³", before: ["max_jerk", "jerk"], after: ["max_jerk", "jerk"], max: 5 },
-          { label: "急刹次数", unit: "次", before: ["hard_brake"], after: ["hard_brake"], max: 3 }
+          { label: "最小 TTC", unit: "s", beforeKeys: ["min_ttc", "ttc"], afterKeys: ["min_ttc", "ttc"], max: 3 },
+          { label: "最大纵向加速度", unit: "m/s²", beforeKeys: ["max_lon_accel", "max_acceleration", "lon_accel"], afterKeys: ["max_lon_accel", "max_acceleration", "lon_accel"], max: 4 },
+          { label: "最大 Jerk", unit: "m/s³", beforeKeys: ["max_jerk", "jerk"], afterKeys: ["max_jerk", "jerk"], max: 5 },
+          { label: "急刹次数", unit: "次", beforeKeys: ["hard_brake"], afterKeys: ["hard_brake"], max: 3 }
         ];
         configs.forEach((item) => {
-          const beforeValue = metricValue(metrics, item.before);
-          const afterValue = metricValue(verify, item.after);
+          const beforeValue = metricValueFrom([labBeforeMetrics, metrics], item.beforeKeys);
+          const afterValue = metricValueFrom([labAfterMetrics, verify], item.afterKeys);
           const row = document.createElement("div");
           row.className = "lab-bar-row" + (beforeValue === null && afterValue === null ? " is-empty" : "");
           const name = document.createElement("span");
