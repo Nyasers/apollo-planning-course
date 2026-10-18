@@ -49,7 +49,7 @@
           <div class="step-list">
             <div class="step"><span class="step-no">01</span><div class="step-copy"><strong>环境检查</strong><small>Docker / aem / Apollo / DreamView</small></div><button class="button" data-action="doctor">检查环境</button></div>
             <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
-            <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check"><input id="execute" type="checkbox">真实执行</label><button class="button" data-action="record">开始录制</button></div></div>
+            <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small><small class="step-hint">不勾选“实际运行”时只预览命令，不会读取 Apollo 容器</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check" title="勾选后才会真正连接 Apollo 容器执行命令"><input id="execute" type="checkbox">实际运行</label><button class="button" data-action="record">开始录制</button></div></div>
             <div class="step"><span class="step-no">04</span><div class="step-copy"><strong>生成 channel 报告</strong><small>读取 record，生成 CSV / PNG / Markdown</small></div><button class="button" data-action="report">生成报告</button></div>
             <div class="step"><span class="step-no">05</span><div class="step-copy"><strong>生成自评报告</strong><small>场景指标 + 体感指标 + 改进建议</small></div><button class="button" data-action="selfeval">生成自评</button></div>
             <div class="step"><span class="step-no">06</span><div class="step-copy"><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
@@ -60,7 +60,7 @@
           <div class="panel-head"><div><span class="eyebrow">RUN</span><h3>当前实验</h3></div><button id="refresh-exp" class="text-button">刷新</button></div>
           <label class="field">实验记录<select id="experiment-select"><option value="">新建实验</option></select></label>
           <div id="experiment-summary" class="summary">尚无实验记录</div>
-          <div class="manual-box"><strong>真实执行开关</strong><p>关闭时只生成 dry-run 计划，不接触 Apollo 容器。开启后才实际执行容器命令。</p></div>
+          <div class="manual-box"><strong>实际运行开关</strong><p>默认关闭时只生成命令预览，不接触 Apollo 容器；勾选“实际运行”后才会真正录制、评分或导出。</p></div>
           <div class="run-note"><span class="eyebrow">NEXT</span><p>先完成环境检查和场景启动，再录制 record。没有场景时 channel 会是 0。</p></div>
         </section>
 
@@ -73,6 +73,17 @@
             <div class="settings-actions"><button id="deepseek-save" class="button">保存</button><button id="deepseek-test" class="button secondary">测试连接</button><button id="deepseek-clear" class="button secondary">清除</button></div>
           </div>
           <div id="deepseek-message" class="settings-message">Key 只发送到本机 Harness，并保存到 ~/.apollo-claw/.env，不写入网页存储。</div>
+          <div class="config-divider"></div>
+          <div class="config-status">
+            <div class="config-status-head"><span class="eyebrow">RUNTIME</span><strong>运行状态</strong></div>
+            <div class="config-status-grid">
+              <div><span>Harness</span><b id="config-harness">本地在线</b></div>
+              <div><span>DreamView</span><b id="config-dreamview">未检查</b></div>
+              <div><span>DeepSeek</span><b id="config-deepseek">未配置</b></div>
+              <div><span>当前实验</span><b id="config-experiment">未选择</b></div>
+            </div>
+            <p id="config-hint" class="config-hint">选择实验后显示运行状态。</p>
+          </div>
         </section>
 
         <section class="panel ai-panel">

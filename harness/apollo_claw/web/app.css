@@ -253,3 +253,89 @@
   font-style: normal;
   line-height: 1.4;
 }
+
+
+/* Beginner-facing runtime hints */
+.step-hint {
+  margin-top: 3px !important;
+  color: var(--amber) !important;
+  font-size: 9.5px !important;
+  line-height: 1.45 !important;
+}
+.manual-box p {
+  color: #c7d8e7;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.run-note {
+  margin-top: 16px;
+  padding: 13px 14px;
+  border: 1px solid rgba(105, 224, 180, .24);
+  border-left: 3px solid var(--mint);
+  border-radius: 10px;
+  background: rgba(105, 224, 180, .055);
+}
+.run-note p {
+  margin-top: 6px;
+  color: #d7e8f5;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.summary-note {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--amber);
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+.config-divider {
+  height: 1px;
+  margin: 17px 0 15px;
+  background: var(--line);
+}
+.config-status-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+.config-status-head strong {
+  color: var(--text);
+  font-size: 15px;
+}
+.config-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.config-status-grid > div {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(7, 17, 28, .58);
+}
+.config-status-grid span,
+.config-status-grid b {
+  display: block;
+}
+.config-status-grid span {
+  color: var(--faint);
+  font-size: 9px;
+  letter-spacing: .04em;
+}
+.config-status-grid b {
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.config-hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.6;
+}

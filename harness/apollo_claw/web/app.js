@@ -1,5 +1,5 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, chat: [], chatBusy: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, chat: [], chatBusy: false, deepseekConfigured: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -171,6 +171,7 @@ function selectTask(task) {
   state.chat = [];
   renderChat();
   updateReportContext();
+  updateConfigStatus();
   renderReport(null);
 }
 
@@ -210,6 +211,7 @@ async function loadExperiment(id) {
     renderReport(null);
     renderChat();
     updateReportContext();
+    updateConfigStatus();
     return;
   }
   state.experimentId = id;
@@ -225,7 +227,32 @@ async function loadExperiment(id) {
   }
   loadChatHistory();
   updateReportContext();
+  updateConfigStatus();
   renderChat();
+}
+
+function updateConfigStatus() {
+  const exp = state.experiment || {};
+  const meta = exp.meta || {};
+  const record = exp.record || {};
+  const status = meta.status || "";
+  const hasRecord = Boolean(record.path || record.status || record.channel_count);
+  const experimentLabel = state.experimentId
+    ? (meta.scenario || meta.task || "已选择") + " · " + state.experimentId
+    : "未选择";
+  if ($("config-harness")) $("config-harness").textContent = "本地在线";
+  if ($("config-dreamview")) $("config-dreamview").textContent = status === "environment_warning" ? "需检查" : hasRecord ? "已运行" : "未检查";
+  if ($("config-deepseek")) $("config-deepseek").textContent = state.deepseekConfigured ? "已配置" : "规则降级";
+  if ($("config-experiment")) $("config-experiment").textContent = experimentLabel;
+  if ($("config-hint")) {
+    $("config-hint").textContent = !state.experimentId
+      ? "选择实验后显示运行状态。"
+      : status === "environment_warning"
+        ? "环境检查有警告：请在 WSL 中启动 Docker、aem 和 DreamView 后重新检查。"
+        : !hasRecord
+          ? "当前实验还没有 record。启动场景后，勾选“实际运行”再录制。"
+          : "已检测到 record，可以继续生成 channel 报告和自评。";
+  }
 }
 
 function chatStorageKey() {
@@ -413,9 +440,28 @@ function renderExperiment() {
   const exp = state.experiment;
   const record = exp.record || {};
   const status = exp.meta?.status || "created";
-  box.innerHTML = `<strong>${esc(status)}</strong><div>实验：${esc(exp.meta?.scenario || exp.meta?.task || "-")}</div><div>record：${esc(record.channel_count ?? "-")} channels · ${esc(record.size_bytes ?? "-")} bytes</div><div>记录状态：${esc(record.status || "-")}</div>`;
-  if ($("metric-status")) $("metric-status").textContent = status;
-  if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
+  const statusLabels = {
+    environment_warning: "环境检查有警告",
+    created: "已创建",
+    recording: "录制中",
+    recorded: "已录制",
+    evaluated: "已完成评分",
+    complete: "已完成"
+  };
+  const statusText = statusLabels[status] || status;
+  const hasRecord = Boolean(record.path || record.status || record.channel_count);
+  const recordStatus = record.status || (hasRecord ? "已记录" : "未录制");
+  const channelText = record.channel_count ?? (hasRecord ? "—" : "未录制");
+  const sizeText = record.size_bytes ?? (hasRecord ? "—" : "未录制");
+  const recordText = hasRecord ? channelText + " channels · " + sizeText + " bytes" : "未录制";
+  const recordHint = !hasRecord
+    ? "当前实验还没有 record。请先在 DreamView 启动场景，再勾选“实际运行”开始录制。"
+    : record.status === "dry-run"
+      ? "本次只生成了录制命令，没有真正写入 Apollo 记录。"
+      : "";
+  box.innerHTML = `<strong>${esc(statusText)}</strong><div>实验：${esc(exp.meta?.scenario || exp.meta?.task || "-")}</div><div>record：${esc(recordText)}</div><div>记录状态：${esc(recordStatus)}</div>${recordHint ? `<div class="summary-note">${esc(recordHint)}</div>` : ""}`;
+  if ($("metric-status")) $("metric-status").textContent = statusText;
+  if ($("metric-channels")) $("metric-channels").textContent = hasRecord ? (record.channel_count ?? "—") : "未录制";
 }
 
 function renderAI(ai) {
@@ -445,10 +491,12 @@ function renderAI(ai) {
 }
 
 function setDeepSeekStatus(configured, masked = "") {
+  state.deepseekConfigured = Boolean(configured);
   const text = configured ? `DeepSeek 已配置${masked ? " · " + masked : ""}` : "规则降级模式";
   setPill("deepseek-config-status", text, configured ? "ok" : "");
   setPill("deepseek-status", text, configured ? "ok" : "");
   if ($("deepseek-side-status")) $("deepseek-side-status").textContent = configured ? "已配置" : "规则降级";
+  updateConfigStatus();
 }
 
 async function loadDeepSeekSettings() {
