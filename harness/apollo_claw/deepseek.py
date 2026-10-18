@@ -89,7 +89,14 @@ def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") ->
         "temperature": 0.2,
         "response_format": {"type": "json_object"},
     }
-    data = _post_json(url, payload, settings.deepseek_api_key)
+    try:
+        data = _post_json(url, payload, settings.deepseek_api_key)
+    except urllib.error.HTTPError as exc:
+        raise DeepSeekUnavailable(f"DeepSeek HTTP {exc.code}: {exc.reason}")
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DeepSeekUnavailable(f"DeepSeek 请求失败：{exc}")
+    except json.JSONDecodeError as exc:
+        raise DeepSeekUnavailable(f"DeepSeek 返回无法解析：{exc}")
     content = data["choices"][0]["message"]["content"]
     try:
         return json.loads(content)
@@ -103,33 +110,67 @@ def explain(settings: Settings, evidence: Dict[str, Any], question: str = "") ->
         }
 
 
+FALLBACK_RULES = {
+    "TTC": "TTC 偏低：这一段是否在跟车/礼让？若是，确认礼让充分；若不是，减速起点要提前。",
+    "ReachEnd": "未到终点：确认 record 是否覆盖到车停下的时刻，必要时把录制时长拉长。",
+    "SpeedLimit": "超速：检查 profiles/default 下的 speed_limit 配置与地图限速。",
+    "AccelerationLimit": "纵向加速度越界：调小 max_acceleration / max_deceleration。",
+    "HardBrake": "出现急刹：grep stop_reason 确认触发原因。",
+    "CentripetalAccelerationLimit": "过弯横向加速度偏大：降低转弯限速。",
+    "Collision": "发生碰撞：检查 obstacle_avoid 安全距离。",
+    "TimeLimit": "场景超时：提升平均速度或减少绕行。",
+    "OnRoad": "越出道路：检查车道宽度与横向控制参数。",
+}
+
+
 def fallback_explain(evidence: Dict[str, Any]) -> Dict[str, Any]:
     metrics = evidence.get("metrics", {}) or {}
     record = evidence.get("record", {}) or {}
+    score = evidence.get("score", {}) or {}
+    events = evidence.get("events", {}) or {}
     errors = evidence.get("errors", []) or []
     facts = []
     suggestions = []
+
+    # 新证据结构：九项指标 + 事件窗口
+    metric_rows = score.get("metrics") or []
+    if metric_rows:
+        failed = [m for m in metric_rows if not m.get("pass")]
+        facts.append(f"场景判定：{'PASS' if score.get('scenario_pass') else 'FAIL'}，"
+                     f"通过 {score.get('passed_metrics', '-')} 项")
+        for item in failed[:3]:
+            facts.append(f"{item.get('name')} 未通过（{item.get('fail')}/{item.get('total')} 帧）")
+            tip = FALLBACK_RULES.get(item.get("name"))
+            if tip:
+                suggestions.append(tip)
+    if "TTC" in events:
+        ev = events["TTC"]
+        facts.append(f"TTC 低于阈值集中在 t={ev.get('first_t')}–{ev.get('last_t')} s（{ev.get('count')} 帧）")
+    if metrics.get("remaining_to_end_m") is not None:
+        facts.append(f"录制结束时距终点 {metrics['remaining_to_end_m']} m")
+
+    # 旧证据结构兼容
     if metrics.get("min_ttc") is not None:
         facts.append(f"最低 TTC：{metrics['min_ttc']} 秒")
-    if metrics.get("hard_brake") is not None:
-        facts.append(f"急刹次数：{metrics['hard_brake']}")
-    if metrics.get("max_jerk") is not None:
-        facts.append(f"最大 Jerk：{metrics['max_jerk']}")
+        if metrics["min_ttc"] < 2.0:
+            suggestions.append("检查人行道前速度边界和停止线参数，确认是否需要提前减速。")
+    for key, label in (("hard_brake", "急刹次数"), ("max_jerk", "最大 Jerk"), ("max_lon_accel", "最大纵向加速度")):
+        if metrics.get(key) is not None:
+            facts.append(f"{label}：{round(metrics[key], 2)}")
     if record.get("channel_count") is not None:
         facts.append(f"record 核心 channel 数量：{record['channel_count']}")
-    if record.get("status"):
-        facts.append(f"record 状态：{record['status']}")
     if record.get("channel_count") == 0:
         suggestions.append("先启动 SimControl 场景和 Planning/Control/Routing 模块，确认 channel 有消息后重新录制。")
-    if metrics.get("min_ttc") is not None and metrics["min_ttc"] < 2.0:
-        suggestions.append("检查人行道前速度边界和停止线参数，确认是否需要提前减速。")
+
     refs = ["local-rule-fallback"]
     if errors:
         refs.append("experiment.errors")
+    if not facts:
+        facts.append("没有可用的指标数据，先确认 record 非空且包含 localization/pose。")
     return {
         "facts": facts,
         "hypotheses": [],
         "suggestions": suggestions,
-        "need_student_confirm": True,
+        "need_student_confirm": bool(suggestions),
         "source_refs": refs,
     }

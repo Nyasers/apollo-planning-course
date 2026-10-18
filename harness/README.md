@@ -18,12 +18,25 @@ apollo-claw test record --tag crosswalk --seconds 25
 apollo-claw test report --record <record-dir>
 apollo-claw eval --scenario <scenario.json> --bag <output.bag>
 apollo-claw report export --experiment <experiment-id>
+apollo-claw report build --experiment <experiment-id>   # 自评报告：场景指标 + 体感 + 建议
 apollo-claw experiment list
 apollo-claw experiment show --id <experiment-id>
 apollo-claw serve --port 8765
 ```
 
 `test record`、`test report`、`eval` 默认 dry-run；只有加 `--execute` 才进入 Apollo 容器执行。
+
+## 自评报告
+
+```bash
+apollo-claw report build --experiment <id> --execute
+```
+
+一条命令跑完两件事：用 apollo-eval 的评分器逐帧判场景指标（到终点、超时、碰撞、在路、限速、加速度、急刹、横向加速度、TTC），再用 extract_metrics 算体感指标，最后合成一份 `selfeval.md`，带改进建议。
+
+- 评分配置默认用包内的 `apollo_claw/defaults/metrics_selfeval.json`，可用 `--metric` 换成自己的。
+- 场景文件省略时，会按实验的场景名在 `~/.apollo/resources/scenario_sets` 里自动匹配；报告里会写明用了哪个文件。
+- 这份报告是**自评**，不是官方评分，阈值来自技能示例与知识库推荐值。
 
 ## 图形化面板
 
@@ -32,22 +45,6 @@ python3 -m apollo_claw serve --port 8765
 ```
 
 打开 `http://127.0.0.1:8765/`。面板提供任务选择、环境检查、record、channel 报告、报告导出、DeepSeek API 配置、DeepSeek 诊断、任务控制台和实验报告摘要。面板只监听本机，并通过启动时生成的一次性 token 保护受控动作；不提供任意命令输入。
-
-## 与课程网站配合
-
-课程实验台通过以下参数打开本地面板：
-
-```text
-http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc&return=<课程页面>
-```
-
-Harness 会自动选择任务，并校验 `return` 是否属于课程站点。导出报告后，面板显示：
-
-- 下载 `report.json`
-- 下载 `report.md`
-- 返回课程报告页
-
-网站不会直接请求 `http://127.0.0.1:8765`，避免 HTTPS 页面访问 HTTP 本地服务时被浏览器拦截。学生下载 `report.json` 后，在课程“实验报告”页本地导入；网站校验报告结构、任务、评分来源和证据字段，再标记为 Harness 报告或真实 Harness 报告。空 record 不会被标记为有效真实结果。
 
 
 ## 目录
@@ -73,7 +70,7 @@ harness/
 - Apollo 容器默认名：`apollo_neo_dev_edu`。
 - 本地图形面板默认：`http://127.0.0.1:8765/`。
 - DeepSeek Key 仅保存在 `~/.apollo-claw/.env`。
-- 技能目录默认：`~/.apollo-claw/skills/{apollo-env,apollo-dev,apollo-test,apollo-eval}`。
+- 技能目录默认：宿主侧 `~/.apollo-claw/skills/{apollo-env,apollo-dev,apollo-test,apollo-eval}`；安装脚本还会同步到容器可见的 `~/application-pnc/.comate/skills`。
 
 ## 安装
 

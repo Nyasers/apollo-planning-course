@@ -195,13 +195,11 @@ def make_handler(settings: Settings, token: Optional[str] = None):
     jobs = JobManager(settings)
 
     class Handler(BaseHTTPRequestHandler):
-        def _send(self, code: int, body: bytes, content_type: str = "text/html; charset=utf-8", headers: Optional[Dict[str, str]] = None):
+        def _send(self, code: int, body: bytes, content_type: str = "text/html; charset=utf-8"):
             self.send_response(code)
             self.send_header("Content-Type", content_type)
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
-            for key, value in (headers or {}).items():
-                self.send_header(key, value)
             self.end_headers()
             self.wfile.write(body)
 
@@ -267,15 +265,27 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(404, {"error": "not found"})
                 return
             action = path.rsplit("/", 1)[-1]
-            if action not in {"doctor", "record", "report", "eval", "export", "explain"}:
+            if action not in {"doctor", "record", "report", "selfeval", "eval", "export", "explain"}:
                 self._json(404, {"error": "unknown action"})
                 return
             try:
                 body = self._read_json()
                 experiment_id = body.get("experiment_id") or ""
-                if action in {"doctor", "record"} and not experiment_id:
+                if action == "doctor" and not experiment_id:
                     experiment = store.create(body.get("task", "crosswalk"), body.get("scenario", "人行道避让"))
                     experiment_id = experiment["meta"]["experiment_id"]
+                elif action == "record":
+                    # 录制默认开一个新实验：否则同一目录会堆上多次 record，报告会把不同时段的数据混算
+                    reuse = bool(body.get("reuse_experiment"))
+                    if experiment_id and not reuse:
+                        try:
+                            existing = store.load(experiment_id)
+                            reuse = not existing.get("record", {}).get("path")
+                        except Exception:
+                            reuse = False
+                    if not reuse:
+                        experiment = store.create(body.get("task", "crosswalk"), body.get("scenario", "人行道避让"))
+                        experiment_id = experiment["meta"]["experiment_id"]
                 if action == "doctor":
                     argv = ["doctor", "--json", "--experiment", experiment_id]
                 elif action == "record":
@@ -288,10 +298,29 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                     argv = ["test", "report", "--experiment", experiment_id, "--record", body["record"]]
                     if body.get("execute"):
                         argv.append("--execute")
+                elif action == "selfeval":
+                    if not experiment_id:
+                        raise ValueError("selfeval requires experiment_id")
+                    argv = ["report", "build", "--experiment", experiment_id]
+                    if body.get("scenario"):
+                        argv.extend(["--scenario", body["scenario"]])
+                    if body.get("metric"):
+                        argv.extend(["--metric", body["metric"]])
+                    if body.get("execute"):
+                        argv.append("--execute")
                 elif action == "eval":
-                    if not experiment_id or not body.get("scenario_path") or not body.get("bag"):
-                        raise ValueError("eval requires experiment_id, scenario_path and bag")
-                    argv = ["eval", "--experiment", experiment_id, "--scenario", body["scenario_path"], "--bag", body["bag"], "--scenario-name", body.get("scenario", "人行道避让")]
+                    if body.get("comfort"):
+                        argv = ["eval", "--comfort", "--experiment", experiment_id]
+                        if body.get("bag"):
+                            argv.extend(["--bag", body["bag"]])
+                    else:
+                        if not experiment_id or not body.get("metric"):
+                            raise ValueError("grading eval requires experiment_id and metric config")
+                        argv = ["eval", "--experiment", experiment_id, "--metric", body["metric"], "--scenario-name", body.get("scenario", "人行道避让")]
+                        if body.get("scenario_path"):
+                            argv.extend(["--scenario", body["scenario_path"]])
+                        if body.get("bag"):
+                            argv.extend(["--bag", body["bag"]])
                     if body.get("execute"):
                         argv.append("--execute")
                 elif action == "explain":
@@ -322,7 +351,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(200, {
                     "ok": True,
                     "service": "apollo-claw-harness",
-                    "version": "0.3.3",
+                    "version": "0.3.4",
                     "settings": {
                         "container": settings.apollo_container_name,
                         "workspace": settings.apollo_workspace_host,
@@ -333,7 +362,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 })
                 return
             if path == "/api/session":
-                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.3"})
+                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.4"})
                 return
             if path == "/api/tasks":
                 self._json(200, _load_tasks(settings))
@@ -365,20 +394,6 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path.startswith("/api/experiments/"):
                 suffix = path[len("/api/experiments/"):]
-                if suffix.endswith("/report.json") or suffix.endswith("/report.md"):
-                    filename = "report.json" if suffix.endswith("/report.json") else "report.md"
-                    exp_id = suffix[:-(len(filename) + 1)]
-                    try:
-                        path_obj = store.report_path(exp_id) if filename == "report.json" else store.experiment_dir(exp_id) / filename
-                    except Exception:
-                        self._json(404, {"error": "experiment not found"})
-                        return
-                    if not path_obj.exists():
-                        self._json(404, {"error": f"{filename} not found"})
-                        return
-                    content_type = "application/json; charset=utf-8" if filename == "report.json" else "text/markdown; charset=utf-8"
-                    self._send(200, path_obj.read_bytes(), content_type, {"Content-Disposition": f'attachment; filename="{exp_id}-{filename}"'})
-                    return
                 if suffix.endswith("/report"):
                     exp_id = suffix[:-7]
                     report = _report(store, exp_id)
@@ -394,7 +409,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 return
             if path in ("/", "/index.html"):
                 index = WEB_ROOT / "index.html"
-                body = index.read_text(encoding="utf-8").replace("__APC_TOKEN__", token)
+                body = index.read_text(encoding="utf-8").replace("__APOLLO_CLAW_TOKEN__", token)
                 self._send(200, body.encode("utf-8"))
                 return
             if path in ("/app.css", "/app.js"):

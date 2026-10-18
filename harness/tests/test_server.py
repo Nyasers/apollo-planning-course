@@ -31,27 +31,8 @@ class ServerTest(unittest.TestCase):
                     page = response.read().decode("utf-8")
                 self.assertIn("APOLLO CLAW", page)
                 self.assertIn("task-list", page)
-                self.assertIn('window.__APOLLO_CLAW_TOKEN__ = "', page)
-                self.assertNotIn("__APC_TOKEN__", page)
                 with urllib.request.urlopen(base + "/app.js", timeout=5) as response:
                     self.assertEqual(response.status, 200)
-
-                exp_dir = Path(tmp) / "experiments" / "demo-crosswalk"
-                exp_dir.mkdir(parents=True)
-                report = {
-                    "meta": {"experiment_id": "demo-crosswalk", "task": "crosswalk", "created_at": "2026-10-18T00:00:00+08:00", "source": "local-harness", "mode": "demo"},
-                    "environment": {}, "record": {}, "metrics": {}, "ai": {}, "verification": {},
-                    "evidence": [], "capability": {},
-                }
-                (exp_dir / "report.json").write_text(json.dumps(report), encoding="utf-8")
-                (exp_dir / "report.md").write_text("# demo\n", encoding="utf-8")
-                with urllib.request.urlopen(base + "/api/experiments/demo-crosswalk/report.json", timeout=5) as response:
-                    self.assertEqual(response.headers.get_content_type(), "application/json")
-                    self.assertIn("attachment", response.headers.get("Content-Disposition", ""))
-                    self.assertEqual(json.loads(response.read().decode("utf-8"))["meta"]["task"], "crosswalk")
-                with urllib.request.urlopen(base + "/api/experiments/demo-crosswalk/report.md", timeout=5) as response:
-                    self.assertIn("attachment", response.headers.get("Content-Disposition", ""))
-                    self.assertEqual(response.read().decode("utf-8").strip(), "# demo")
             finally:
                 server.shutdown()
                 server.server_close()

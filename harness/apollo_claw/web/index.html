@@ -30,15 +30,6 @@
     </aside>
 
     <section class="workspace">
-      <div id="course-context" class="course-context" hidden>
-        <div class="course-context-copy">
-          <span class="eyebrow">COURSE CONTEXT</span>
-          <strong id="course-context-text">来自课程网站</strong>
-          <small id="course-context-detail"></small>
-        </div>
-        <a id="course-return" class="button secondary" href="#">返回课程实验台 ↗</a>
-      </div>
-
       <section class="hero">
         <div class="hero-copy"><span class="eyebrow">AI + VIRTUAL SIMULATION</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
         <div class="hero-actions"><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a><button id="refresh" class="button secondary">刷新状态</button></div>
@@ -59,7 +50,8 @@
             <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
             <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check"><input id="execute" type="checkbox">真实执行</label><button class="button" data-action="record">开始录制</button></div></div>
             <div class="step"><span class="step-no">04</span><div class="step-copy"><strong>生成 channel 报告</strong><small>读取 record，生成 CSV / PNG / Markdown</small></div><button class="button" data-action="report">生成报告</button></div>
-            <div class="step"><span class="step-no">05</span><div class="step-copy"><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
+            <div class="step"><span class="step-no">05</span><div class="step-copy"><strong>生成自评报告</strong><small>场景指标 + 体感指标 + 改进建议</small></div><button class="button" data-action="selfeval">生成自评</button></div>
+            <div class="step"><span class="step-no">06</span><div class="step-copy"><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
           </div>
         </section>
 
@@ -86,7 +78,7 @@
           <div class="panel-head"><div><span class="eyebrow">AI ASSIST</span><h3>DeepSeek 诊断</h3></div><span id="deepseek-status" class="pill">未配置</span></div>
           <div class="ai-grid">
             <label class="field">问题<input id="ai-question" type="text" placeholder="例如：为什么人行道前 TTC 偏低？"></label>
-            <label class="field">日志路径（可选）<input id="ai-log" type="text" placeholder="/home/fqx/application-pnc/data/log/planning.INFO"></label>
+            <label class="field">日志路径（可选）<input id="ai-log" type="text" placeholder="~/application-pnc/data/log/planning.INFO"></label>
             <button class="button" data-action="explain">开始诊断</button>
           </div>
           <div id="ai-view" class="ai-view">选择实验后，可让 DeepSeek 解释当前证据；未配置 Key 时自动使用规则降级。</div>
@@ -99,17 +91,12 @@
 
         <section class="panel report-panel wide">
           <div class="panel-head"><div><span class="eyebrow">REPORT</span><h3>报告摘要</h3></div><span id="report-status" class="pill">尚无报告</span></div>
-          <div id="report-actions" class="report-actions" hidden>
-            <a id="download-report-json" class="button" href="#" download>下载 report.json</a>
-            <a id="download-report-md" class="button secondary" href="#" download>下载 report.md</a>
-            <a id="return-report-course" class="button secondary" href="#" hidden>返回课程报告页 ↗</a>
-          </div>
           <div id="report-view" class="report-view">选择已有实验并导出报告后，这里显示状态、指标和证据。</div>
         </section>
       </div>
     </section>
   </main>
-  <script>window.__APOLLO_CLAW_TOKEN__ = "__APC_TOKEN__";</script>
+  <script>window.__APOLLO_CLAW_TOKEN__ = "__APOLLO_CLAW_TOKEN__";</script>
   <script src="/app.js"></script>
 </body>
 </html>

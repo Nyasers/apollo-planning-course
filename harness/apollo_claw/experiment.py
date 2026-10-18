@@ -135,7 +135,13 @@ class ExperimentStore:
         })
 
     def add_evidence(self, experiment: Dict[str, Any], kind: str, path: str, summary: str = "") -> None:
-        experiment.setdefault("evidence", []).append({"type": kind, "path": path, "summary": summary})
+        evidence = experiment.setdefault("evidence", [])
+        # 同一份证据重复跑一次不该出现两条
+        for item in evidence:
+            if item.get("type") == kind and item.get("path") == path:
+                item["summary"] = summary or item.get("summary", "")
+                return
+        evidence.append({"type": kind, "path": path, "summary": summary})
 
     def add_error(self, experiment: Dict[str, Any], source: str, message: str, details: str = "") -> None:
         experiment.setdefault("errors", []).append({

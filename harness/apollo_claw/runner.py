@@ -101,6 +101,9 @@ def docker_exec(settings: Settings, command: Iterable[str], timeout: Optional[in
         "APOLLO_PLUGIN_INDEX_PATH": "/opt/apollo/neo/share/cyber_plugin_index",
         "APOLLO_PLUGIN_LIB_PATH": "/opt/apollo/neo/lib",
         "PYTHONPATH": "/opt/apollo/neo/python",
+        "PYTHONIOENCODING": "utf-8",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
         "PATH": "/opt/apollo/neo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
     }
     base_env.update(env)

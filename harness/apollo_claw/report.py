@@ -153,6 +153,19 @@ def to_markdown(report: Dict[str, Any]) -> str:
         f"- 来源：{score.get('source', 'not-run')}",
         f"- 分数：{score.get('value') if score.get('value') is not None else '-'}",
         f"- 是否官方评分：{score.get('is_official', False)}",
+        f"- 通过项：{score.get('passed_metrics', '-')}",
+    ])
+    metric_rows = score.get("metrics") or []
+    if metric_rows:
+        lines.extend([
+            "",
+            "| 场景指标 | 结果 | 未通过帧 |",
+            "| --- | --- | ---: |",
+        ])
+        for item in metric_rows:
+            verdict = "PASS" if item.get("pass") else "FAIL"
+            lines.append(f"| {item.get('name')} | {verdict} | {item.get('fail')}/{item.get('total')} |")
+    lines.extend([
         "",
         "## AI 辅助结论",
         "",

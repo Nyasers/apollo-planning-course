@@ -55,7 +55,16 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
     record: { duration_sec: 25, channel_count: 7, message_count: 2048, status: "ok" },
     metrics: { min_ttc: 1.5, max_acceleration: 3.4, max_jerk: 4.5, hard_brake: 2 },
     verification: { min_ttc: 2.6, max_acceleration: 1.9, max_jerk: 2.4, hard_brake: 0, score_before: 80, score_after: 91 },
-    score: { source: "apollo-eval", value: 91, is_official: false },
+    score: {
+      source: "apollo-eval",
+      value: 91,
+      is_official: false,
+      passed_metrics: "2/2",
+      metrics: [
+        { name: "SpeedLimit", pass: true, score: 100, fail: 0, total: 257 },
+        { name: "TTC", pass: false, score: 100, fail: 29, total: 257 }
+      ]
+    },
     ai: { skills: ["apollo-dev", "apollo-eval"], facts: ["测试事实"], hypotheses: ["测试推测"], suggestions: ["测试建议"], source_refs: ["planning.INFO"], student_confirmed: true },
     evidence: [{ type: "record", path: "outputs/experiments/test/crosswalk.record", summary: "测试记录" }],
     capability: { environment: 90, log_analysis: 80, data_capture: 88, parameter_tuning: 70, reporting: 75, ai_usage: 92 },
@@ -67,6 +76,8 @@ const url = (name) => "file:///" + path.join(root, name).replaceAll("\\", "/").r
   if ((await page.locator("[data-report-score-after]").innerText()) !== "91") throw new Error("Imported score mismatch");
   if ((await page.locator("[data-report-run-id]").innerText()) !== "20261018-test-crosswalk") throw new Error("Imported experiment id missing");
   if ((await page.locator("[data-report-evidence] li").count()) !== 1) throw new Error("Imported evidence missing");
+  if ((await page.locator("[data-report-score-table] tbody tr").count()) !== 2) throw new Error("Imported scenario metrics missing");
+  if (!(await page.locator("[data-report-environment]").innerText()).includes("已记录")) throw new Error("Environment status missing");
   const storedReport = await page.evaluate(() => localStorage.getItem("apollo-lab-harness-report-v1"));
   if (!storedReport) throw new Error("Imported report was not persisted");
 

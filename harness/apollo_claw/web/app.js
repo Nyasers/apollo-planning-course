@@ -1,67 +1,7 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, token: "", context: { lesson: "", source: "", returnUrl: "" } };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", jobId: "", pollTimer: null, token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
-
-const allowedCourseHosts = new Set(["apc.nyase.ru", "tyler-fqx.github.io", "localhost", "127.0.0.1"]);
-
-function safeCourseUrl(raw) {
-  if (!raw) return "";
-  try {
-    const url = new URL(raw);
-    const localHttp = url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname);
-    if (url.protocol !== "https:" && !localHttp) return "";
-    if (!allowedCourseHosts.has(url.hostname)) return "";
-    return url.href;
-  } catch {
-    return "";
-  }
-}
-
-function courseReportUrl(report) {
-  if (!state.context.returnUrl) return "";
-  try {
-    const url = new URL(state.context.returnUrl);
-    if (/\.html?$/i.test(url.pathname)) url.pathname = url.pathname.replace(/[^/]+$/, "report.html");
-    else url.pathname = url.pathname.replace(/\/?$/, "/report.html");
-    const params = new URLSearchParams({ apc_status: "done", apc_source: "local-harness" });
-    if (report?.meta?.experiment_id) params.set("apc_run", report.meta.experiment_id);
-    if (report?.score?.value !== null && report?.score?.value !== undefined) params.set("apc_score", String(report.score.value));
-    url.search = params.toString();
-    url.hash = "";
-    return url.href;
-  } catch {
-    return "";
-  }
-}
-
-function renderCourseContext() {
-  const box = $("course-context");
-  if (!box) return;
-  const { lesson, source, returnUrl } = state.context;
-  if (!lesson && !source && !returnUrl) { box.hidden = true; return; }
-  box.hidden = false;
-  const sourceLabel = source === "apc" ? "Apollo Planning Lab 课程网站" : "课程网站";
-  $("course-context-text").textContent = `来自${sourceLabel}`;
-  $("course-context-detail").textContent = lesson ? `课程单元：${lesson}` : "已通过课程实验台进入";
-  const back = $("course-return");
-  if (returnUrl) { back.href = returnUrl; back.hidden = false; }
-  else back.hidden = true;
-}
-
-function configureReportActions(report) {
-  const box = $("report-actions");
-  if (!box) return;
-  const id = report?.meta?.experiment_id || state.experimentId;
-  if (!report || !id) { box.hidden = true; return; }
-  box.hidden = false;
-  $("download-report-json").href = `/api/experiments/${encodeURIComponent(id)}/report.json`;
-  $("download-report-md").href = `/api/experiments/${encodeURIComponent(id)}/report.md`;
-  const course = $("return-report-course");
-  const target = courseReportUrl(report);
-  if (target) { course.href = target; course.hidden = false; }
-  else course.hidden = true;
-}
 
 async function api(path, options = {}) {
   const opts = { ...options, headers: { ...(options.headers || {}) } };
@@ -272,12 +212,10 @@ function renderReport(report) {
   if (!report) {
     box.textContent = "选择已有实验并导出报告后，这里显示状态、指标和证据。";
     setPill("report-status", "尚无报告");
-    configureReportActions(null);
     if ($("metric-score")) $("metric-score").textContent = "—";
     if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
   }
-  configureReportActions(report);
   const meta = report.meta || {};
   const record = report.record || {};
   const score = report.score || {};
@@ -315,8 +253,7 @@ function renderReport(report) {
     evidence.appendChild(row);
   });
   box.appendChild(evidence);
-  const emptyRecord = record.channel_count === 0 || record.status === "empty" || String(meta.status || "").includes("empty");
-  setPill("report-status", emptyRecord ? "空 record" : meta.mode === "real" ? "真实数据" : "演示/计划", emptyRecord ? "bad" : meta.mode === "real" ? "ok" : "");
+  setPill("report-status", meta.mode === "real" ? "真实数据" : "演示/计划", meta.mode === "real" ? "ok" : "");
   if ($("metric-status")) $("metric-status").textContent = meta.status || "—";
   if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
   if ($("metric-score")) $("metric-score").textContent = score.value ?? "—";
@@ -329,6 +266,7 @@ async function actionBody(action) {
   if (action === "doctor") return { task: task.id, scenario: task.title };
   if (action === "record") return { experiment_id: state.experimentId || undefined, task: task.id, scenario: task.title, tag: task.id, seconds: Number($("seconds").value || 25), execute };
   if (action === "report") return { experiment_id: state.experimentId, record: state.experiment?.record?.path, execute };
+  if (action === "selfeval") return { experiment_id: state.experimentId, execute };
   if (action === "export") return { experiment_id: state.experimentId };
   if (action === "explain") return { experiment_id: state.experimentId, question: $("ai-question").value.trim() || "请分析当前实验证据并给出下一步建议。", log: $("ai-log").value.trim() };
   return {};
@@ -340,7 +278,7 @@ async function runAction(action) {
     setPill("job-status", "提交中");
     const payload = await actionBody(action);
     if (action === "report" && !payload.record) throw new Error("请先完成一次 record，或选择已有实验");
-    if ((action === "report" || action === "export" || action === "explain") && !payload.experiment_id) throw new Error("请先选择或创建实验记录");
+    if ((action === "report" || action === "selfeval" || action === "export" || action === "explain") && !payload.experiment_id) throw new Error("请先选择或创建实验记录");
     const data = await api(`/api/actions/${action}`, { method: "POST", body: payload });
     state.jobId = data.job.job_id;
     state.experimentId = data.experiment_id;
@@ -383,12 +321,6 @@ async function init() {
     setDeepSeekStatus(Boolean(session.deepseek_configured));
     await loadDeepSeekSettings();
     const params = new URLSearchParams(location.search);
-    state.context = {
-      lesson: params.get("lesson") || "",
-      source: params.get("source") || "",
-      returnUrl: safeCourseUrl(params.get("return")),
-    };
-    renderCourseContext();
     const wanted = params.get("task");
     selectTask(state.tasks.find((task) => task.id === wanted) || state.tasks[0] || { id: "crosswalk", title: "人行道避让" });
     await loadExperiments();

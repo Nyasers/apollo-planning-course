@@ -1,5 +1,9 @@
 # Apollo Claw Harness 运行测试记录
 
+> 状态说明：本文件记录的是 0.3.3 阶段的一次首次测试（record 生成了文件但 0 channels）。
+> 0.3.4 后续已产生非空 6-channel record，并生成了真实的 `report.json`、`selfeval.md` 和图表；
+> 本文件不应再作为 0.3.4 的最终通过结论。
+
 日期：2026-10-18
 环境：Windows 11 + WSL2 Ubuntu 22.04
 Apollo 容器：`apollo_neo_dev_edu`

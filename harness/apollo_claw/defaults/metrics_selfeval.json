@@ -1,0 +1,169 @@
+{
+  "_note": "Apollo Claw Harness 自评用评分配置。不是赛事官方评分表，数值来自技能自带示例与知识库推荐值，仅用于横向对比和生成改进建议。",
+  "_sources": {
+    "SpeedLimit": "技能 README JSON 示例（16.67 m/s = 60 km/h，single_deduction 2）",
+    "AccelerationLimit": "技能 example_usage.py（[-4.5, 4.0]）",
+    "HardBrake": "技能 config.yaml eval_hard_brake_threshold（4.0）+ example_usage 扣分力度",
+    "CentripetalAccelerationLimit": "技能 config.yaml eval_lat_accel_max（2.0）",
+    "TTC": "技能 example_usage.py（3.0 s）",
+    "OnRoad": "地图道路边界，无阈值",
+    "TimeLimit": "场景文件 storyboard.simulationTime（默认 100 s）",
+    "ReachEnd": "场景文件 autoCarInfo.end；判定框 8×8 m 为本项目自定",
+    "Collision": "proto 默认距离 0.05 m"
+  },
+  "use_score": true,
+  "metric": [
+    {
+      "name": "SpeedLimit",
+      "description": "不超过 60 km/h",
+      "is_critical": true,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "speed_condition": {
+          "name": "speed",
+          "min_speed": -0.5,
+          "max_speed": 16.67,
+          "use_score": true,
+          "single_deduction": 2,
+          "deduction_unit": 1
+        }
+      }
+    },
+    {
+      "name": "AccelerationLimit",
+      "description": "纵向加速度 -4.5 ~ 4.0 m/s²",
+      "is_critical": false,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "acceleration_condition": {
+          "name": "acceleration",
+          "min_acceleration": -4.5,
+          "max_acceleration": 4.0,
+          "use_score": true,
+          "single_deduction": 5,
+          "deduction_unit": 0.5
+        }
+      }
+    },
+    {
+      "name": "HardBrake",
+      "description": "急刹车（减速度超过 4.0 m/s²，排除合理刹车）",
+      "is_critical": false,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "acceleration_condition": {
+          "name": "HardBrake",
+          "min_acceleration": -4.0,
+          "max_acceleration": 4.0,
+          "use_score": true,
+          "single_deduction": 10,
+          "deduction_unit": 1,
+          "ttc": 3.0,
+          "cut_in_distance": 10.0
+        }
+      }
+    },
+    {
+      "name": "CentripetalAccelerationLimit",
+      "description": "横向加速度不超过 2.0 m/s²",
+      "is_critical": false,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "centripetal_acceleration_condition": {
+          "name": "centripetal_acceleration",
+          "max_centripetal_acceleration": 2.0,
+          "use_score": true,
+          "single_deduction": 3,
+          "deduction_unit": 0.5
+        }
+      }
+    },
+    {
+      "name": "TTC",
+      "description": "与前车/障碍物 TTC 不小于 3.0 s",
+      "is_critical": true,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "ttc_condition": {
+          "name": "ttc",
+          "time": 3.0,
+          "use_score": true,
+          "single_deduction": 5,
+          "deduction_unit": 0.5
+        }
+      }
+    },
+    {
+      "name": "OnRoad",
+      "description": "车辆保持在道路范围内",
+      "is_critical": true,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "on_road_condition": {
+          "name": "on_road",
+          "use_road_boundary": false,
+          "use_score": true,
+          "single_deduction": 10,
+          "deduction_unit": 1
+        }
+      }
+    },
+    {
+      "name": "TimeLimit",
+      "description": "在场景规定时间内完成（默认 100 s）",
+      "is_critical": true,
+      "require_all_time_pass": true,
+      "get_deduction_score": false,
+      "condition": {
+        "time_limit_condition": {
+          "name": "time_limit",
+          "timeout": 100
+        }
+      }
+    },
+    {
+      "name": "ReachEnd",
+      "description": "到达场景终点（终点坐标由 scenario.json 覆盖）",
+      "is_critical": true,
+      "require_all_time_pass": false,
+      "once_pass_stay_pass": true,
+      "get_deduction_score": false,
+      "condition": {
+        "region_overlap_lw_condition": {
+          "name": "reach_end",
+          "x": 0,
+          "y": 0,
+          "length": 8,
+          "width": 8,
+          "require_fully_contain": false,
+          "use_score": true
+        }
+      }
+    },
+    {
+      "name": "Collision",
+      "description": "与障碍物无碰撞",
+      "is_critical": true,
+      "require_all_time_pass": true,
+      "get_deduction_score": true,
+      "condition": {
+        "object_overlap_condition": {
+          "name": "collision",
+          "source_object_ids": "adc",
+          "target_object_ids": "*",
+          "distance": 0.05,
+          "direction": "INCLUDE_BACK",
+          "use_score": true,
+          "single_deduction": 100,
+          "deduction_unit": 1
+        }
+      }
+    }
+  ]
+}

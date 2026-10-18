@@ -398,6 +398,58 @@
     });
   }
 
+  function environmentLabel(environment) {
+    if (!environment || typeof environment !== "object" || Object.keys(environment).length === 0) return "未绑定环境检查";
+    if (environment.error) return "环境检查异常";
+    return "已记录环境检查";
+  }
+
+  function renderScoreMetrics(root, metricList) {
+    const box = root.querySelector("[data-report-score-table]");
+    if (!box) return;
+    box.innerHTML = "";
+    const items = Array.isArray(metricList) ? metricList : [];
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.className = "lab-report-empty";
+      empty.textContent = "当前报告没有逐项场景指标。";
+      box.appendChild(empty);
+      return;
+    }
+    const table = document.createElement("table");
+    table.className = "lab-table";
+    const thead = document.createElement("thead");
+    const header = document.createElement("tr");
+    ["指标", "结果", "得分", "未通过帧"].forEach((label) => {
+      const th = document.createElement("th");
+      th.textContent = label;
+      header.appendChild(th);
+    });
+    thead.appendChild(header);
+    const tbody = document.createElement("tbody");
+    items.forEach((metric) => {
+      const row = document.createElement("tr");
+      const name = document.createElement("td");
+      name.textContent = metric.name || "—";
+      const result = document.createElement("td");
+      const isPass = metric.pass === true;
+      result.textContent = isPass ? "PASS" : "FAIL";
+      result.className = isPass ? "is-pass" : "is-fail";
+      const score = document.createElement("td");
+      let scoreValue = numberOrNull(metric.score);
+      if (!isPass && scoreValue === 100) scoreValue = null;
+      score.textContent = scoreValue === null ? "—" : formatNumber(scoreValue, 0);
+      const fail = document.createElement("td");
+      const failCount = numberOrNull(metric.fail);
+      const total = numberOrNull(metric.total);
+      fail.textContent = failCount === null && total === null ? "—" : (failCount ?? "—") + "/" + (total ?? "—");
+      row.append(name, result, score, fail);
+      tbody.appendChild(row);
+    });
+    table.append(thead, tbody);
+    box.appendChild(table);
+  }
+
   function renderCapability(root, capability) {
     const box = root.querySelector("[data-report-capability]");
     if (!box) return;
@@ -456,6 +508,11 @@
     if (score.value !== null && score.value !== undefined) {
       return "当前报告得分为 " + formatNumber(score.value) + "，评分来源为 " + (score.source || "未知") + (score.is_official ? "。该分数标记为官方评分。" : "。该分数不是官方评分。");
     }
+    if (Array.isArray(score.metrics) && score.metrics.length) {
+      const failed = score.metrics.filter((item) => item && item.pass === false).map((item) => item.name).filter(Boolean);
+      const passed = score.passed_metrics || (score.metrics.filter((item) => item && item.pass === true).length + "/" + score.metrics.length);
+      return "场景自评通过 " + passed + " 项" + (failed.length ? "；未通过：" + failed.join("、") + "。" : "。") + "该结果是本地自评估，不是官方评分。";
+    }
     return "报告已生成，但尚无可比较的优化前后指标。请检查 record、apollo-eval 和 verification 字段。";
   }
 
@@ -486,6 +543,14 @@
       "| 最大 Jerk（m/s³） | " + formatNumber(metricValue(metrics, ["max_jerk", "jerk"])) + " | " + formatNumber(metricValue(verification, ["max_jerk", "jerk"])) + " |",
       "| 急刹次数 | " + formatNumber(metricValue(metrics, ["hard_brake"]), 0) + " | " + formatNumber(metricValue(verification, ["hard_brake"]), 0) + " |",
       "",
+      ...(Array.isArray(score.metrics) && score.metrics.length ? [
+        "## 场景指标",
+        "",
+        "| 指标 | 结果 | 得分 | 未通过帧 |",
+        "| --- | --- | ---: | ---: |",
+        ...score.metrics.map((metric) => "| " + (metric.name || "—") + " | " + (metric.pass ? "PASS" : "FAIL") + " | " + (metric.pass === false && numberOrNull(metric.score) === 100 ? "—" : (numberOrNull(metric.score) === null ? "—" : formatNumber(metric.score, 0))) + " | " + (metric.fail ?? "—") + "/" + (metric.total ?? "—") + " |"),
+        ""
+      ] : []),
       "## AI 事实",
       "",
       ...(ai.facts || []).map((item) => "- " + item),
@@ -551,19 +616,21 @@
       setText(root, "[data-report-scenario]", meta.scenario || meta.task || "人行道避让");
       setText(root, "[data-report-run-id]", meta.experiment_id || "—");
       setText(root, "[data-report-task]", (meta.scenario || meta.task || "—") + (meta.status ? " · " + meta.status : ""));
+      setText(root, "[data-report-environment]", environmentLabel(report.environment));
       setText(root, "[data-report-created-at]", formatDateTime(meta.created_at));
       setText(root, "[data-report-record]", (record.channel_count ?? "—") + " channels · " + (record.message_count ?? "—") + " messages · " + (record.duration_sec ?? "—") + " s");
       setText(root, "[data-report-score-source]", score.source || "未运行评分");
       setText(root, "[data-report-ai-skills]", (ai.skills || []).join(", ") || "—");
 
       const scoreBefore = numberOrNull(verify.score_before);
-      const scoreAfter = numberOrNull(score.value) ?? numberOrNull(verify.score_after);
-      setText(root, "[data-report-score-after]", scoreAfter === null ? "—" : formatNumber(scoreAfter, 0));
-      setText(root, "[data-report-score-current]", scoreAfter === null ? "—" : formatNumber(scoreAfter, 0));
+      const scoreValue = numberOrNull(score.value) ?? numberOrNull(verify.score_after);
+      const scoreDisplay = scoreValue === null ? (score.passed_metrics || "—") : formatNumber(scoreValue, 0);
+      setText(root, "[data-report-score-after]", scoreDisplay);
+      setText(root, "[data-report-score-current]", scoreDisplay);
       setText(root, "[data-report-score-before]", scoreBefore === null ? "—" : formatNumber(scoreBefore, 0));
-      setText(root, "[data-report-score-label]", scoreAfter === null ? "未评分" : "场景得分");
+      setText(root, "[data-report-score-label]", scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : "场景得分");
       setText(root, "[data-report-official]", score.value === null || score.value === undefined
-        ? "当前报告没有评分结果。"
+        ? (score.passed_metrics ? "本地自评：通过 " + score.passed_metrics + " 项，不提供总分，不替代官方评分。" : "当前报告没有评分结果。")
         : score.is_official ? "官方评分。" : "本地自评估，不替代官方评分。");
 
       const bars = root.querySelector("[data-report-bars]");
@@ -601,6 +668,7 @@
       setText(root, "[data-report-metrics-note]", imported
         ? "本区来自导入的 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
         : "橙色表示优化前，绿色表示当前报告。当前为演示数据，不替代官方评测。");
+      renderScoreMetrics(root, score.metrics);
 
       fillList(root, "[data-report-ai-facts]", ai.facts, "暂无 AI 事实");
       fillList(root, "[data-report-ai-hypotheses]", ai.hypotheses, "暂无 AI 推测");

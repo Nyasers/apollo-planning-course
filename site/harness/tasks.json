@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.3.4",
   "apollo": "9.0",
   "localPanel": "http://127.0.0.1:8765/",
   "tasks": [
@@ -8,16 +8,39 @@
       "lesson": "lesson-15",
       "title": "人行道避让",
       "localEntry": "http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15",
-      "skills": ["apollo-env", "apollo-dev", "apollo-test", "apollo-eval"],
-      "evidence": ["doctor.json", "record", "channel_summary.csv", "plots/*.png", "score.json", "report.md"]
+      "skills": [
+        "apollo-env",
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "doctor.json",
+        "record",
+        "channel_summary.csv",
+        "plots/*.png",
+        "score.json",
+        "report.md",
+        "report.json",
+        "selfeval.md"
+      ]
     },
     {
       "id": "traffic-light",
       "lesson": "lesson-16",
       "title": "交通灯停走",
       "localEntry": "http://127.0.0.1:8765/?task=traffic-light&lesson=lesson-16",
-      "skills": ["apollo-dev", "apollo-test", "apollo-eval"],
-      "evidence": ["record", "channel_summary.csv", "score.json", "report.md"],
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ],
       "status": "planned"
     },
     {
@@ -25,8 +48,17 @@
       "lesson": "lesson-18",
       "title": "自主泊车",
       "localEntry": "http://127.0.0.1:8765/?task=valet-parking&lesson=lesson-18",
-      "skills": ["apollo-dev", "apollo-test", "apollo-eval"],
-      "evidence": ["record", "trajectory.png", "score.json", "report.md"],
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "trajectory.png",
+        "score.json",
+        "report.md"
+      ],
       "status": "planned"
     }
   ]

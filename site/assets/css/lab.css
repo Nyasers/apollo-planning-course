@@ -1532,3 +1532,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Scenario metric table from imported Harness report.json */
+.lab-table td.is-pass { color: var(--green); font-weight: 700; }
+.lab-table td.is-fail { color: var(--red); font-weight: 700; }
