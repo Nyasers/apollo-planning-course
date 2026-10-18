@@ -56,8 +56,17 @@
     </section>
 
     <section class="lab-section">
-      <div class="lab-section-head"><div><p class="section-kicker">JSON Contract</p><h2>网页和 Harness 的统一证据格式</h2></div><p>统一 JSON 可以同时驱动网页、报告和教师复核。</p></div>
-      <pre class="lab-code">{
+      <div class="lab-section-head"><div><p class="section-kicker">EVIDENCE MAP</p><h2>网页和 Harness 如何共享证据</h2></div><p>网页只展示报告字段和处理结果，不展示 Harness 的实现源码、命令输出或 API Key。</p></div>
+      <div class="lab-contract-table">
+        <div class="lab-contract-row"><b>实验身份</b><span>实验编号、任务和生成时间</span><small>用于确认这份报告属于哪一次仿真。</small></div>
+        <div class="lab-contract-row"><b>环境与录制</b><span>环境检查、record channel 和消息数量</span><small>用于判断数据是否足以支持评分。</small></div>
+        <div class="lab-contract-row"><b>指标与评分</b><span>九项场景指标、PASS/FAIL 和失败帧数</span><small>评分由脚本产生，不由 AI 生成。</small></div>
+        <div class="lab-contract-row"><b>AI 解释</b><span>事实、推测、建议和待确认问题</span><small>AI 只解释证据，不替代教师或官方评测。</small></div>
+        <div class="lab-contract-row"><b>人工核验</b><span>学生确认、目标对象和复盘结论</span><small>用于区分真实缺陷和合理礼让等情况。</small></div>
+      </div>
+      <details class="lab-contract-json">
+        <summary>技术人员：查看 JSON 字段示例</summary>
+        <pre class="lab-code">{
   "experiment_id": "20261017-crosswalk-01",
   "task": "crosswalk",
   "environment": {"docker": true, "aem": true, "dreamview": true},
@@ -71,6 +80,7 @@
   },
   "verification": {"min_ttc": 2.3, "hard_brake": 0, "max_jerk": 2.8}
 }</pre>
+      </details>
     </section>
   </main>
   <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容"><div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div></div>

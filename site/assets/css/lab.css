@@ -1536,3 +1536,63 @@
 /* Scenario metric table from imported Harness report.json */
 .lab-table td.is-pass { color: var(--green); font-weight: 700; }
 .lab-table td.is-fail { color: var(--red); font-weight: 700; }
+
+
+/* Evidence page: human-readable contract, code example collapsed */
+.lab-contract-table {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-muted);
+}
+.lab-contract-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 4px 20px;
+  padding: 14px 17px;
+  border-bottom: 1px solid var(--line);
+}
+.lab-contract-row:last-child { border-bottom: 0; }
+.lab-contract-row b {
+  color: var(--green);
+  font-size: 12px;
+}
+.lab-contract-row span {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.lab-contract-row small {
+  grid-column: 2;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.lab-contract-json {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+.lab-contract-json summary {
+  cursor: pointer;
+  padding: 13px 16px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  user-select: none;
+}
+.lab-contract-json[open] summary {
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+.lab-contract-json .lab-code {
+  margin: 0;
+  border: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+@media (max-width: 640px) {
+  .lab-contract-row { grid-template-columns: 1fr; gap: 4px; }
+  .lab-contract-row small { grid-column: 1; }
+}
