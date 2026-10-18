@@ -98,3 +98,4 @@ python3 -m unittest discover -v
 - 不把 API Key、record 原始数据和隐私信息提交到 Git。
 - 模型只生成建议，不直接执行命令。
 - 本地面板只监听 `127.0.0.1`，使用启动时生成的一次性 token 调用受控动作，不提供任意命令输入。
+- 面板操作按钮会显示忙碌状态和计时；报告生成后可直接打开 report.json、report.md、selfeval.md 和 doctor.json。

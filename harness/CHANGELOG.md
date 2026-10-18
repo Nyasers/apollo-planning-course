@@ -58,3 +58,11 @@ DreamView 启动需要 `APOLLO_DISTRIBUTION_VERSION=9.0`，否则 `aem bootstrap
 - `record_channel_report.py` 的最近障碍物距离改为障碍物坐标减自车定位坐标，修复 4e6 量级距离图。
 - 网站实验报告页支持导入真实 report.json，展示环境状态、九项场景指标和 PASS/FAIL。
 - site harness 元数据更新为 0.3.4 / selfeval-ready。
+
+### 面板交互与报告文件（2026-10-18）
+
+- 操作按钮点击后立即进入 busy 状态，显示旋转指示、禁用重复点击，并按秒显示“处理中/录制中”。
+- 增加 workflow status 和 toast，明确展示提交、运行、完成和失败状态。
+- 修复 token 注入：只替换 token 值，不替换 `window.__APOLLO_CLAW_TOKEN__` 属性名。
+- 新增 `/api/experiments/<id>/files/<name>`，可在面板中直接打开 `report.json`、`report.md`、`selfeval.md` 和 `doctor.json`。
+- 报告摘要下方新增报告文件链接；工具仅允许读取白名单文件。
