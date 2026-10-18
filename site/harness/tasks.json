@@ -22,7 +22,9 @@
         "score.json",
         "report.md",
         "report.json",
-        "selfeval.md"
+        "selfeval.md",
+        "lab-report.json",
+        "lab-report.md"
       ]
     },
     {

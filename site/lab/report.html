@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 实验报告：人行道避让优化前后对比。">
   <title>实验报告 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261018-real-report-v2">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-lab-report">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -36,7 +36,7 @@
       <div class="lab-hero-copy">
         <p class="lesson-kicker">Report · <span data-report-scenario>人行道避让</span></p>
         <h1>实验数据<span>与证据报告</span></h1>
-        <p data-report-intro>当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。</p>
+        <p data-report-intro>当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 或 lab-report.json 后，可在此导入真实指标、AI 建议、基线与本轮对比和证据链。</p>
         <div class="lab-hero-actions">
           <button class="button-primary" type="button" data-download-report>下载当前报告摘要</button>
           <a class="button-secondary" data-local-panel href="http://127.0.0.1:8765/">打开本地 Harness</a>
@@ -65,7 +65,7 @@
           <p data-report-import-status role="status">当前显示网站内置演示数据，不代表真实仿真结果。</p>
         </div>
         <div class="lab-report-import-actions">
-          <label class="lab-file-button">选择 report.json<input type="file" accept="application/json,.json" data-report-file></label>
+          <label class="lab-file-button">选择报告文件<input type="file" accept="application/json,.json" data-report-file></label>
           <button class="button-secondary" type="button" data-report-reset>恢复演示数据</button>
         </div>
         <dl class="lab-report-meta-grid">
@@ -77,6 +77,20 @@
           <div><dt>评分来源</dt><dd data-report-score-source>网站演示</dd></div>
           <div><dt>AI 技能</dt><dd data-report-ai-skills>—</dd></div>
         </dl>
+      </div>
+    </section>
+
+    <section class="lab-section" data-report-lab-section hidden>
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Integrated Lab Report</p><h2 data-report-lab-headline>基线与本轮对比</h2></div>
+        <p data-report-lab-summary></p>
+      </div>
+      <div class="lab-report-grid">
+        <article class="lab-report-card is-wide"><h3>基线与本轮</h3><div data-report-lab-comparison></div></article>
+        <article class="lab-report-card"><h3>人工核验</h3><ul class="lab-report-data-list" data-report-lab-review></ul></article>
+        <article class="lab-report-card"><h3>需要关注</h3><ul class="lab-report-data-list" data-report-lab-warnings></ul></article>
+        <article class="lab-report-card"><h3>下一步</h3><ul class="lab-report-data-list" data-report-lab-next></ul></article>
+        <article class="lab-report-card is-wide"><h3>报告文件</h3><ul class="lab-report-data-list" data-report-lab-files></ul></article>
       </div>
     </section>
 
@@ -161,6 +175,6 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261018-real-report-v2"></script>
+  <script src="../assets/js/lab.js?v=20261019-lab-report"></script>
 </body>
 </html>

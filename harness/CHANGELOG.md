@@ -66,3 +66,10 @@ DreamView 启动需要 `APOLLO_DISTRIBUTION_VERSION=9.0`，否则 `aem bootstrap
 - 修复 token 注入：只替换 token 值，不替换 `window.__APOLLO_CLAW_TOKEN__` 属性名。
 - 新增 `/api/experiments/<id>/files/<name>`，可在面板中直接打开 `report.json`、`report.md`、`selfeval.md` 和 `doctor.json`。
 - 报告摘要下方新增报告文件链接；工具仅允许读取白名单文件。
+
+### 网站整合报告（2026-10-19）
+
+- 新增 `apollo-claw report bundle`，把当前报告和 baseline 报告合并成 `lab-report.json` / `lab-report.md`。
+- 整合报告包含：基线对比、人工核验、警告、下一步、证据清单和报告文件清单。
+- 网站实验报告页支持导入 `lab-report.json`，显示基线/本轮对比、人工核验和报告文件。
+- 已生成第二轮样例：`lab-report-round2.json` 和 `lab-report-round2.md`。

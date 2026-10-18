@@ -523,6 +523,7 @@
     const verification = report.verification || {};
     const score = report.score || {};
     const ai = report.ai || {};
+    const lab = report.lab || {};
     const lines = [
       "# Apollo Claw 实验报告摘要",
       "",
@@ -551,6 +552,14 @@
         ...score.metrics.map((metric) => "| " + (metric.name || "—") + " | " + (metric.pass ? "PASS" : "FAIL") + " | " + (metric.pass === false && numberOrNull(metric.score) === 100 ? "—" : (numberOrNull(metric.score) === null ? "—" : formatNumber(metric.score, 0))) + " | " + (metric.fail ?? "—") + "/" + (metric.total ?? "—") + " |"),
         ""
       ] : []),
+      ...(Array.isArray(lab.comparison) && lab.comparison.length ? [
+        "## 基线与本轮",
+        "",
+        "| 指标 | Baseline | 本轮 | 变化 |",
+        "| --- | --- | --- | --- |",
+        ...lab.comparison.map((item) => "| " + (item.label || item.id || "—") + " | " + String(item.before ?? "—") + " " + (item.before_detail || "") + " | " + String(item.after ?? "—") + " " + (item.after_detail || "") + " | " + (item.status || "—") + " |"),
+        ""
+      ] : []),
       "## AI 事实",
       "",
       ...(ai.facts || []).map((item) => "- " + item),
@@ -563,6 +572,9 @@
       "",
       ...(ai.suggestions || []).map((item) => "- " + item),
       "",
+      ...(lab.human_review && lab.human_review.length ? ["## 人工核验", "", ...lab.human_review.map((item) => "- " + item), ""] : []),
+      ...(lab.warnings && lab.warnings.length ? ["## 需要关注", "", ...lab.warnings.map((item) => "- " + item), ""] : []),
+      ...(lab.next_actions && lab.next_actions.length ? ["## 下一步", "", ...lab.next_actions.map((item) => "- " + item), ""] : []),
       "## 证据",
       "",
       ...(report.evidence || []).map((item) => "- " + (item.type || "file") + "：" + (item.summary || "") + "（" + (item.path || "") + "）"),
@@ -570,6 +582,63 @@
       "> 本地自评估不等于官方评分。"
     ];
     return lines.join("\n");
+  }
+
+  function renderLabReport(root, report) {
+    const section = root.querySelector("[data-report-lab-section]");
+    if (!section) return;
+    const lab = report && report.lab;
+    if (!lab || !lab.schema) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    setText(root, "[data-report-lab-headline]", lab.headline || "基线与本轮对比");
+    setText(root, "[data-report-lab-summary]", lab.summary || "");
+    const box = root.querySelector("[data-report-lab-comparison]");
+    if (box) {
+      box.innerHTML = "";
+      const items = Array.isArray(lab.comparison) ? lab.comparison : [];
+      if (!items.length) {
+        const empty = document.createElement("p");
+        empty.className = "lab-report-empty";
+        empty.textContent = "当前报告没有 baseline 对比数据。";
+        box.appendChild(empty);
+      } else {
+        const table = document.createElement("table");
+        table.className = "lab-table";
+        const thead = document.createElement("thead");
+        const head = document.createElement("tr");
+        ["指标", "Baseline", "本轮", "变化"].forEach((label) => {
+          const th = document.createElement("th");
+          th.textContent = label;
+          head.appendChild(th);
+        });
+        thead.appendChild(head);
+        const tbody = document.createElement("tbody");
+        const statusText = { improved: "改善", regressed: "退步", unchanged: "持平", changed: "变化" };
+        items.forEach((item) => {
+          const row = document.createElement("tr");
+          const label = document.createElement("td");
+          label.textContent = item.label || item.id || "—";
+          const before = document.createElement("td");
+          before.textContent = String(item.before ?? "—") + " " + (item.before_detail || "");
+          const after = document.createElement("td");
+          after.textContent = String(item.after ?? "—") + " " + (item.after_detail || "");
+          const change = document.createElement("td");
+          change.textContent = statusText[item.status] || item.status || "—";
+          change.className = item.status === "improved" ? "is-pass" : item.status === "regressed" ? "is-fail" : "";
+          row.append(label, before, after, change);
+          tbody.appendChild(row);
+        });
+        table.append(thead, tbody);
+        box.appendChild(table);
+      }
+    }
+    fillList(root, "[data-report-lab-review]", lab.human_review, "暂无人工核验记录");
+    fillList(root, "[data-report-lab-warnings]", lab.warnings, "没有额外警告");
+    fillList(root, "[data-report-lab-next]", lab.next_actions, "暂无下一步建议");
+    fillList(root, "[data-report-lab-files]", Object.entries(lab.files || {}).map(([key, value]) => key + " · " + value), "暂无报告文件清单");
   }
 
   function initReportPage() {
@@ -669,6 +738,7 @@
         ? "本区来自导入的 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
         : "橙色表示优化前，绿色表示当前报告。当前为演示数据，不替代官方评测。");
       renderScoreMetrics(root, score.metrics);
+      renderLabReport(root, report);
 
       fillList(root, "[data-report-ai-facts]", ai.facts, "暂无 AI 事实");
       fillList(root, "[data-report-ai-hypotheses]", ai.hypotheses, "暂无 AI 推测");

@@ -18,7 +18,8 @@ apollo-claw test record --tag crosswalk --seconds 25
 apollo-claw test report --record <record-dir>
 apollo-claw eval --scenario <scenario.json> --bag <output.bag>
 apollo-claw report export --experiment <experiment-id>
-apollo-claw report build --experiment <experiment-id>   # 自评报告：场景指标 + 体感 + 建议
+apollo-claw report build --experiment <experiment-id>   # 自评报告
+apollo-claw report bundle --experiment <experiment-id> --baseline <baseline-report.json>  # 网站整合报告：场景指标 + 体感 + 建议
 apollo-claw experiment list
 apollo-claw experiment show --id <experiment-id>
 apollo-claw serve --port 8765

@@ -18,6 +18,7 @@ from .deepseek import DeepSeekUnavailable, explain, fallback_explain
 from .evidence import read_json, write_json
 from .experiment import ExperimentStore
 from .knowledge import search as search_knowledge
+from .lab_report import build_lab_report, export_lab_report
 from .report import build_report, export_report, validate_report
 from .router import route
 from .runner import CommandResult, docker_exec, run_host, save_command_output
@@ -212,6 +213,39 @@ def cmd_explain(settings: Settings, args) -> int:
                 experiment[key] = evidence[key]
         store.save(experiment)
     print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_report_bundle(settings: Settings, args) -> int:
+    """Create the website-ready integrated report (baseline + current run)."""
+    if not getattr(args, "experiment", None):
+        print("report bundle 需要 --experiment", file=sys.stderr)
+        return 2
+    store = _store(settings)
+    try:
+        experiment = store.load(args.experiment)
+    except Exception as exc:
+        print(f"读取实验失败：{exc}", file=sys.stderr)
+        return 2
+    report_path = store.report_path(args.experiment)
+    if not report_path.exists():
+        print(f"报告不存在：{report_path}。请先运行 report build。", file=sys.stderr)
+        return 2
+    current = json.loads(report_path.read_text(encoding="utf-8"))
+    baseline = None
+    if getattr(args, "baseline", None):
+        baseline_path = Path(args.baseline).expanduser()
+        if not baseline_path.exists():
+            print(f"baseline 报告不存在：{baseline_path}", file=sys.stderr)
+            return 2
+        baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    lab_report = build_lab_report(current, baseline, getattr(args, "review_note", "") or "")
+    out_dir = Path(args.output_dir).expanduser() if getattr(args, "output_dir", None) else store.experiment_dir(args.experiment)
+    json_path, md_path = export_lab_report(lab_report, out_dir)
+    print(f"lab-report.json: {json_path}")
+    print(f"lab-report.md: {md_path}")
+    if not experiment.get("environment"):
+        print("警告：当前实验没有 environment 数据；请在同一个 experiment 上运行 doctor 后重新生成。", file=sys.stderr)
     return 0
 
 
@@ -961,6 +995,13 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--experiment")
     q.add_argument("--output-dir")
     q.set_defaults(func=cmd_report_export)
+
+    q = rsub.add_parser("bundle", help="生成网站可导入的整合报告（lab-report.json）")
+    q.add_argument("--experiment", required=True)
+    q.add_argument("--baseline", help="baseline report.json 路径")
+    q.add_argument("--review-note", help="人工核验说明，例如：TTC 目标 3060 为行人")
+    q.add_argument("--output-dir")
+    q.set_defaults(func=cmd_report_bundle)
 
     q = rsub.add_parser("build", help="自评报告：场景评分 + 体感 + 改进建议")
     q.add_argument("--experiment")
