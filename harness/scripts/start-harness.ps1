@@ -33,6 +33,11 @@ try {
     throw "找不到 Apollo_Harness 目录。请设置 APOLLO_HARNESS_HOME 环境变量。"
   }
 
+  if (-not $env:APOLLO_CLAW_SKILLS_DIR -and (Test-Path (Join-Path $harness "skills"))) {
+    $env:APOLLO_CLAW_SKILLS_DIR = (Join-Path $harness "skills")
+    Write-LauncherLog "使用包内技能目录: $env:APOLLO_CLAW_SKILLS_DIR"
+  }
+
   $query = ""
   if ($LaunchUri) {
     try { $query = ([System.Uri]$LaunchUri).Query } catch { Write-LauncherLog "无法解析 URI: $LaunchUri" }
