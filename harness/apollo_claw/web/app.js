@@ -1,5 +1,5 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, chat: [], chatBusy: false, deepseekConfigured: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, doctor: null, chat: [], chatBusy: false, deepseekConfigured: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -201,11 +201,20 @@ async function fetchCurrentReport(id) {
   }
 }
 
+async function fetchDoctor(id) {
+  try {
+    return await api(`/api/experiments/${encodeURIComponent(id)}/files/doctor.json`);
+  } catch {
+    return null;
+  }
+}
+
 async function loadExperiment(id) {
   if (!id) {
     state.experiment = null;
     state.experimentId = "";
     state.report = null;
+    state.doctor = null;
     state.chat = [];
     renderExperiment();
     renderReport(null);
@@ -219,12 +228,14 @@ async function loadExperiment(id) {
   renderExperiments();
   renderExperiment();
   state.report = null;
+  state.doctor = null;
   try {
     state.report = await fetchCurrentReport(id);
     renderReport(state.report);
   } catch {
     renderReport(null);
   }
+  state.doctor = await fetchDoctor(id);
   loadChatHistory();
   updateReportContext();
   updateConfigStatus();
@@ -235,23 +246,32 @@ function updateConfigStatus() {
   const exp = state.experiment || {};
   const meta = exp.meta || {};
   const record = exp.record || {};
-  const status = meta.status || "";
+  const status = meta.status || "created";
   const hasRecord = Boolean(record.path || record.status || record.channel_count);
+  const doctor = state.doctor || {};
+  const dreamview = doctor.dreamview || {};
+  const dreamviewText = dreamview.ok === true ? "已连接" : dreamview.error ? "未连接" : "未检查";
+  const recordText = hasRecord ? (record.status || "已记录") : "未录制";
+  const reportText = state.report ? "已生成" : "未生成";
   const experimentLabel = state.experimentId
     ? (meta.scenario || meta.task || "已选择") + " · " + state.experimentId
     : "未选择";
   if ($("config-harness")) $("config-harness").textContent = "本地在线";
-  if ($("config-dreamview")) $("config-dreamview").textContent = status === "environment_warning" ? "需检查" : hasRecord ? "已运行" : "未检查";
+  if ($("config-dreamview")) $("config-dreamview").textContent = dreamviewText;
+  if ($("config-record")) $("config-record").textContent = recordText;
+  if ($("config-report")) $("config-report").textContent = reportText;
   if ($("config-deepseek")) $("config-deepseek").textContent = state.deepseekConfigured ? "已配置" : "规则降级";
   if ($("config-experiment")) $("config-experiment").textContent = experimentLabel;
   if ($("config-hint")) {
     $("config-hint").textContent = !state.experimentId
       ? "选择实验后显示运行状态。"
-      : status === "environment_warning"
-        ? "环境检查有警告：请在 WSL 中启动 Docker、aem 和 DreamView 后重新检查。"
+      : status === "environment_warning" || dreamview.error
+        ? "当前实验环境有警告：请在 WSL 中启动 Docker、aem 和 DreamView 后重新检查。"
         : !hasRecord
           ? "当前实验还没有 record。启动场景后，勾选“实际运行”再录制。"
-          : "已检测到 record，可以继续生成 channel 报告和自评。";
+          : !state.report
+            ? "已检测到 record，下一步生成 channel 报告和自评报告。"
+            : "当前实验已完成环境检查和报告生成，可以继续查看报告或问答。";
   }
 }
 
