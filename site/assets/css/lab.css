@@ -1596,3 +1596,30 @@
   .lab-contract-row { grid-template-columns: 1fr; gap: 4px; }
   .lab-contract-row small { grid-column: 1; }
 }
+
+
+/* Lab pages: stronger scroll reveal than generic course cards */
+.lab-hero.reveal,
+.lab-section.reveal {
+  opacity: 0;
+  transform: translateY(42px) scale(.988);
+  filter: blur(3px);
+  transition:
+    opacity 720ms cubic-bezier(.2, .8, .2, 1),
+    transform 720ms cubic-bezier(.2, .8, .2, 1),
+    filter 720ms ease;
+}
+.lab-hero.reveal.is-visible,
+.lab-section.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-hero.reveal,
+  .lab-section.reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

@@ -236,9 +236,13 @@
         }
       });
     }, { threshold: 0.08 });
-    document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+    const revealTargets = Array.from(document.querySelectorAll(".reveal, .lab-hero, .lab-section"));
+    revealTargets.forEach((el) => {
+      el.classList.add("reveal");
+      revealObserver.observe(el);
+    });
   } else {
-    document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
+    document.querySelectorAll(".reveal, .lab-hero, .lab-section").forEach((el) => el.classList.add("reveal", "is-visible"));
   }
 
   const searchDialog = document.querySelector("[data-search-dialog]");
