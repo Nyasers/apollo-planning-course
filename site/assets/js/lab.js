@@ -645,6 +645,7 @@
     const root = document.querySelector("[data-lab-report]");
     if (!root) return;
     const fileInput = root.querySelector("[data-report-file]");
+    const sampleButton = root.querySelector("[data-load-sample-report]");
     const resetButton = root.querySelector("[data-report-reset]");
     const summary = incomingRunSummary();
 
@@ -779,6 +780,23 @@
           setImportStatus(root, "导入失败：" + error.message, "is-error");
         } finally {
           fileInput.value = "";
+        }
+      });
+    }
+
+    if (sampleButton) {
+      sampleButton.addEventListener("click", async () => {
+        try {
+          setImportStatus(root, "正在加载第二轮真实整合报告...", "is-warn");
+          const response = await fetch("./data/lab-report-round2.json", { cache: "no-store" });
+          if (!response.ok) throw new Error("找不到内置真实报告");
+          const parsed = await response.json();
+          const errors = validateHarnessReport(parsed);
+          if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
+          writeHarnessReport(parsed);
+          render("已加载第二轮真实整合报告：8/9，TTC 仍未通过；报告为本地自评。", "is-ok");
+        } catch (error) {
+          setImportStatus(root, "加载内置真实报告失败：" + error.message, "is-error");
         }
       });
     }
