@@ -85,3 +85,23 @@
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast.is-success { border-color: #89c9b7; }
 .toast.is-error { border-color: #e79a91; }
+
+
+/* Beginner-friendly job summary and actionable empty report state */
+.console-summary {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft, #f6f7f8);
+  color: var(--ink);
+  font-size: .92rem;
+  line-height: 1.7;
+}
+.console-summary.is-running { border-color: #e5b85c; background: #fff7df; color: #8a6215; }
+.console-summary.is-success { border-color: #89c9b7; background: #eaf8f3; color: #176e57; }
+.console-summary.is-warn { border-color: #e5b85c; background: #fff7df; color: #8a6215; }
+.console-summary.is-error { border-color: #e79a91; background: #fff0ed; color: #a23d34; }
+.console-details { margin-top: 10px; }
+.console-details summary { cursor: pointer; color: var(--muted); font-size: .78rem; }
+.console-details .console { margin-top: 10px; }
+.report-empty-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }

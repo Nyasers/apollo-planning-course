@@ -93,6 +93,53 @@ function setActionBusy(action, busy) {
   }
 }
 
+function setConsoleSummary(text, kind = "") {
+  const box = $("console-summary");
+  if (!box) return;
+  box.textContent = text;
+  box.className = "console-summary" + (kind ? " is-" + kind : "");
+}
+
+function setConsoleDetails(raw) {
+  const pre = $("console");
+  const details = $("console-details");
+  if (pre) pre.textContent = raw || "等待操作...";
+  if (details) details.hidden = !String(raw || "").trim();
+}
+
+function jobHumanSummary(job) {
+  const raw = [job.stdout, job.stderr].filter(Boolean).join("\n");
+  const dryRun = /dry-run/i.test(raw);
+  const failed = job.status === "failed";
+  if (job.status === "running") {
+    return { text: `${actionLabel(job.action)}正在运行，请保持页面和仿真环境开启。`, kind: "running" };
+  }
+  if (failed) {
+    return { text: `${actionLabel(job.action)}失败。请展开“查看技术日志”定位原因，或先检查环境/场景状态。`, kind: "error" };
+  }
+  if (job.action === "record") {
+    return dryRun
+      ? { text: "这次只是演练：生成了录制命令，但没有真正进入 Apollo 容器。勾选“真实执行”后再点“开始录制”。", kind: "warn" }
+      : { text: "录制完成。下一步点击“生成 channel 报告”，再点击“生成自评”。", kind: "success" };
+  }
+  if (job.action === "report") {
+    return { text: "channel 报告已生成：CSV、PNG 和 Markdown 已准备好。下一步点击“生成自评”。", kind: "success" };
+  }
+  if (job.action === "selfeval") {
+    return { text: "自评报告已生成。下方会出现报告摘要和 report.json / selfeval.md 等文件链接。", kind: "success" };
+  }
+  if (job.action === "export") {
+    return { text: "报告文件已导出：report.json 和 report.md 已准备好。", kind: "success" };
+  }
+  if (job.action === "doctor") {
+    return { text: "环境检查完成，结果已保存为 doctor.json。建议接着启动 DreamView 场景。", kind: "success" };
+  }
+  if (job.action === "explain") {
+    return { text: "AI 诊断完成，结果已显示在上方的“DeepSeek 诊断”区域。", kind: "success" };
+  }
+  return { text: `${actionLabel(job.action)}完成。`, kind: "success" };
+}
+
 function renderTasks() {
   const list = $("task-list");
   list.innerHTML = "";
@@ -288,7 +335,12 @@ function renderReportFiles(report) {
 function renderReport(report) {
   const box = $("report-view");
   if (!report) {
-    box.textContent = "选择已有实验并导出报告后，这里显示状态、指标和证据。";
+    const hasExperiment = Boolean(state.experimentId);
+    box.innerHTML = `<p>当前还没有可展示的报告。先完成 record，再依次生成 channel 报告和自评报告；生成后这里会自动显示场景指标、AI 建议和文件链接。</p><div class="report-empty-actions"><button class="button" type="button" data-report-empty-action="selfeval">生成自评报告</button><button class="button secondary" type="button" data-report-empty-action="export">导出报告文件</button></div>`;
+    box.querySelectorAll("[data-report-empty-action]").forEach((button) => {
+      button.disabled = !hasExperiment;
+      button.addEventListener("click", () => runAction(button.dataset.reportEmptyAction));
+    });
     setPill("report-status", "尚无报告");
     renderReportFiles(null);
     if ($("metric-score")) $("metric-score").textContent = "—";
@@ -360,7 +412,8 @@ async function runAction(action) {
   const label = actionLabel(action);
   setActionBusy(action, true);
   setWorkflowStatus(`${label}：正在提交本地 Harness...`, "running");
-  $("console").textContent = `[${action}] 正在提交任务...\n`;
+  setConsoleSummary(`${label}：正在提交本地 Harness...`, "running");
+  setConsoleDetails(`[${action}] 正在提交任务...\n`);
   showToast(`${label}已开始，正在等待本地 Harness 响应。`);
   try {
     const payload = await actionBody(action);
@@ -369,7 +422,8 @@ async function runAction(action) {
     const data = await api(`/api/actions/${action}`, { method: "POST", body: payload });
     state.jobId = data.job.job_id;
     state.experimentId = data.experiment_id;
-    $("console").textContent = `[${action}] 任务已启动：${state.jobId}\n`;
+    setConsoleSummary(`${label}已提交，任务编号 ${state.jobId}，请等待运行结果。`, "running");
+    setConsoleDetails(`[${action}] 任务已启动：${state.jobId}\n`);
     setPill("job-status", "运行中", "ok");
     setWorkflowStatus(`${label}已提交，任务编号 ${state.jobId}。`, "running");
     await pollJob(state.jobId);
@@ -378,7 +432,8 @@ async function runAction(action) {
     setPill("job-status", "失败", "bad");
     setWorkflowStatus(`${label}失败：${error.message}`, "error");
     showToast(`${label}失败：${error.message}`, "error");
-    $("console").textContent = `错误：${error.message}`;
+    setConsoleSummary(`${label}失败：${error.message}`, "error");
+    setConsoleDetails(`错误：${error.message}`);
     state.jobId = "";
   }
 }
@@ -387,10 +442,11 @@ async function pollJob(jobId) {
   try {
     const job = await api(`/api/jobs/${encodeURIComponent(jobId)}`);
     const output = [job.stdout, job.stderr].filter(Boolean).join("\n");
-    $("console").textContent = `[${job.action}] ${job.status}\n${output || "等待输出..."}\n`;
+    setConsoleDetails(output || "等待输出...");
     setPill("job-status", job.status, job.status === "failed" ? "bad" : job.status === "succeeded" ? "ok" : "");
     if (job.status === "running") {
       const elapsed = Math.max(0, Math.floor((Date.now() - state.actionStartedAt) / 1000));
+      setConsoleSummary(`${actionLabel(job.action)}正在运行 · 已等待 ${elapsed}s`, "running");
       setWorkflowStatus(`${actionLabel(job.action)}正在运行 · 已等待 ${elapsed}s`, "running");
       state.pollTimer = setTimeout(() => pollJob(jobId), 1200);
       return;
@@ -398,6 +454,8 @@ async function pollJob(jobId) {
     setActionBusy(false);
     state.jobId = "";
     if (state.pollTimer) clearTimeout(state.pollTimer);
+    const human = jobHumanSummary(job);
+    setConsoleSummary(human.text, human.kind);
     if (job.status === "succeeded") {
       setWorkflowStatus(`${actionLabel(job.action)}完成，正在刷新实验状态。`, "success");
       showToast(`${actionLabel(job.action)}完成。`, "success");
@@ -413,7 +471,8 @@ async function pollJob(jobId) {
     setPill("job-status", "失败", "bad");
     setWorkflowStatus(`任务轮询失败：${error.message}`, "error");
     showToast(`任务轮询失败：${error.message}`, "error");
-    $("console").textContent = `轮询失败：${error.message}`;
+    setConsoleSummary(`任务轮询失败：${error.message}`, "error");
+    setConsoleDetails(`轮询失败：${error.message}`);
   }
 }
 
@@ -428,6 +487,7 @@ async function init() {
     const wanted = params.get("task");
     selectTask(state.tasks.find((task) => task.id === wanted) || state.tasks[0] || { id: "crosswalk", title: "人行道避让" });
     await loadExperiments();
+    if (!state.experimentId && state.experiments.length) state.experimentId = state.experiments[0].experiment_id;
     if (state.experimentId) await loadExperiment(state.experimentId);
     setPill("service-status", "本地在线", "ok");
   } catch (error) {

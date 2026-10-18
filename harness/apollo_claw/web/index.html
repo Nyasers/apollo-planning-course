@@ -87,7 +87,11 @@
 
         <section class="panel console-panel wide">
           <div class="panel-head"><div><span class="eyebrow">CONSOLE</span><h3>任务控制台</h3></div><span id="job-status" class="pill">空闲</span></div>
-          <pre id="console" class="console" aria-live="polite">等待操作...</pre>
+          <div id="console-summary" class="console-summary" aria-live="polite">等待操作...</div>
+          <details id="console-details" class="console-details" hidden>
+            <summary>查看技术日志</summary>
+            <pre id="console" class="console">等待操作...</pre>
+          </details>
         </section>
 
         <section class="panel report-panel wide">
