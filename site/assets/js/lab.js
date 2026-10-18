@@ -641,9 +641,29 @@
     fillList(root, "[data-report-lab-files]", Object.entries(lab.files || {}).map(([key, value]) => key + " · " + value), "暂无报告文件清单");
   }
 
+  function readReportFromHash() {
+    const match = location.hash.match(/^#report=(.+)$/);
+    if (!match) return null;
+    try {
+      const base64 = match[1].replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64 + "=".repeat((4 - base64.length % 4) % 4);
+      const binary = atob(padded);
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      const parsed = JSON.parse(new TextDecoder().decode(bytes));
+      return validateHarnessReport(parsed).length === 0 ? parsed : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function initReportPage() {
     const root = document.querySelector("[data-lab-report]");
     if (!root) return;
+    const hashReport = readReportFromHash();
+    if (hashReport) {
+      writeHarnessReport(hashReport);
+      history.replaceState(null, "", location.pathname + location.search);
+    }
     const fileInput = root.querySelector("[data-report-file]");
     const sampleButton = root.querySelector("[data-load-sample-report]");
     const resetButton = root.querySelector("[data-report-reset]");

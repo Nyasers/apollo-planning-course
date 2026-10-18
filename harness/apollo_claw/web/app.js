@@ -343,6 +343,8 @@ function renderReport(report) {
     });
     setPill("report-status", "尚无报告");
     renderReportFiles(null);
+    const webButton = document.querySelector("#open-web-report");
+    if (webButton) webButton.hidden = true;
     if ($("metric-score")) $("metric-score").textContent = "—";
     if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
@@ -385,11 +387,42 @@ function renderReport(report) {
   });
   box.appendChild(evidence);
   renderReportFiles(report);
+  const webButton = document.querySelector("#open-web-report");
+  if (webButton) webButton.hidden = !(meta.source === "local-harness" && state.experimentId);
   setPill("report-status", meta.mode === "real" ? "真实数据" : "演示/计划", meta.mode === "real" ? "ok" : "");
   if ($("metric-status")) $("metric-status").textContent = meta.status || "—";
   if ($("metric-channels")) $("metric-channels").textContent = record.channel_count ?? "—";
   if ($("metric-score")) $("metric-score").textContent = score.value ?? "—";
   if ($("metric-evidence")) $("metric-evidence").textContent = (report.evidence || []).length;
+}
+
+async function openCurrentReportInWebsite() {
+  if (!state.experimentId) {
+    showToast("请先选择一个已有实验。", "error");
+    return;
+  }
+  try {
+    const raw = await api("/api/experiments/" + encodeURIComponent(state.experimentId) + "/report");
+    const payload = {
+      meta: raw.meta || {},
+      environment: raw.environment || {},
+      record: raw.record || {},
+      metrics: raw.metrics || {},
+      score: raw.score || {},
+      ai: raw.ai || {},
+      verification: raw.verification || {},
+      evidence: raw.evidence || [],
+      capability: raw.capability || {},
+      errors: raw.errors || []
+    };
+    const bytes = new TextEncoder().encode(JSON.stringify(payload));
+    let binary = "";
+    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+    const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    window.open("https://apc.nyase.ru/lab/report.html#report=" + encoded, "_blank", "noopener");
+  } catch (error) {
+    showToast("打开网站报告失败：" + error.message, "error");
+  }
 }
 
 async function actionBody(action) {
@@ -503,6 +536,8 @@ document.addEventListener("DOMContentLoaded", () => {
   $("experiment-select").addEventListener("change", (event) => loadExperiment(event.target.value).catch((error) => { $("console").textContent = error.message; }));
   $("deepseek-save").addEventListener("click", saveDeepSeekSettings);
   $("deepseek-test").addEventListener("click", testDeepSeekConnection);
-  $("deepseek-clear").addEventListener("click", clearDeepSeekKey);
+  document.getElementById("deepseek-clear").addEventListener("click", clearDeepSeekKey);
+  const webReportButton = document.getElementById("open-web-report");
+  if (webReportButton) webReportButton.addEventListener("click", openCurrentReportInWebsite);
   init();
 });
