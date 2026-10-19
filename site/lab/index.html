@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Planning Lab：城市道路自动驾驶综合仿真实验中心。">
   <title>实验中心 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-report-modes">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -26,7 +26,7 @@
       <a href="../index.html">返回课程</a>
     </nav>
     <div class="lab-actions">
-      <span class="lab-status-pill">演示模式</span>
+      <span class="lab-status-pill">当前 MVP</span>
       <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button>
     </div>
   </header>
@@ -34,61 +34,82 @@
   <main class="lab-shell" id="main-content">
     <section class="lab-hero reveal">
       <div class="lab-hero-copy">
-        <p class="lesson-kicker">AI + Virtual Simulation</p>
+        <p class="lesson-kicker">Experiment Center</p>
         <h1>城市道路自动驾驶<span>综合仿真实验</span></h1>
-        <p>本页用于实验导学：先了解实验目标、适用对象和交付物，再按五步教学引导完成环境准备、场景运行、record、AI 诊断和报告复盘。网页负责介绍与引导，真实仿真、数据和评分在本地 Harness 中完成。</p>
+        <p>先看当前真实结果，再按一条 8 阶段实验链完成一次可复核的人行道避让实验。网页负责课程与报告展示，真实仿真、record 和评分在本地 Harness 完成。</p>
         <div class="lab-hero-actions">
-          <a class="button-primary" href="crosswalk.html">进入人行道避让实验</a>
-          <a class="button-secondary" href="ai-loop.html">查看 AI 教学引导</a>
+          <a class="button-primary" href="crosswalk.html">开始人行道避让实验</a>
+          <a class="button-secondary" href="report.html">查看当前真实报告</a>
           <a class="button-secondary" href="../setup/index.html">配置本地环境</a>
         </div>
       </div>
       <div class="lab-hero-board">
-        <p class="lab-board-label">EXPERIMENT FLOW</p>
-        <ol class="lab-flow">
-          <li><b>01</b><span>环境检查</span><em>apollo-env</em></li>
-          <li><b>02</b><span>场景运行</span><em>SimControl</em></li>
-          <li><b>03</b><span>问题定位</span><em>apollo-dev</em></li>
-          <li><b>04</b><span>数据录制</span><em>apollo-test</em></li>
-          <li><b>05</b><span>评分优化</span><em>apollo-eval</em></li>
-        </ol>
+        <p class="lab-board-label">CURRENT STATUS</p>
+        <div class="lab-progress-list">
+          <div><span>场景自评</span><strong>8/9</strong><small>通过项</small></div>
+          <div><span>TTC 失败帧</span><strong>29/267</strong><small>仍需优化</small></div>
+          <div><span>Record 消息</span><strong>7,729</strong><small>25 秒记录</small></div>
+        </div>
+        <p class="lab-board-note">本地自评，不是官方总分。</p>
       </div>
     </section>
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Experiment Brief</p><h2>实验介绍</h2></div>
-        <p>本实验不是只看演示，而是完成一条可复核的自动驾驶实验闭环。</p>
+        <div><p class="section-kicker">Current Evidence</p><h2>当前真实进展</h2></div>
+        <p>第二轮人行道避让实验已跑通本地闭环。结果和问题一起保留，作为下一轮优化的起点。</p>
       </div>
-      <div class="lab-metrics-grid">
-        <article class="lab-card"><span class="lab-number">01</span><h3>实验目标</h3><p>理解 Planning 在城市道路场景中的作用，完成环境检查、场景运行、record 采集、数据分析与一次参数优化。</p></article>
-        <article class="lab-card"><span class="lab-number">02</span><h3>适用对象</h3><p>智能车辆工程、车辆工程、自动化、计算机等专业本科二年级及以上学生；具备 Linux 和 C++/Python 基础更佳。</p></article>
-        <article class="lab-card"><span class="lab-number">03</span><h3>核心任务</h3><p>以人行道避让为首个场景，完成“环境检查—场景运行—日志定位—录制—评分—优化—报告”的闭环。</p></article>
-        <article class="lab-card"><span class="lab-number">04</span><h3>学习成果</h3><p>形成 record、channel 报告、指标图表、report.json 和实验报告，并能解释参数变化与场景表现之间的关系。</p></article>
+      <div class="lab-current-grid">
+        <article class="lab-card is-primary">
+          <span class="lab-chip">真实本地自评</span>
+          <h3>人行道避让 · 第二轮</h3>
+          <p>实验编号 20261018-232816-56f463-crosswalk · 2026-10-18 · 25 秒 record</p>
+          <div class="lab-current-metrics">
+            <div class="lab-metric"><span>场景自评</span><strong>8/9</strong><small>通过项</small></div>
+            <div class="lab-metric"><span>TTC 失败帧</span><strong>29/267</strong><small>仍需优化</small></div>
+            <div class="lab-metric"><span>Record 消息</span><strong>7,729</strong><small>25 秒</small></div>
+            <div class="lab-metric"><span>核心通道</span><strong>6</strong><small>planning / control / localization</small></div>
+            <div class="lab-metric"><span>最大 Jerk</span><strong>2.90</strong><small>舒适性指标</small></div>
+            <div class="lab-metric"><span>急刹次数</span><strong>0</strong><small>本轮记录</small></div>
+          </div>
+          <a class="button-primary" href="report.html">查看当前真实报告</a>
+        </article>
+        <article class="lab-card">
+          <h3>当前边界</h3>
+          <ul class="lab-report-list">
+            <li>已跑通：环境检查、场景运行、record、评分、报告</li>
+            <li>仍待优化：TTC 29/267 失败帧</li>
+            <li>尚未开放：交通灯、自主泊车、完整 24 步</li>
+          </ul>
+          <div class="lab-notice" style="margin-top:14px">24 步是完整建设方案，不代表已经全部上线。</div>
+        </article>
       </div>
     </section>
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Teaching Guide</p><h2>教学引导</h2></div>
-        <p>按五步完成实验。每一步都说明学生做什么、AI 如何辅助、完成后留下什么证据。</p>
+        <div><p class="section-kicker">Experiment Runbook</p><h2>一次实验怎么做</h2></div>
+        <p>8 个阶段，每个阶段都说明学生做什么、AI 如何辅助、完成后留下什么证据。</p>
       </div>
       <div class="lab-ai-timeline">
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>准备环境</h3><p>学生准备 WSL2/Ubuntu、Docker 和 Apollo；AI 通过 apollo-env 检查环境并解释失败原因。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：doctor.json</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>运行场景</h3><p>学生在 DreamView/SimControl 选择地图和场景，启动 Planning/Control/Routing；AI 提示运行前检查项。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：运行状态记录</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>录制数据</h3><p>学生录制 20-30 秒核心 channel；AI 通过 apollo-test 盘点 channel，确认 planning/control/localization 是否有消息。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test</span><small>产出：record / channel_summary.csv</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">04</div><div><h3>分析与诊断</h3><p>学生观察 TTC、加速度、Jerk、急刹和日志；AI 定位 crosswalk 配置，给出下一步最小改动建议。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev + apollo-eval</span><small>产出：评分解释 / 优化建议</small></div></article>
-        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">05</div><div><h3>复盘与提交</h3><p>学生完成第二轮验证，比较优化前后指标，把 Harness 导出的 report.json 导入课程报告页核验来源，再提交 report.md 并说明参数变化与结果的关系。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>产出：report.json / report.md</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">01</div><div><h3>实验准备</h3><p>学生确认课程、场景和交付物；AI 读取任务上下文并给出检查清单。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">任务上下文</span><small>产出：目标 / 清单</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">02</div><div><h3>环境检查</h3><p>学生准备 WSL2/Ubuntu、Docker 和 Apollo；AI 用 apollo-env 检查并解释失败原因。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-env</span><small>产出：doctor.json</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">03</div><div><h3>运行场景</h3><p>学生在 DreamView/SimControl 启动地图、Planning/Control/Routing；AI 提示运行前检查项。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">SimControl</span><small>产出：运行状态记录</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">04</div><div><h3>观察问题</h3><p>学生观察减速、停车和路径；AI 关联日志与时间窗，帮助确认问题发生在哪一步。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：问题描述</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">05</div><div><h3>AI 辅助诊断</h3><p>学生确认假设；AI 定位 Scenario、Task 和参数，给出最小改动建议。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-dev</span><small>产出：诊断建议</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">06</div><div><h3>录制与可视化</h3><p>学生录制 20–30 秒核心 channel；AI 盘点 channel，确认 planning/control/localization 是否有消息。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test</span><small>产出：record / channel_summary.csv</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">07</div><div><h3>评分与优化</h3><p>学生查看 TTC、Jerk、急刹和未通过帧；AI 解释失败帧并给出下一轮优化方向。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-eval</span><small>产出：评分解释 / 优化建议</small></div></article>
+        <article class="lab-ai-stage"><div class="lab-ai-stage-marker">08</div><div><h3>报告与复盘</h3><p>学生完成第二轮验证，把 report.json 导入报告页核验来源，再提交 report.md 和个人反思。</p></div><div class="lab-ai-stage-side"><span class="lab-ai-skill">apollo-test + apollo-eval</span><small>产出：report.json / report.md</small></div></article>
       </div>
       <div class="lab-local-banner" style="margin-top:18px">
-        <div><strong>AI 是教学引导，不是评分裁判</strong><p>脚本产出事实，模型解释事实，学生确认操作，教师保留最终评价。未配置 DeepSeek 时仍可使用规则降级完成实验。</p></div>
+        <div><strong>AI 是教学引导，不是评分裁判</strong><p>脚本产出事实，模型解释事实，学生确认操作，教师保留最终评价。</p></div>
         <div class="lab-card-actions"><a class="button-primary" href="ai-loop.html">查看详细 AI 引导</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
       </div>
     </section>
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Current Experiment</p><h2>本次实验与交付物</h2></div>
+        <div><p class="section-kicker">Current Deliverables</p><h2>本次实验与交付物</h2></div>
         <p>当前开放人行道避让单场景，交通灯和自主泊车按路线图建设。</p>
       </div>
       <div class="lab-scenario-grid">
@@ -109,19 +130,31 @@
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Local Harness</p><h2>本地环境与 Harness</h2></div>
-        <p>推荐使用预装 Ubuntu 镜像；也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。真实实验在本地 Harness 面板完成。</p>
+        <div><p class="section-kicker">Target Report · Planned</p><h2>产品完善后的报告界面</h2></div>
+        <p>这是目标形态，不是当前结果。用于展示多场景、教师复核和能力画像的最终呈现。</p>
       </div>
-      <div class="lab-setup-grid">
-        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐 · 准备中</span><h3>预装 Ubuntu 镜像</h3><p>镜像发布后将包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。</p><ul><li>离线导入镜像</li><li>启动脚本自检</li><li>本地 DeepSeek Key 配置</li></ul><div class="lab-card-actions"><a class="button-primary" href="../setup/index.html">查看导入说明</a></div></article>
-        <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉命令行的学生。需要在 WSL2 中验证 Docker、AEM、GUI 和 DreamView 端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>application-pnc + buildtool</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
-        <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但虚拟磁盘和内存占用更高。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+      <div class="lab-target-grid">
+        <article class="lab-card">
+          <div class="lab-report-preview">
+            <div class="lab-report-preview-head"><span>TARGET REPORT</span><span class="lab-chip">规划中</span></div>
+            <div class="lab-report-preview-tabs"><span>概览</span><span>指标</span><span>AI</span><span>证据</span><span>能力</span></div>
+            <div class="lab-report-preview-grid"><div>多场景报告</div><div>教师复核</div><div>能力画像</div><div>导出与共享</div></div>
+          </div>
+          <p style="margin-top:14px">目标形态将把 baseline、指标、AI 解释、证据文件和能力画像放在同一份可导出报告中。</p>
+          <a class="button-secondary" href="report.html?mode=preview">查看目标形态预览</a>
+        </article>
+        <article class="lab-card">
+          <span class="lab-chip">当前可用</span>
+          <h3>真实本地自评报告</h3>
+          <p>8/9 通过，TTC 29/267 失败帧，7,729 条 record 消息。真实数据和问题都保留。</p>
+          <a class="button-primary" href="report.html">查看当前真实报告</a>
+        </article>
       </div>
     </section>
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
-        <div><p class="section-kicker">Experiment Roadmap</p><h2>24 步实验的当前状态</h2></div>
+        <div><p class="section-kicker">Experiment Roadmap</p><h2>24 步建设路线与当前状态</h2></div>
         <p>当前先覆盖环境、通信、规划、数据和评分的关键路径，其余步骤将逐步开放。</p>
       </div>
       <table class="lab-table">
@@ -135,6 +168,18 @@
         </tbody>
       </table>
     </section>
+
+    <section class="lab-section reveal">
+      <div class="lab-section-head">
+        <div><p class="section-kicker">Local Harness</p><h2>本地环境与 Harness</h2></div>
+        <p>推荐使用预装 Ubuntu 镜像；也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。真实实验在本地 Harness 面板完成。</p>
+      </div>
+      <div class="lab-setup-grid">
+        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐 · 准备中</span><h3>预装 Ubuntu 镜像</h3><p>镜像发布后将包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。</p><ul><li>离线导入镜像</li><li>启动脚本自检</li><li>本地 DeepSeek Key 配置</li></ul><div class="lab-card-actions"><a class="button-primary" href="../setup/index.html">查看导入说明</a></div></article>
+        <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉命令行的学生。需要在 WSL2 中验证 Docker、AEM、GUI 和 DreamView 端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>application-pnc + buildtool</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+        <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但虚拟磁盘和内存占用更高。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+      </div>
+    </section>
   </main>
 
   <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容">
@@ -142,6 +187,6 @@
   </div>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261019-launcher-v1"></script>
+  <script src="../assets/js/lab.js?v=20261019-report-modes"></script>
 </body>
 </html>

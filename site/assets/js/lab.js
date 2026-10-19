@@ -676,9 +676,11 @@
     }
   }
 
-  function initReportPage() {
+  async function initReportPage() {
     const root = document.querySelector("[data-lab-report]");
     if (!root) return;
+    let builtInRealReport = null;
+    let currentMode = "real";
     const hashReport = readReportFromHash();
     if (hashReport) {
       writeHarnessReport(hashReport);
@@ -688,10 +690,54 @@
     const sampleButton = root.querySelector("[data-load-sample-report]");
     const resetButton = root.querySelector("[data-report-reset]");
     const summary = incomingRunSummary();
+    const modeButtons = Array.from(root.querySelectorAll("[data-report-mode]"));
+    const importActions = root.querySelector("[data-report-import-actions]");
+    const previewBanner = root.querySelector("[data-report-preview-banner]");
+    const importTitle = root.querySelector("[data-report-import-title]");
+    const importDesc = root.querySelector("[data-report-import-desc]");
+
+    function updateModeChrome(mode) {
+      modeButtons.forEach((button) => {
+        const active = button.dataset.reportMode === mode;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      if (importActions) importActions.hidden = mode !== "import";
+      if (previewBanner) previewBanner.hidden = mode !== "preview";
+      if (importTitle) {
+        importTitle.textContent = mode === "real"
+          ? "当前真实报告来源"
+          : mode === "preview"
+            ? "目标形态预览来源"
+            : "导入本地 Harness 报告";
+      }
+      if (importDesc) {
+        importDesc.textContent = mode === "real"
+          ? "以下元数据来自第二轮真实本地自评报告，数据只保存在当前浏览器。"
+          : mode === "preview"
+            ? "以下为目标形态的演示数据，不代表当前实验结果。"
+            : "网站不会上传你的文件。report.json 只在当前浏览器本地读取和保存，用于核验真实实验来源。";
+      }
+    }
+
+    async function loadBuiltInRealReport(force = false) {
+      if (builtInRealReport && !force) return builtInRealReport;
+      const response = await fetch("./data/lab-report-round2.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("找不到内置真实报告");
+      const parsed = await response.json();
+      const errors = validateHarnessReport(parsed);
+      if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
+      builtInRealReport = parsed;
+      return builtInRealReport;
+    }
 
     function render(noticeOverride, noticeKind) {
       const imported = readHarnessReport();
-      const report = imported || demoReportData();
+      const report = currentMode === "preview"
+        ? demoReportData()
+        : currentMode === "real"
+          ? (builtInRealReport || demoReportData())
+          : (imported || demoReportData());
       const meta = report.meta || {};
       const record = report.record || {};
       const metrics = report.metrics || {};
@@ -708,20 +754,28 @@
         badge.className = "lab-source-badge " + (isReal ? "is-real" : "is-demo");
       }
 
-      const defaultNotice = imported
-        ? "已载入保存在当前浏览器中的本地 Harness 报告。"
-        : summary
-          ? "已收到本地运行摘要 " + summary.run + "。摘要不能替代原始报告，请导入对应的 report.json 核验。"
-          : "当前显示网站内置演示数据，不代表真实仿真结果。";
-      setImportStatus(root, noticeOverride || defaultNotice, noticeKind || (isReal ? "is-ok" : "is-warn"));
+      const defaultNotice = currentMode === "preview"
+        ? "目标形态预览：演示数据，不代表当前实验结果。"
+        : currentMode === "real"
+          ? (builtInRealReport
+              ? "正在显示第二轮真实本地自评报告：8/9，TTC 仍未通过；不是官方总分。"
+              : "内置真实报告尚未加载。")
+          : imported
+            ? "已载入保存在当前浏览器中的本地 Harness 报告。"
+            : summary
+              ? "已收到本地运行摘要 " + summary.run + "。摘要不能替代原始报告，请导入对应的 report.json 核验。"
+              : "尚未导入报告。选择 report.json 后在此查看。";
+      setImportStatus(root, noticeOverride || defaultNotice, noticeKind || (currentMode === "preview" ? "is-warn" : isReal ? "is-ok" : "is-warn"));
 
-      const intro = isReal
-        ? "本页显示从本地 Harness 导入的真实 report.json。数据只保存在当前浏览器，网站不会上传文件。"
-        : isHarness
-          ? emptyRecord
-            ? "本报告来自本地 Harness，但 record channels 为 0（状态：" + (meta.status || "empty") + "）。该报告不能作为有效驾驶指标，请先启动仿真场景并重新 record。"
-            : "本页显示本地 Harness 报告，但报告模式为 " + (meta.mode || "未知") + "；请结合状态和 record 判断是否可用于正式结论。"
-          : "当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。";
+      const intro = currentMode === "preview"
+        ? "这是产品完善后的报告界面预览，使用演示数据，不代表当前实验结果。"
+        : isReal
+          ? "本页显示第二轮真实本地自评报告。数据只保存在当前浏览器，网站不会上传文件。"
+          : isHarness
+            ? emptyRecord
+              ? "本报告来自本地 Harness，但 record channels 为 0（状态：" + (meta.status || "empty") + "）。该报告不能作为有效驾驶指标，请先启动仿真场景并重新 record。"
+              : "本页显示本地 Harness 报告，但报告模式为 " + (meta.mode || "未知") + "；请结合状态和 record 判断是否可用于正式结论。"
+            : "尚未导入真实报告。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。";
       setText(root, "[data-report-intro]", intro);
       setText(root, "[data-report-scenario]", meta.scenario || meta.task || "人行道避让");
       setText(root, "[data-report-run-id]", meta.experiment_id || "—");
@@ -783,9 +837,16 @@
           bars.appendChild(row);
         });
       }
-      setText(root, "[data-report-metrics-note]", imported
-        ? "本区来自导入的 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
-        : "橙色表示优化前，绿色表示当前报告。当前为演示数据，不替代官方评测。");
+      setText(root, "[data-report-score-note]", currentMode === "preview"
+        ? "目标形态预览中的九项场景指标布局；演示数据不代表当前结果。"
+        : isHarness
+          ? "当前显示真实报告的九项场景指标、PASS/FAIL、得分和未通过帧数。"
+          : "导入报告后显示九项场景指标的 PASS/FAIL、得分和未通过帧数。");
+      setText(root, "[data-report-metrics-note]", currentMode === "preview"
+        ? "目标形态演示数据：橙色表示优化前，绿色表示当前报告，不替代官方评测。"
+        : isHarness
+          ? "本区来自本地 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
+          : "当前没有可用的真实指标；演示数据不替代官方评测。");
       renderScoreMetrics(root, score.metrics);
       renderLabReport(root, report);
 
@@ -813,6 +874,26 @@
       }
     }
 
+    async function setReportMode(mode, options = {}) {
+      currentMode = mode;
+      let notice = options.notice;
+      let noticeKind = options.noticeKind;
+      if (mode === "real" && !builtInRealReport) {
+        try {
+          await loadBuiltInRealReport();
+        } catch (error) {
+          notice = "加载内置真实报告失败：" + error.message;
+          noticeKind = "is-error";
+        }
+      }
+      updateModeChrome(mode);
+      render(notice, noticeKind);
+      const url = new URL(location.href);
+      if (mode === "real") url.searchParams.delete("mode");
+      else url.searchParams.set("mode", mode);
+      history.replaceState(null, "", url.href);
+    }
+
     if (fileInput) {
       fileInput.addEventListener("change", async () => {
         const file = fileInput.files && fileInput.files[0];
@@ -823,7 +904,7 @@
           const errors = validateHarnessReport(parsed);
           if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
           writeHarnessReport(parsed);
-          render("导入成功：已读取 " + file.name + "，数据只保存在当前浏览器。", "is-ok");
+          await setReportMode("import", { notice: "导入成功：已读取 " + file.name + "，数据只保存在当前浏览器。", noticeKind: "is-ok" });
         } catch (error) {
           setImportStatus(root, "导入失败：" + error.message, "is-error");
         } finally {
@@ -841,8 +922,8 @@
           const parsed = await response.json();
           const errors = validateHarnessReport(parsed);
           if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
-          writeHarnessReport(parsed);
-          render("已加载第二轮真实整合报告：8/9，TTC 仍未通过；报告为本地自评。", "is-ok");
+          builtInRealReport = parsed;
+          await setReportMode("real", { notice: "已加载第二轮真实整合报告：8/9，TTC 仍未通过；报告为本地自评。", noticeKind: "is-ok" });
         } catch (error) {
           setImportStatus(root, "加载内置真实报告失败：" + error.message, "is-error");
         }
@@ -850,16 +931,32 @@
     }
 
     if (resetButton) {
-      resetButton.addEventListener("click", () => {
-        localStorage.removeItem(harnessReportKey);
-        render("已恢复网站内置演示数据。", "is-warn");
+      resetButton.addEventListener("click", async () => {
+        await setReportMode("preview", { notice: "已切换到目标形态预览：演示数据，不代表当前实验结果。", noticeKind: "is-warn" });
       });
     }
 
-    render();
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setReportMode(button.dataset.reportMode || "real");
+      });
+    });
+
+    const params = new URLSearchParams(location.search);
+    const requestedMode = hashReport
+      ? "import"
+      : params.get("mode") === "preview"
+        ? "preview"
+        : params.get("mode") === "import" || summary
+          ? "import"
+          : "real";
+    setReportMode(requestedMode).catch((error) => {
+      console.error(error);
+      setImportStatus(root, "报告初始化失败：" + error.message, "is-error");
+    });
   }
 
   syncLocalPanelLinks();
   initRunPage();
-  initReportPage();
+  initReportPage().catch((error) => { console.error(error); });
 })();
