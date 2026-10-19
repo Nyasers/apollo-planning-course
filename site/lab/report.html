@@ -57,7 +57,7 @@
 
     <section class="lab-section">
       <div class="lab-report-modes" role="group" aria-label="报告视图">
-        <button class="lab-report-mode" type="button" aria-pressed="true" data-report-mode="real">当前真实报告</button>
+        <button class="lab-report-mode" type="button" aria-pressed="true" data-report-mode="real">当前进度产物</button>
         <button class="lab-report-mode" type="button" aria-pressed="false" data-report-mode="import">导入我的报告</button>
         <button class="lab-report-mode" type="button" aria-pressed="false" data-report-mode="preview">目标形态预览</button>
       </div>
@@ -76,7 +76,7 @@
         </div>
         <div class="lab-report-import-actions" data-report-import-actions>
           <label class="lab-file-button">选择报告文件<input type="file" accept="application/json,.json" data-report-file></label>
-          <button class="button-secondary" type="button" data-load-sample-report>查看第二轮真实报告</button>
+          <button class="button-secondary" type="button" data-load-sample-report>加载当前进度产物</button>
           <button class="button-secondary" type="button" data-report-reset>查看目标形态预览</button>
         </div>
         <dl class="lab-report-meta-grid">
@@ -108,7 +108,7 @@
     <section class="lab-section">
       <div class="lab-section-head">
         <div><p class="section-kicker">Scenario Metrics</p><h2>场景指标</h2></div>
-        <p data-report-score-note>真实 Harness 报告会显示九项场景指标的 PASS/FAIL、得分和未通过帧数。</p>
+        <p data-report-score-note>本地自评产物会显示九项场景指标的 PASS/FAIL、得分和未通过帧数。</p>
       </div>
       <div class="lab-report-card is-wide" data-report-score-table>
         <p class="lab-report-empty">当前报告没有逐项场景指标。</p>
@@ -161,7 +161,7 @@
         </article>
         <article class="lab-report-card">
           <h3>报告结论</h3>
-          <p data-report-conclusion>尚无真实实验数据。</p>
+          <p data-report-conclusion>尚无当前进度产物数据。</p>
         </article>
         <article class="lab-report-card">
           <h3>错误与阻塞</h3>

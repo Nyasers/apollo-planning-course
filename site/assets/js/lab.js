@@ -706,14 +706,14 @@
       if (previewBanner) previewBanner.hidden = mode !== "preview";
       if (importTitle) {
         importTitle.textContent = mode === "real"
-          ? "当前真实报告来源"
+          ? "当前进度产物来源"
           : mode === "preview"
             ? "目标形态预览来源"
             : "导入本地 Harness 报告";
       }
       if (importDesc) {
         importDesc.textContent = mode === "real"
-          ? "以下元数据来自第二轮真实本地自评报告，数据只保存在当前浏览器。"
+          ? "以下元数据来自第二轮阶段性本地自评产物，数据只保存在当前浏览器。"
           : mode === "preview"
             ? "以下为目标形态的演示数据，不代表当前实验结果。"
             : "网站不会上传你的文件。report.json 只在当前浏览器本地读取和保存，用于核验真实实验来源。";
@@ -723,7 +723,7 @@
     async function loadBuiltInRealReport(force = false) {
       if (builtInRealReport && !force) return builtInRealReport;
       const response = await fetch("./data/lab-report-round2.json", { cache: "no-store" });
-      if (!response.ok) throw new Error("找不到内置真实报告");
+      if (!response.ok) throw new Error("找不到当前进度产物");
       const parsed = await response.json();
       const errors = validateHarnessReport(parsed);
       if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
@@ -748,7 +748,7 @@
       const emptyRecord = record.channel_count === 0 || record.status === "empty" || String(meta.status || "").includes("empty");
       const isReal = isHarness && meta.mode === "real" && !emptyRecord;
       const badge = root.querySelector("[data-report-mode-badge]");
-      const badgeText = isReal ? "真实 Harness 报告" : isHarness ? (emptyRecord ? "Harness · 空 record" : "Harness " + (meta.mode || "报告")) : "演示数据";
+      const badgeText = isReal ? "本地自评产物" : isHarness ? (emptyRecord ? "Harness · 空 record" : "Harness " + (meta.mode || "报告")) : "演示数据";
       if (badge) {
         badge.textContent = badgeText;
         badge.className = "lab-source-badge " + (isReal ? "is-real" : "is-demo");
@@ -758,8 +758,8 @@
         ? "目标形态预览：演示数据，不代表当前实验结果。"
         : currentMode === "real"
           ? (builtInRealReport
-              ? "正在显示第二轮真实本地自评报告：8/9，TTC 仍未通过；不是官方总分。"
-              : "内置真实报告尚未加载。")
+              ? "正在显示第二轮阶段性本地自评产物：8/9，TTC 仍未通过；不是官方总分。"
+              : "当前进度产物尚未加载。")
           : imported
             ? "已载入保存在当前浏览器中的本地 Harness 报告。"
             : summary
@@ -770,12 +770,12 @@
       const intro = currentMode === "preview"
         ? "这是产品完善后的报告界面预览，使用演示数据，不代表当前实验结果。"
         : isReal
-          ? "本页显示第二轮真实本地自评报告。数据只保存在当前浏览器，网站不会上传文件。"
+          ? "本页显示第二轮阶段性本地自评产物。数据只保存在当前浏览器，网站不会上传文件。"
           : isHarness
             ? emptyRecord
               ? "本报告来自本地 Harness，但 record channels 为 0（状态：" + (meta.status || "empty") + "）。该报告不能作为有效驾驶指标，请先启动仿真场景并重新 record。"
               : "本页显示本地 Harness 报告，但报告模式为 " + (meta.mode || "未知") + "；请结合状态和 record 判断是否可用于正式结论。"
-            : "尚未导入真实报告。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。";
+            : "尚未导入实验产物。完成本地 Harness 实验并导出 report.json 后，可在此导入真实指标、AI 建议和证据链。";
       setText(root, "[data-report-intro]", intro);
       setText(root, "[data-report-scenario]", meta.scenario || meta.task || "人行道避让");
       setText(root, "[data-report-run-id]", meta.experiment_id || "—");
@@ -840,7 +840,7 @@
       setText(root, "[data-report-score-note]", currentMode === "preview"
         ? "目标形态预览中的九项场景指标布局；演示数据不代表当前结果。"
         : isHarness
-          ? "当前显示真实报告的九项场景指标、PASS/FAIL、得分和未通过帧数。"
+          ? "当前进度产物包含九项场景指标、PASS/FAIL、得分和未通过帧数。"
           : "导入报告后显示九项场景指标的 PASS/FAIL、得分和未通过帧数。");
       setText(root, "[data-report-metrics-note]", currentMode === "preview"
         ? "目标形态演示数据：橙色表示优化前，绿色表示当前报告，不替代官方评测。"
@@ -882,7 +882,7 @@
         try {
           await loadBuiltInRealReport();
         } catch (error) {
-          notice = "加载内置真实报告失败：" + error.message;
+          notice = "加载当前进度产物失败：" + error.message;
           noticeKind = "is-error";
         }
       }
@@ -918,14 +918,14 @@
         try {
           setImportStatus(root, "正在加载第二轮真实整合报告...", "is-warn");
           const response = await fetch("./data/lab-report-round2.json", { cache: "no-store" });
-          if (!response.ok) throw new Error("找不到内置真实报告");
+          if (!response.ok) throw new Error("找不到当前进度产物");
           const parsed = await response.json();
           const errors = validateHarnessReport(parsed);
           if (errors.length) throw new Error(errors.slice(0, 4).join("；"));
           builtInRealReport = parsed;
           await setReportMode("real", { notice: "已加载第二轮真实整合报告：8/9，TTC 仍未通过；报告为本地自评。", noticeKind: "is-ok" });
         } catch (error) {
-          setImportStatus(root, "加载内置真实报告失败：" + error.message, "is-error");
+          setImportStatus(root, "加载当前进度产物失败：" + error.message, "is-error");
         }
       });
     }
