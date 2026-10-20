@@ -731,6 +731,125 @@
       return builtInRealReport;
     }
 
+  function renderAiPresentation(root, ai) {
+    const box = root.querySelector("[data-report-ai-presentation]");
+    if (!box) return;
+    box.innerHTML = "";
+    const presentation = ai && ai.presentation;
+    const make = (tag, className, text) => {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text !== undefined && text !== null) el.textContent = String(text);
+      return el;
+    };
+    if (!presentation) {
+      const empty = make("div", "ai-presentation-empty");
+      empty.appendChild(make("h3", "", "当前报告还是旧版 AI 数据结构"));
+      empty.appendChild(make("p", "", "请回到本地 Harness 重新执行“生成自评”，再导入新的 report.json。下方技术细节仍可查看。"));
+      box.appendChild(empty);
+      return;
+    }
+
+    const hero = make("div", "ai-summary-hero is-" + (presentation.severity || "neutral"));
+    hero.appendChild(make("span", "ai-summary-kicker", "一句话结论"));
+    hero.appendChild(make("h3", "", presentation.headline || "本轮实验分析"));
+    hero.appendChild(make("p", "", presentation.summary || "暂无摘要"));
+    const badges = make("div", "ai-summary-badges");
+    (presentation.badges || []).forEach((badge) => {
+      const chip = make("span", "ai-summary-chip is-" + (badge.severity || "neutral"));
+      chip.appendChild(make("small", "", badge.label || ""));
+      chip.appendChild(make("strong", "", badge.value || "—"));
+      badges.appendChild(chip);
+    });
+    hero.appendChild(badges);
+    box.appendChild(hero);
+
+    const findings = Array.isArray(presentation.findings) ? presentation.findings : [];
+    if (findings.length) {
+      const section = make("section", "ai-readable-section");
+      section.appendChild(make("h3", "", "先看这些关键指标"));
+      section.appendChild(make("p", "ai-readable-lead", "每一项都标出了实际值、参考标准和对驾驶体验的影响。"));
+      const grid = make("div", "ai-finding-grid");
+      findings.forEach((item) => {
+        const card = make("article", "ai-finding-card is-" + (item.severity || "neutral"));
+        const top = make("div", "ai-finding-top");
+        top.appendChild(make("strong", "", item.title || item.id || "指标"));
+        top.appendChild(make("span", "ai-status-pill", item.status || "—"));
+        card.appendChild(top);
+        const value = make("div", "ai-finding-value");
+        value.appendChild(make("b", "", item.value || "—"));
+        if (item.unit) value.appendChild(make("small", "", " " + item.unit));
+        card.appendChild(value);
+        card.appendChild(make("div", "ai-finding-threshold", "参考标准：" + (item.threshold || "—")));
+        card.appendChild(make("p", "", item.explanation || "暂无解释"));
+        card.appendChild(make("code", "ai-finding-source", item.source || ""));
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      box.appendChild(section);
+    }
+
+    const actions = Array.isArray(presentation.actions) ? presentation.actions : [];
+    if (actions.length) {
+      const section = make("section", "ai-readable-section");
+      section.appendChild(make("h3", "", "下一步怎么做"));
+      section.appendChild(make("p", "ai-readable-lead", "建议按顺序处理，每一步都说明原因和完成标准。"));
+      const list = make("div", "ai-action-list");
+      actions.forEach((action) => {
+        const card = make("article", "ai-action-card");
+        const head = make("div", "ai-action-head");
+        head.appendChild(make("span", "ai-action-number", "0" + (action.priority || 1)));
+        head.appendChild(make("h4", "", action.title || "下一步"));
+        card.appendChild(head);
+        card.appendChild(make("p", "", action.why || ""));
+        const steps = Array.isArray(action.steps) ? action.steps : [];
+        if (steps.length) {
+          const ol = make("ol", "ai-action-steps");
+          steps.forEach((step) => ol.appendChild(make("li", "", step)));
+          card.appendChild(ol);
+        }
+        if (action.done_when) {
+          const done = make("div", "ai-action-done");
+          done.appendChild(make("strong", "", "完成标准："));
+          done.appendChild(document.createTextNode(action.done_when));
+          card.appendChild(done);
+        }
+        list.appendChild(card);
+      });
+      section.appendChild(list);
+      box.appendChild(section);
+    }
+
+    const questions = Array.isArray(presentation.questions) ? presentation.questions : [];
+    if (questions.length) {
+      const section = make("section", "ai-readable-section ai-question-section");
+      section.appendChild(make("h3", "", "需要你确认"));
+      const ul = make("ul", "ai-question-list");
+      questions.forEach((item) => ul.appendChild(make("li", "", item)));
+      section.appendChild(ul);
+      box.appendChild(section);
+    }
+
+    const glossary = Array.isArray(presentation.glossary) ? presentation.glossary : [];
+    if (glossary.length) {
+      const details = make("details", "ai-glossary");
+      details.appendChild(make("summary", "", "参数名看不懂？展开术语表"));
+      const grid = make("div", "ai-glossary-grid");
+      glossary.forEach((item) => {
+        const card = make("div", "ai-glossary-item");
+        const name = make("div", "ai-glossary-name");
+        name.appendChild(make("code", "", item.term || ""));
+        name.appendChild(make("strong", "", item.label || ""));
+        card.appendChild(name);
+        card.appendChild(make("p", "", item.meaning || ""));
+        card.appendChild(make("small", "", "单位：" + (item.unit || "—") + " · 参考：" + (item.reference || "—")));
+        grid.appendChild(card);
+      });
+      details.appendChild(grid);
+      box.appendChild(details);
+    }
+  }
+
     function render(noticeOverride, noticeKind) {
       const imported = readHarnessReport();
       const report = currentMode === "preview"
@@ -784,7 +903,8 @@
       setText(root, "[data-report-created-at]", formatDateTime(meta.created_at));
       setText(root, "[data-report-record]", (record.channel_count ?? "—") + " channels · " + (record.message_count ?? "—") + " messages · " + (record.duration_sec ?? "—") + " s");
       setText(root, "[data-report-score-source]", score.source || "未运行评分");
-      setText(root, "[data-report-ai-skills]", (ai.skills || []).join(", ") || "—");
+      setText(root, "[data-report-ai-skills]", (Array.isArray(ai.skills) ? ai.skills : (ai.skill ? [ai.skill] : [])).join(", ") || "—");
+      renderAiPresentation(root, ai);
 
       const lab = report.lab || {};
       const labBaseline = lab.baseline || {};
@@ -800,7 +920,7 @@
       setText(root, "[data-report-score-after]", scoreDisplay);
       setText(root, "[data-report-score-current]", scoreDisplay);
       setText(root, "[data-report-score-before]", scoreBeforeDisplay);
-      setText(root, "[data-report-score-label]", scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : "场景得分");
+      setText(root, "[data-report-score-label]", scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : (score.is_official ? "官方得分" : "综合自评"));
       setText(root, "[data-report-official]", score.value === null || score.value === undefined
         ? (score.passed_metrics ? "本地自评：通过 " + score.passed_metrics + " 项，不提供总分，不替代官方评分。" : "当前报告没有评分结果。")
         : score.is_official ? "官方评分。" : "本地自评估，不替代官方评分。");

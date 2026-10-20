@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Apollo Claw 实验报告：人行道避让优化前后对比。">
   <title>实验报告 | Apollo Planning Lab</title>
-  <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/site.css?v=20261021-ai-readable-v041">
   <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-progress-artifact">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
@@ -126,27 +126,31 @@
     <section class="lab-section">
       <div class="lab-section-head">
         <div><p class="section-kicker">AI Evidence</p><h2>AI 辅助结论</h2></div>
-        <p>AI 只解释证据和提出建议；事实、推测、建议和引用分别展示，学生仍需确认并重新运行验证。</p>
+        <p>先看一句话结论、关键指标和行动清单；原始事实、模型推测与引用收在技术细节中，学生仍需重新运行验证。</p>
       </div>
-      <div class="lab-report-grid">
-        <article class="lab-report-card">
-          <h3>事实</h3>
-          <ul class="lab-report-data-list" data-report-ai-facts></ul>
-        </article>
-        <article class="lab-report-card">
-          <h3>推测</h3>
-          <ul class="lab-report-data-list" data-report-ai-hypotheses></ul>
-        </article>
-        <article class="lab-report-card">
-          <h3>建议</h3>
-          <ul class="lab-report-data-list" data-report-ai-suggestions></ul>
-        </article>
-        <article class="lab-report-card">
-          <h3>引用与确认</h3>
-          <ul class="lab-report-data-list" data-report-ai-source-refs></ul>
-          <p class="lab-report-confirm" data-report-ai-confirmed>学生确认状态：未确认</p>
-        </article>
-      </div>
+      <div class="ai-presentation-shell" data-report-ai-presentation></div>
+      <details class="ai-technical-details">
+        <summary>查看技术细节、原始事实与引用</summary>
+        <div class="lab-report-grid">
+          <article class="lab-report-card">
+            <h3>原始事实</h3>
+            <ul class="lab-report-data-list" data-report-ai-facts></ul>
+          </article>
+          <article class="lab-report-card">
+            <h3>模型推测</h3>
+            <ul class="lab-report-data-list" data-report-ai-hypotheses></ul>
+          </article>
+          <article class="lab-report-card">
+            <h3>原始建议</h3>
+            <ul class="lab-report-data-list" data-report-ai-suggestions></ul>
+          </article>
+          <article class="lab-report-card">
+            <h3>引用与确认</h3>
+            <ul class="lab-report-data-list" data-report-ai-source-refs></ul>
+            <p class="lab-report-confirm" data-report-ai-confirmed>学生确认状态：未确认</p>
+          </article>
+        </div>
+      </details>
     </section>
 
     <section class="lab-section">
@@ -186,6 +190,6 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261019-progress-artifact"></script>
+  <script src="../assets/js/lab.js?v=20261021-ai-readable-v041"></script>
 </body>
 </html>
