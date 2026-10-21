@@ -56,8 +56,12 @@ def _sync_skills_to_workspace(settings: Settings) -> Path:
             source_skill = source / name
             if source_skill.is_dir():
                 shutil.copytree(source_skill, target / name, dirs_exist_ok=True)
+    fallback_script = Path(__file__).resolve().parents[1] / "skills" / "apollo-test" / "scripts" / "crosswalk_stop_distance.py"
+    target_script = target / "apollo-test" / "scripts" / "crosswalk_stop_distance.py"
+    if fallback_script.exists() and not target_script.exists():
+        target_script.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(fallback_script, target_script)
     return target
-
 def _get_or_create_experiment(settings: Settings, args) -> Dict[str, Any]:
     store = _store(settings)
     experiment_id = getattr(args, "experiment", None)
@@ -869,6 +873,41 @@ def cmd_report_build(settings: Settings, args) -> int:
                         experiment["metrics"]["crosswalk_stop_distance_min_m"] = crosswalk_measurement["min_m"]
                         experiment["metrics"]["crosswalk_stop_distance_max_m"] = crosswalk_measurement["max_m"]
                         experiment["score"]["crosswalk_stop_distance"] = crosswalk_measurement
+                # Raw HDMap distance must be computed inside the Apollo container.
+                raw_script = _resolve_container_script(settings, None, skills.test_crosswalk_distance_script)
+                if raw_script and localization_csv.exists():
+                    map_file = f"{settings.apollo_workspace_container}/data/map_data/Xh_2026_contest/base_map.bin"
+                    raw_argv = [
+                        "python3", raw_script,
+                        "--csv", _host_to_container(settings, str(localization_csv)),
+                        "--map-file", map_file,
+                        "--vehicle-param", "/apollo/modules/common/data/vehicle_param.pb.txt",
+                    ]
+                    raw_result = docker_exec(settings, raw_argv, timeout=args.timeout)
+                    _save_command(settings, experiment, "crosswalk-distance", raw_argv, raw_result)
+                    if raw_result.ok:
+                        raw_data = None
+                        for line in reversed(raw_result.stdout.splitlines()):
+                            line = line.strip()
+                            if line.startswith("{"):
+                                try:
+                                    raw_data = json.loads(line)
+                                    break
+                                except ValueError:
+                                    pass
+                        if raw_data:
+                            experiment["metrics"]["crosswalk_raw_map_distance_m"] = raw_data["raw_map_distance_m"]
+                            crosswalk_score = experiment["score"].setdefault("crosswalk_stop_distance", {})
+                            crosswalk_score.update({
+                                "raw_map_distance_m": raw_data["raw_map_distance_m"],
+                                "crosswalk_id": raw_data.get("crosswalk_id"),
+                                "front_edge_to_center_m": raw_data.get("front_edge_to_center_m"),
+                                "front_point": raw_data.get("front_point"),
+                                "crosswalk_bounds": raw_data.get("crosswalk_bounds"),
+                                "raw_source": "Xh_2026_contest/base_map.bin",
+                            })
+                            raw_pass = 1.5 <= float(raw_data["raw_map_distance_m"]) <= 2.0
+                            crosswalk_score["pass"] = raw_pass
             except (OSError, ValueError) as exc:
                 print(f"人行横道停车距离计算失败：{exc}", file=sys.stderr)
     experiment["score"].update(compute_self_score(

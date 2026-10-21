@@ -53,6 +53,14 @@ class SkillPaths:
         return self._path("apollo-test", "scripts", "record_channel_report.py")
 
     @property
+    def test_crosswalk_distance_script(self) -> Optional[Path]:
+        path = self._path("apollo-test", "scripts", "crosswalk_stop_distance.py")
+        if path:
+            return path
+        fallback = Path(__file__).resolve().parents[1] / "skills" / "apollo-test" / "scripts" / "crosswalk_stop_distance.py"
+        return fallback if fallback.exists() else None
+
+    @property
     def eval_grading_script(self) -> Optional[Path]:
         return self._path("apollo-eval", "scripts", "grading_system_py", "main.py")
 

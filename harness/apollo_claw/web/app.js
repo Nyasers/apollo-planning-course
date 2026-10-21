@@ -897,7 +897,12 @@ function renderReport(report) {
   const crosswalkScore = report.score && report.score.crosswalk_stop_distance;
   if (crosswalkDistance !== undefined && crosswalkDistance !== null) {
     const crosswalkPass = crosswalkScore && crosswalkScore.pass;
-    cards.push({ label: "人行道停车距离", value: String(crosswalkDistance) + " m", note: crosswalkPass ? "符合 1.5—2.0m" : "不在 1.5—2.0m 范围" });
+    const rawDistance = crosswalkScore && crosswalkScore.raw_map_distance_m;
+    const distanceValue = rawDistance !== undefined && rawDistance !== null ? rawDistance : crosswalkDistance;
+    const note = rawDistance !== undefined && rawDistance !== null
+      ? "地图原始距离 · 标定相对值 " + crosswalkDistance + "m · " + (crosswalkPass ? "符合" : "不在") + " 1.5—2.0m"
+      : (crosswalkPass ? "符合 1.5—2.0m" : "不在 1.5—2.0m 范围");
+    cards.push({ label: "人行道停车距离", value: String(distanceValue) + " m", note });
   }
   cards.forEach((item) => {
     const card = document.createElement("div");
