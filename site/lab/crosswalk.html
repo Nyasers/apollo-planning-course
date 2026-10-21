@@ -3,148 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="人行道避让综合仿真实验：Apollo Claw 综合实验台。">
-  <title>人行道避让实验 | Apollo Planning Lab</title>
-  <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261022-score-reason-v1">
-  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="refresh" content="0; url=crosswalk-guide.html">
+  <title>正在进入人行道避让真实实验</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 </head>
-<body class="lab-body" data-page="lab">
-  <a class="skip-link" href="#main-content">跳到正文</a>
-  <header class="lab-topbar">
-    <a class="lab-brand" href="../index.html">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>人行道避让 · 综合实验台</span></span>
-    </a>
-    <nav class="lab-nav" aria-label="实验中心导航">
-      <a href="./">实验中心</a>
-      <a href="ai-loop.html">AI 引导</a>
-      <a href="report.html">实验报告</a>
-      <a href="../index.html">返回课程</a>
-    </nav>
-    <div class="lab-actions">
-      <span class="lab-status-pill">AI 辅助实验 · 演示模式</span>
-      <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button>
-    </div>
-  </header>
-
-  <main class="lab-shell" id="main-content" data-lab-run>
-    <div class="lab-workspace">
-      <aside class="lab-stepbar" aria-label="实验步骤">
-        <div class="lab-stepbar-head"><strong>人行道避让</strong><span>单场景闭环约 45 分钟 · 8 个阶段</span></div>
-        <ol class="lab-stage-list">
-          <li><button class="lab-stage-button is-active" type="button" data-lab-stage="0"><span class="lab-stage-index">01</span><span class="lab-stage-title">实验准备</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="1"><span class="lab-stage-index">02</span><span class="lab-stage-title">环境检查</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="2"><span class="lab-stage-index">03</span><span class="lab-stage-title">运行场景</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="3"><span class="lab-stage-index">04</span><span class="lab-stage-title">观察问题</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="4"><span class="lab-stage-index">05</span><span class="lab-stage-title">AI 辅助诊断</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="5"><span class="lab-stage-index">06</span><span class="lab-stage-title">录制与可视化</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="6"><span class="lab-stage-index">07</span><span class="lab-stage-title">评分与优化</span></button></li>
-          <li><button class="lab-stage-button" type="button" data-lab-stage="7"><span class="lab-stage-index">08</span><span class="lab-stage-title">报告与复盘</span></button></li>
-        </ol>
-      </aside>
-
-      <div class="lab-main">
-        <header class="lab-run-header">
-          <div>
-            <p class="lesson-kicker">Experiment 01 · Crosswalk</p>
-            <h1>人行道避让综合实验</h1>
-            <p>跟随一条最小教学闭环，观察规划轨迹、速度曲线、TTC 与舒适性指标，并用 Apollo Claw 辅助完成一次优化。网页展示 AI 介入点和证据链；真实 record、评分与 DeepSeek 调用由本地 Harness 完成。</p>
-          </div>
-          <div>
-            <span class="lab-chip" data-stage-count>01 / 08</span>
-            <div class="progress-track" style="width:150px;margin-top:10px"><div class="progress-fill" data-lab-progress style="width:12.5%"></div></div>
-          </div>
-        </header>
-
-        <section class="lab-stage-card">
-          <h2 data-stage-title>实验准备</h2>
-          <p data-stage-desc>确认课程、实验目标和运行环境，进入人行道避让任务。</p>
-        </section>
-
-        <div class="lab-local-banner" style="margin-top:16px">
-          <div><strong>AI 辅助模式</strong><p>页面以演示数据展示 AI 如何介入 8 个阶段。本地 Harness 完成环境检查、record、评分和 DeepSeek 解释后，导出 report.json，再回到“实验报告”页导入本地实验产物。</p></div>
-          <div class="lab-card-actions"><a class="button-primary" data-local-panel data-local-launch href="#">启动并打开本地 Harness</a></div><p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p><p class="lab-local-hint">首次使用需在本地仓库运行一次 <code>harness\scripts\install-harness-launcher.ps1</code>，并在浏览器弹窗中选择“打开 Apollo_Harness”。如果本地服务已经启动但未自动打开，可<a data-local-direct href="http://127.0.0.1:8765/">直接打开本地 Harness</a>。</p>
-        </div>
-
-        <div class="lab-workspace-grid">
-          <section class="lab-simulation">
-            <div class="lab-panel-head"><h2>场景运行台</h2><span class="lab-chip">Schematic Demo</span></div>
-            <div class="lab-scene" data-lab-scene data-state="idle">
-              <span class="lab-road-label">行人横穿 · 静态障碍物 · 人行道停止区</span>
-              <span class="lab-scene-status" data-lab-scene-status>准备</span>
-              <span class="lab-lane lab-lane-left" aria-hidden="true"></span>
-              <span class="lab-lane lab-lane-right" aria-hidden="true"></span>
-              <span class="lab-crosswalk" aria-hidden="true"></span>
-              <span class="lab-stop-line" aria-hidden="true"></span>
-              <svg class="lab-path" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true"><path d="M 610 690 L 610 20"></path></svg>
-              <span class="lab-car" aria-label="自车示意">
-                <span class="lab-wheel lab-wheel-front-left"></span>
-                <span class="lab-wheel lab-wheel-front-right"></span>
-                <span class="lab-wheel lab-wheel-rear-left"></span>
-                <span class="lab-wheel lab-wheel-rear-right"></span>
-                <span class="lab-windshield" aria-hidden="true"></span>
-              </span>
-              <span class="lab-person" aria-label="横穿行人示意"></span>
-            </div>
-            <div class="lab-console" data-lab-console><div class="lab-console-line">实验控制台已就绪。点击“运行演示流程”观察完整教学链。</div></div>
-            <div class="lab-controls">
-              <button class="lab-control-button is-primary" type="button" data-run-demo>运行演示流程</button>
-              <button class="lab-control-button" type="button" data-open-simulation>打开仿真入口</button>
-              <a class="lab-control-button" data-local-direct href="http://127.0.0.1:8765/">打开本地 Harness</a>
-              <a class="lab-control-button" href="report.html" data-report-link aria-disabled="true">查看实验报告</a>
-            </div>
-          </section>
-
-          <aside class="lab-agent">
-            <div class="lab-panel-head"><h3>Apollo Claw</h3><span class="lab-chip">本地 Harness</span></div>
-            <div class="lab-agent-log" data-agent-log></div>
-            <div class="lab-quick-actions">
-              <button class="lab-quick-action" type="button" data-agent-skill="env">检查实验环境</button>
-              <button class="lab-quick-action" type="button" data-agent-skill="dev">定位相关代码</button>
-              <button class="lab-quick-action" type="button" data-agent-skill="test">生成录包建议</button>
-              <button class="lab-quick-action" type="button" data-agent-skill="eval">解释评分结果</button>
-            </div>
-            <form class="lab-agent-form" data-agent-form>
-              <input class="lab-agent-input" data-agent-input type="text" placeholder="例如：为什么人行道前急刹？">
-              <button class="lab-agent-send" type="submit">发送</button>
-            </form>
-          </aside>
-        </div>
-
-        <section class="lab-results is-hidden" data-lab-results>
-          <div class="lab-result-head"><div><p class="section-kicker">Experiment Result</p><h3>实验完成后的优化结果</h3></div><p>点击“运行演示流程”后生成，用于展示评分、指标和证据。</p></div>
-          <div class="lab-metrics-strip">
-            <div class="lab-metric"><span>TTC</span><strong>1.4 → 2.3 s</strong><small>演示结果</small></div>
-            <div class="lab-metric"><span>纵向加速度</span><strong>3.6 → 2.1</strong><small>m/s²</small></div>
-            <div class="lab-metric"><span>Jerk</span><strong>4.8 → 2.8</strong><small>m/s³</small></div>
-            <div class="lab-metric"><span>急刹次数</span><strong>2 → 0</strong><small>次</small></div>
-            <div class="lab-metric"><span>场景得分</span><strong>82 → 94</strong><small>本地自评估</small></div>
-            <div class="lab-metric"><span>证据</span><strong>record</strong><small>CSV / PNG / Report</small></div>
-          </div>
-        </section>
-
-        <section class="lab-section">
-          <div class="lab-section-head">
-            <div><p class="section-kicker">AI Teaching Guide</p><h2>实验台保留操作，AI 引导单独查看</h2></div>
-            <p>本页聚焦场景控制、record 和指标观察。AI 在 8 个阶段的具体介入点、输出格式、责任边界和证据链，集中放在 AI 教学引导和实验报告中，避免重复。</p>
-          </div>
-          <div class="lab-notice"><strong>建议学习顺序：</strong>先在实验中心阅读实验介绍和五步教学引导，再进入本页操作；遇到问题时可切换到 AI 教学引导查看诊断思路。</div>
-          <div class="lab-hero-actions" style="margin-top:16px"><a class="button-primary" href="ai-loop.html">查看 AI 教学引导</a><a class="button-secondary" href="report.html">查看实验报告</a></div>
-        </section>
-      </div>
-    </div>
+<body style="margin:0;background:#06111a;color:#eef8ff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh">
+  <main style="padding:28px;text-align:center">
+    <p>正在进入人行道避让真实实验引导…</p>
+    <p><a href="crosswalk-guide.html" style="color:#73aaff">如果页面没有自动跳转，请点击这里</a></p>
+    <p><a href="crosswalk-demo.html" style="color:#7895a8">打开旧版实验台</a></p>
   </main>
-
-  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容">
-    <div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div>
-  </div>
-  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
-  <script src="../assets/js/search-index.js"></script>
-  <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261022-score-reason-v1"></script>
+  <script>location.replace('crosswalk-guide.html' + location.search + location.hash);</script>
 </body>
 </html>
-
-
-

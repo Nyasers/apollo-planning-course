@@ -178,7 +178,7 @@
   async function loadCompetitionScenarios() {
     if (!scenariosBox) return;
     try {
-      const response = await fetch("../harness/competition-scenarios.json?v=20261021-competition-scenarios-v2", { cache: "no-store" });
+      const response = await fetch("../harness/competition-scenarios.json?v=20261022-crosswalk-guide-v1", { cache: "no-store" });
       if (!response.ok) throw new Error("scenarios unavailable");
       renderCompetitionScenarios(await response.json());
     } catch (error) {
@@ -217,3 +217,4 @@
   }
   renderDemo(); setStep(current); loadManifest(); loadCompetitionScenarios();
 })();
+
