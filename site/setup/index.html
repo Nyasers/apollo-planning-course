@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 本地实验环境：预装 Ubuntu 镜像、WSL2、Harness 和 DeepSeek 配置。">
   <title>本地环境与 Harness | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-config-v2">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-config-v3">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -32,7 +32,7 @@
     <section class="lab-section">
       <div class="lab-section-head"><div><p class="section-kicker">Choose a Route</p><h2>三种环境路线</h2></div><p>零基础学生优先使用预装镜像；熟悉命令行的学生可以按第 00 课手动安装。</p></div>
       <div class="lab-setup-grid">
-        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐</span><h3>预装 Ubuntu 镜像</h3><p>镜像内含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、四套 skill 和 Harness。</p><ul><li>离线导入，减少下载失败</li><li>首次启动自动检查环境</li><li>本地配置 DeepSeek Key</li></ul><div class="lab-card-actions"><a class="button-primary" href="#image">查看镜像说明</a></div></article>
+        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐</span><h3>预装 Ubuntu 镜像</h3><p>镜像内含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、四套 skill 和 Harness。</p><ul><li>离线导入，减少下载失败</li><li>首次启动自动检查环境</li><li>Harness 面板内配置 DeepSeek Key</li></ul><div class="lab-card-actions"><a class="button-primary" href="#image">查看镜像说明</a></div></article>
         <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉 Windows、Docker 和命令行的学生。需要单独验证 Docker、AEM、GUI 和端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>DreamView localhost 转发</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
         <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但占用更多内存和磁盘。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
       </div>
@@ -60,7 +60,7 @@ bash scripts/install-harness.sh
 python3 -m apollo_claw serve --port 8765</pre><p>如需单独指定技能目录，可设置 <code>APOLLO_SKILLS_SOURCE</code>。</p></article>
       </div>
       <div class="start-check-grid" style="margin-top:16px"><article><span>1. 服务启动</span><strong><code>/health</code> 返回 200</strong></article><article><span>2. 环境检查</span><strong>Linux / Docker / Apollo / DreamView 分层显示</strong></article><article><span>3. 模型连接</span><strong>在面板保存并测试 DeepSeek Key</strong></article><article><span>4. 开始实验</span><strong>进入场景并开始 record</strong></article></div>
-      <div class="lab-ai-hero-note" style="margin-top:16px"><strong>首次使用：</strong><span>建议直接返回 <a href="../lab/start.html">首次使用向导</a>，按照“配置确认 → 准备材料 → 检查环境 → 开始实验”的顺序执行。API Key 只保存在本地 <code>~/.apollo-claw/.env</code>，不要写入网页或 Git。</span></div>
+      <div class="lab-ai-hero-note" style="margin-top:16px"><strong>首次使用：</strong><span>启动仿真、环境检查、record 和 DeepSeek Key 配置都在 Harness 面板内完成，不需要在终端手动执行 <code>aem</code> 命令或编辑 <code>.env</code>。建议返回 <a href="../lab/start.html">首次使用向导</a>，按照“配置确认 → 准备材料 → 检查环境 → 开始实验”的顺序执行。API Key 只保存在本地，不写入网页或 Git。</span></div>
     </section>
 
     <section class="lab-section" id="harness-launcher">
@@ -71,44 +71,11 @@ powershell -ExecutionPolicy Bypass -File scripts\install-harness-launcher.ps1</p
       <div class="lab-card-actions" style="margin-top:16px"><a class="button-primary" data-local-panel href="#">启动并打开本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">直接打开本地页面</a></div>
     </section>
 
-    <section class="lab-section">
-      <div class="lab-section-head"><div><p class="section-kicker">First Start</p><h2>首次启动和 Harness 检查</h2></div><p>镜像导入后，先启动 Apollo 仿真，再启动本地 Harness。</p></div>
-      <pre class="lab-code"># 1. 进入 Ubuntu 终端
-cd ~/application-pnc
-
-# 2. 启动 Apollo 容器并进入
-aem start
-aem enter
-
-# 3. 启动 DreamView
-aem bootstrap start --plus
-
-# 4. 新开终端，启动 Apollo Claw Harness
-~/apollo-claw/scripts/start-harness.sh
-
-# 5. 浏览器访问本地实验台
-# http://127.0.0.1:8765/</pre>
-    </section>
-
-    <section class="lab-section">
-      <div class="lab-section-head"><div><p class="section-kicker">DeepSeek Key</p><h2>本地模型配置</h2></div><p>DeepSeek Key 只保存在本地环境，不进入网页、Git 或实验报告。</p></div>
-      <pre class="lab-code">mkdir -p ~/.apollo-claw
-cat > ~/.apollo-claw/.env &lt;&lt;'EOF'
-DEEPSEEK_API_KEY=sk-your-key
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-chat
-EOF
-chmod 600 ~/.apollo-claw/.env</pre>
-      <div class="lab-ai-boundary" style="margin-top:18px">
-        <article><h3>允许</h3><ul><li>本地保存 Key</li><li>本地调用 Harness</li><li>本地保存 record 和报告</li></ul></article>
-        <article><h3>禁止</h3><ul><li>把 Key 写进网页</li><li>把 Key 提交到 Git</li><li>把隐私数据上传到公开平台</li></ul></article>
-      </div>
-    </section>
   </main>
   <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容"><div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Apollo Claw、人行道..."><span>ESC</span></div><div class="search-results" data-search-results></div></div></div>
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-harness-config-v2"></script>
+  <script src="../assets/js/lab.js?v=20261021-harness-config-v3"></script>
 </body>
 </html>
