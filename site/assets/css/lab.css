@@ -2024,3 +2024,55 @@
   .lab-optional-install > summary { align-items: flex-start; flex-direction: column; padding: 20px; }
   .lab-optional-body { padding: 0 20px 20px; }
 }
+/* Lab hero: local Harness launcher */
+.button-local-harness {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid color-mix(in srgb, var(--blue) 48%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  color: var(--blue-deep);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.button-local-harness:hover {
+  transform: translateY(-2px);
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 14%, var(--surface));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--blue) 16%, transparent);
+}
+.lab-local-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 12%, transparent);
+}
+.lab-hero .lab-harness-direct {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  color: var(--ink-faint);
+  font-size: .76rem;
+  line-height: 1.6;
+}
+.lab-hero .lab-harness-direct a {
+  color: var(--blue-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lab-score-reason {
+  margin: 12px 0 0;
+  padding: 11px 12px;
+  border-left: 3px solid var(--amber);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--amber) 10%, var(--surface));
+  color: var(--ink-soft);
+  font-size: .8rem;
+  line-height: 1.65;
+}

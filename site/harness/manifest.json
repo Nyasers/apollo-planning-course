@@ -1,6 +1,6 @@
 {
   "harness": "apollo-claw-harness",
-  "version": "0.5.1-r11",
+  "version": "0.5.1-r17",
   "apollo": "9.0",
   "panel": "http://127.0.0.1:8765/",
   "status": "guided-onboarding-ready",
@@ -51,10 +51,10 @@
     "harnessPackage": {
       "status": "ready",
       "label": "Apollo Claw Harness 0.5.1",
-      "version": "0.5.1-r11",
-      "url": "/harness/apollo-claw-harness-0.5.1-r11.zip",
-      "sizeBytes": 1180388,
-      "sha256": "0f05c02e41cf7c75b1d8a7a8a899ed0fccf73cd829331d59fb829a3b84dfea06",
+      "version": "0.5.1-r17",
+      "url": "/harness/apollo-claw-harness-0.5.1-r17.zip",
+      "sizeBytes": 1204060,
+      "sha256": "80643305017a6c8598c0922ce6ac5f99ffe627038e2011993828487e7f656f3f",
       "note": "包含一键配置Harness.cmd、Harness 源码、脚本和内置 skills；不包含 API Key"
     },
     "manualSetupUrl": "/setup/",

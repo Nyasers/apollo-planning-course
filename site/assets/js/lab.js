@@ -551,11 +551,23 @@
     return "已记录环境检查";
   }
 
-  function renderScoreMetrics(root, metricList) {
+  function renderScoreMetrics(root, metricList, scenarioRule) {
     const box = root.querySelector("[data-report-score-table]");
     if (!box) return;
     box.innerHTML = "";
     const items = Array.isArray(metricList) ? metricList : [];
+    if (scenarioRule) {
+      const primary = document.createElement("div");
+      primary.className = "lab-notice";
+      const distance = numberOrNull(scenarioRule.distance_m);
+      const minM = numberOrNull(scenarioRule.min_m) ?? 1.5;
+      const maxM = numberOrNull(scenarioRule.max_m) ?? 2.0;
+      const penalty = numberOrNull(scenarioRule.penalty) ?? 0;
+      const ruleLabel = scenarioRule.label || "场景规则";
+      const redStop = numberOrNull(scenarioRule.red_stop_duration_s);
+      primary.textContent = "主规则 · " + ruleLabel + "：" + (distance === null ? "—" : formatNumber(distance, 3) + " m") + "，要求 " + formatNumber(minM, 1) + "—" + formatNumber(maxM, 1) + " m，判定 " + (scenarioRule.status || (scenarioRule.pass ? "PASS" : "FAIL")) + "，扣 " + formatNumber(penalty, 0) + " 分。" + (redStop === null ? "" : " 红灯停车 " + formatNumber(redStop, 3) + " s。");
+      box.appendChild(primary);
+    }
     if (!items.length) {
       const empty = document.createElement("p");
       empty.className = "lab-report-empty";
@@ -993,17 +1005,34 @@
       const labAfterMetrics = labCurrent.metrics || {};
       const scoreBeforeValue = numberOrNull(verify.score_before) ?? numberOrNull(labBaseline.score_value);
       const scoreValue = numberOrNull(score.value) ?? numberOrNull(verify.score_after) ?? numberOrNull(labCurrent.score_value);
-      const scoreDisplay = scoreValue === null ? (score.passed_metrics || labCurrent.passed_metrics || "—") : formatNumber(scoreValue, 0);
+      const scoreDisplay = score.scenario_rule && score.scenario_rule.status === "INCOMPLETE"
+        ? "数据不足"
+        : (scoreValue === null ? (score.passed_metrics || labCurrent.passed_metrics || "—") : formatNumber(scoreValue, 0));
       const scoreBeforeDisplay = scoreBeforeValue === null
         ? (labBaseline.passed_metrics || "—")
         : formatNumber(scoreBeforeValue, 0);
+      const scenarioRule = score.scenario_rule || (score.crosswalk_stop_distance ? {
+        distance_m: metrics.crosswalk_stop_distance_m,
+        min_m: score.crosswalk_stop_distance.min_m || 1.5,
+        max_m: score.crosswalk_stop_distance.max_m || 2.0,
+        pass: score.crosswalk_stop_distance.pass,
+        status: score.crosswalk_stop_distance.pass ? "PASS" : "FAIL",
+        penalty: score.crosswalk_stop_distance.pass ? 0 : 20
+      } : null);
       setText(root, "[data-report-score-after]", scoreDisplay);
       setText(root, "[data-report-score-current]", scoreDisplay);
       setText(root, "[data-report-score-before]", scoreBeforeDisplay);
-      setText(root, "[data-report-score-label]", scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : (score.is_official ? "官方得分" : "综合自评"));
+      const scoreLabel = scenarioRule ? (scenarioRule.short_label || scenarioRule.label || "场景分") : (scoreValue === null ? (score.passed_metrics ? "通过项" : "未评分") : (score.is_official ? "官方得分" : "综合自评"));
+      setText(root, "[data-report-score-label]", scoreLabel);
+      const scenarioNote = scenarioRule
+        ? " 主规则：" + (scenarioRule.label || "停车规则") + "，距离 " + (numberOrNull(scenarioRule.distance_m) === null ? "—" : formatNumber(scenarioRule.distance_m, 3)) + " m，要求 " + (scenarioRule.min_m ?? 1.5) + "—" + (scenarioRule.max_m ?? 2.0) + " m，判定 " + (scenarioRule.status || (scenarioRule.pass ? "PASS" : "FAIL")) + "，扣 " + formatNumber(scenarioRule.penalty || 0, 0) + " 分。" + (scenarioRule.red_stop_duration_s === undefined ? "" : " 红灯停车 " + formatNumber(scenarioRule.red_stop_duration_s, 3) + " s。")
+        : "";
+      setText(root, "[data-report-score-reason]", scenarioRule
+        ? (scenarioRule.message || "当前场景主规则未通过，请查看评分明细和修改建议。")
+        : "当前报告没有可用的场景主规则说明。");
       setText(root, "[data-report-official]", score.value === null || score.value === undefined
         ? (score.passed_metrics ? "本地自评：通过 " + score.passed_metrics + " 项，不提供总分，不替代官方评分。" : "当前报告没有评分结果。")
-        : score.is_official ? "官方评分。" : "本地自评估，不替代官方评分。");
+        : (score.is_official ? "官方评分。" : "本地自评估，不替代官方评分。" + scenarioNote));
 
       const bars = root.querySelector("[data-report-bars]");
       if (bars) {
@@ -1038,12 +1067,14 @@
         });
       }
       setText(root, "[data-report-score-note]", isHarness
-        ? "当前报告包含场景指标的 PASS/FAIL、得分和未通过帧数。"
+        ? (scenarioRule
+          ? "当前场景以停车距离规则为主；不合格扣 50 分。下方同时保留通用指标 PASS/FAIL。"
+          : "当前报告包含场景指标的 PASS/FAIL、得分和未通过帧数。")
         : "导入报告后显示场景指标的 PASS/FAIL、得分和未通过帧数。");
       setText(root, "[data-report-metrics-note]", isHarness
         ? "本区来自本地 Harness 报告；缺失指标显示为“—”，不会自动补造数据。"
         : "当前没有可用的真实指标。请先导入 Harness 报告。");
-      renderScoreMetrics(root, score.metrics);
+      renderScoreMetrics(root, score.metrics, scenarioRule);
       renderLabReport(root, report);
 
       fillList(root, "[data-report-ai-facts]", ai.facts, "暂无 AI 事实");
@@ -1111,3 +1142,7 @@
     if (!document.hidden) initLabIndexSnapshot().catch((error) => { console.error(error); });
   });
 })();
+
+
+
+

@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Planning Lab：城市道路自动驾驶综合仿真实验中心。">
   <title>实验中心 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-optional-install-v2">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261022-score-reason-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -36,7 +36,10 @@
         <p>选择一个实验，按 8 阶段实验链完成一次可复核的本地仿真实验。网页负责课程、报告和证据展示，真实仿真、record 和评分在本地 Harness 完成。</p>
         <div class="lab-hero-actions">
           <a class="button-primary" href="start.html?step=experiments">开启实验</a>
+          <a class="button-local-harness" href="apollo-harness://open/" data-local-panel data-local-launch><span class="lab-local-dot" aria-hidden="true"></span>打开本地 Harness</a>
           <a class="button-secondary" href="report.html">查看实验报告</a>
+          <p class="lab-harness-direct">Harness 已在运行？<a href="http://127.0.0.1:8765/" data-local-direct>直接打开</a></p>
+          <p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p>
         </div>
       </div>
       <div class="lab-hero-board">
@@ -191,6 +194,9 @@
   </div>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-empty-snapshot-v2"></script>
+  <script src="../assets/js/lab.js?v=20261022-score-reason-v1"></script>
 </body>
 </html>
+
+
+

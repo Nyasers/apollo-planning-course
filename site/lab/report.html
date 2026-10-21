@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 实验报告：导入本地 Harness 结果，查看指标、AI 建议和证据链。">
   <title>实验报告 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css?v=20261021-ai-readable-v041">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-optional-install-v2">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261022-score-reason-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -50,6 +50,7 @@
           <li><b data-report-score-before>—</b><span>优化前得分</span><em>BASELINE</em></li>
           <li><b data-report-score-current>—</b><span>当前报告得分</span><em>REPORT</em></li>
         </div>
+        <p class="lab-score-reason" data-report-score-reason>导入报告后显示扣分原因。</p>
         <p class="lab-board-note" data-report-official>导入报告后显示本地自评结果。</p>
       </div>
     </section>
@@ -179,6 +180,10 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-report-import-v2"></script>
+  <script src="../assets/js/lab.js?v=20261022-score-reason-v1"></script>
 </body>
 </html>
+
+
+
+
