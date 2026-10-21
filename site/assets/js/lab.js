@@ -279,10 +279,26 @@
     const report = readHarnessReport();
     const source = "browser";
     if (!report) {
-      setText(document, "[data-lab-source]", "当前没有可读取的实验报告。");
-      setText(document, "[data-lab-headline-summary]", "完成本地实验并导入 report.json 后，这里会显示最新结果。");
-      setText(document, "[data-lab-current-copy]", "暂无当前报告指标。");
-      setText(document, "[data-lab-failing]", "暂无未通过指标数据");
+      setText(document, "[data-lab-score]", "—");
+      setText(document, "[data-lab-score-note]", "暂无报告");
+      setText(document, "[data-lab-ttc]", "—");
+      setText(document, "[data-lab-ttc-note]", "导入后显示");
+      setText(document, "[data-lab-messages]", "—");
+      setText(document, "[data-lab-duration]", "导入后显示");
+      setText(document, "[data-lab-score-detail]", "—");
+      setText(document, "[data-lab-ttc-detail]", "—");
+      setText(document, "[data-lab-messages-detail]", "—");
+      setText(document, "[data-lab-duration-detail]", "导入后显示");
+      setText(document, "[data-lab-channels]", "—");
+      setText(document, "[data-lab-jerk]", "—");
+      setText(document, "[data-lab-hard-brake]", "—");
+      setText(document, "[data-lab-source]", "尚未导入实验报告");
+      setText(document, "[data-lab-headline-summary]", "开启实验并完成一轮本地实验后，导入 report.json 即可在此查看结果。");
+      setText(document, "[data-lab-headline]", "尚未导入实验报告");
+      setText(document, "[data-lab-meta]", "当前浏览器没有可读取的报告数据。");
+      setText(document, "[data-lab-badge]", "等待导入");
+      setText(document, "[data-lab-current-copy]", "导入报告后显示场景指标、评分和证据。");
+      setText(document, "[data-lab-failing]", "导入报告后显示未通过指标");
       return;
     }
 
