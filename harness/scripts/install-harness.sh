@@ -7,8 +7,16 @@ if [ ! -f "$HOME/.apollo-claw/.env" ]; then
   cp .env.example "$HOME/.apollo-claw/.env"
   echo "created $HOME/.apollo-claw/.env"
 fi
-# The four skills are external skills, not vendored into this repository.
-SKILLS_SOURCE="${APOLLO_SKILLS_SOURCE:-$HOME/.openclaw/skills}"
+# Prefer the skills bundled with the Harness package, then fall back to an external skills directory.
+if [ -z "${APOLLO_SKILLS_SOURCE:-}" ]; then
+  if [ -d "$PWD/skills" ]; then
+    SKILLS_SOURCE="$PWD/skills"
+  else
+    SKILLS_SOURCE="$HOME/.openclaw/skills"
+  fi
+else
+  SKILLS_SOURCE="$APOLLO_SKILLS_SOURCE"
+fi
 SKILLS_DEST="${APOLLO_CLAW_SKILLS_DIR:-$HOME/.apollo-claw/skills}"
 WORKSPACE_HOST="${APOLLO_WORKSPACE_HOST:-$HOME/application-pnc}"
 CONTAINER_STAGE="$WORKSPACE_HOST/.comate/skills"

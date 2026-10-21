@@ -53,8 +53,8 @@
       "label": "Apollo Claw Harness 0.5.1",
       "version": "0.5.1",
       "url": "/harness/apollo-claw-harness-0.5.1.zip",
-      "sizeBytes": 1163698,
-      "sha256": "1fd915556d5474a68d5a22216bc63c92712e01f43f16e42694e6540d3f703188",
+      "sizeBytes": 1163744,
+      "sha256": "0d19354b67ccbfc394805fe3d1593220cf4d0297ebbf2102929141e39cac1ff8",
       "note": "包含 Harness 源码、脚本、技能和测试；不包含 API Key"
     },
     "manualSetupUrl": "/setup/",

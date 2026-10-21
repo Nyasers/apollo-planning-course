@@ -116,6 +116,9 @@
     if (kind === "image") {
       const manual = document.createElement("a"); manual.className = "button-secondary"; manual.href = manifest.onboarding.manualSetupUrl; manual.textContent = "查看手动配置"; actions.appendChild(manual);
     }
+    if (kind === "harness") {
+      const guide = document.createElement("a"); guide.className = "button-secondary"; guide.href = "../setup/index.html#harness-config"; guide.textContent = "查看配置说明"; actions.appendChild(guide);
+    }
     card.querySelector("small").textContent = ready ? "下载后请核对 SHA256。" : "请联系项目负责人获取发布版本。";
     return card;
   }

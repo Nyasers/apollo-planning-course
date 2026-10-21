@@ -1290,8 +1290,11 @@
   .lab-setup-grid,
   .lab-ai-boundary,
   .lab-kpi-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+  .lab-setup-card { min-width: 0; }
+  .lab-setup-card code,
+  .lab-setup-card li { overflow-wrap: anywhere; }
   .lab-ai-stage-side { grid-column: auto; }
   .lab-evidence-row { grid-template-columns: 1fr; gap: 4px; }
 }

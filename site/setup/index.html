@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 本地实验环境：预装 Ubuntu 镜像、WSL2、Harness 和 DeepSeek 配置。">
   <title>本地环境与 Harness | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-start-guide-v1">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-config-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -47,6 +47,20 @@
         <div class="lab-evidence-row"><strong>校验值</strong><span>待补充 SHA256</span></div>
         <div class="lab-evidence-row"><strong>托管位置</strong><span>待确认：网盘、对象存储或学校服务器</span></div>
       </article></div>
+    </section>
+
+    <section class="lab-section" id="harness-config">
+      <div class="lab-section-head"><div><p class="section-kicker">Harness Quick Start</p><h2>Harness 下载后如何配置和使用</h2></div><p>推荐在 Windows 宿主机运行 Harness，由它调用 WSL/Apollo；也可以直接在 WSL/Ubuntu 内运行。</p></div>
+      <div class="lab-setup-grid">
+        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐</span><h3>Windows 宿主机运行</h3><ol><li>解压 Harness 到固定目录，例如 <code>C:\ApolloClaw\harness</code>。</li><li>确认 Windows 已安装 Python 3.9+。</li><li>在 PowerShell 中进入 Harness 目录并安装启动器。</li><li>回到首次使用向导点击“启动并打开 Harness”。</li><li>浏览器打开 <code>http://127.0.0.1:8765/</code>，在面板中配置 DeepSeek Key。</li></ol><pre class="lab-code">cd C:\ApolloClaw\harness
+python --version
+powershell -ExecutionPolicy Bypass -File scripts\install-harness-launcher.ps1</pre></article>
+        <article class="lab-setup-card"><h3>WSL / Ubuntu 内运行</h3><ol><li>将 Harness 解压到 Ubuntu 目录。</li><li>运行安装脚本，默认使用包内 <code>skills/</code>。</li><li>启动 Harness 服务。</li><li>在 Windows 浏览器访问本地端口。</li></ol><pre class="lab-code">cd ~/apollo-claw-harness
+bash scripts/install-harness.sh
+python3 -m apollo_claw serve --port 8765</pre><p>如需单独指定技能目录，可设置 <code>APOLLO_SKILLS_SOURCE</code>。</p></article>
+      </div>
+      <div class="start-check-grid" style="margin-top:16px"><article><span>1. 服务启动</span><strong><code>/health</code> 返回 200</strong></article><article><span>2. 环境检查</span><strong>Linux / Docker / Apollo / DreamView 分层显示</strong></article><article><span>3. 模型连接</span><strong>在面板保存并测试 DeepSeek Key</strong></article><article><span>4. 开始实验</span><strong>进入场景并开始 record</strong></article></div>
+      <div class="lab-ai-hero-note" style="margin-top:16px"><strong>首次使用：</strong><span>建议直接返回 <a href="../lab/start.html">首次使用向导</a>，按照“配置确认 → 准备材料 → 检查环境 → 开始实验”的顺序执行。API Key 只保存在本地 <code>~/.apollo-claw/.env</code>，不要写入网页或 Git。</span></div>
     </section>
 
     <section class="lab-section" id="harness-launcher">
@@ -95,6 +109,6 @@ chmod 600 ~/.apollo-claw/.env</pre>
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-start-guide-v1"></script>
+  <script src="../assets/js/lab.js?v=20261021-harness-config-v1"></script>
 </body>
 </html>
