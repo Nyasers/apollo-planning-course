@@ -6,7 +6,7 @@
   <meta name="description" content="人行道避让综合仿真实验：Apollo Claw 综合实验台。">
   <title>人行道避让实验 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-launcher-v1">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-optional-install-v2">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -19,10 +19,7 @@
     <nav class="lab-nav" aria-label="实验中心导航">
       <a href="./">实验中心</a>
       <a href="ai-loop.html">AI 引导</a>
-      <a href="crosswalk.html" aria-current="page">人行道避让</a>
       <a href="report.html">实验报告</a>
-      <a href="evidence.html">证据链</a>
-      <a href="../setup/index.html">环境部署</a>
       <a href="../index.html">返回课程</a>
     </nav>
     <div class="lab-actions">
@@ -67,7 +64,7 @@
 
         <div class="lab-local-banner" style="margin-top:16px">
           <div><strong>AI 辅助模式</strong><p>页面以演示数据展示 AI 如何介入 8 个阶段。本地 Harness 完成环境检查、record、评分和 DeepSeek 解释后，导出 report.json，再回到“实验报告”页导入本地实验产物。</p></div>
-          <div class="lab-card-actions"><a class="button-primary" data-local-panel data-local-launch href="#">启动并打开本地 Harness</a><a class="button-secondary" href="evidence.html">查看证据链</a></div><p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p><p class="lab-local-hint">首次使用需在本地仓库运行一次 <code>harness\scripts\install-harness-launcher.ps1</code>，并在浏览器弹窗中选择“打开 Apollo_Harness”。如果本地服务已经启动但未自动打开，可<a data-local-direct href="http://127.0.0.1:8765/">直接打开本地 Harness</a>。</p>
+          <div class="lab-card-actions"><a class="button-primary" data-local-panel data-local-launch href="#">启动并打开本地 Harness</a></div><p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p><p class="lab-local-hint">首次使用需在本地仓库运行一次 <code>harness\scripts\install-harness-launcher.ps1</code>，并在浏览器弹窗中选择“打开 Apollo_Harness”。如果本地服务已经启动但未自动打开，可<a data-local-direct href="http://127.0.0.1:8765/">直接打开本地 Harness</a>。</p>
         </div>
 
         <div class="lab-workspace-grid">
@@ -130,10 +127,10 @@
         <section class="lab-section">
           <div class="lab-section-head">
             <div><p class="section-kicker">AI Teaching Guide</p><h2>实验台保留操作，AI 引导单独查看</h2></div>
-            <p>本页聚焦场景控制、record 和指标观察。AI 在 8 个阶段的具体介入点、输出格式、责任边界和证据链，集中放在教学引导与证据链页面，避免重复。</p>
+            <p>本页聚焦场景控制、record 和指标观察。AI 在 8 个阶段的具体介入点、输出格式、责任边界和证据链，集中放在 AI 教学引导和实验报告中，避免重复。</p>
           </div>
           <div class="lab-notice"><strong>建议学习顺序：</strong>先在实验中心阅读实验介绍和五步教学引导，再进入本页操作；遇到问题时可切换到 AI 教学引导查看诊断思路。</div>
-          <div class="lab-hero-actions" style="margin-top:16px"><a class="button-primary" href="ai-loop.html">查看 AI 教学引导</a><a class="button-secondary" href="evidence.html">查看证据链</a><a class="button-secondary" href="report.html">查看实验报告</a></div>
+          <div class="lab-hero-actions" style="margin-top:16px"><a class="button-primary" href="ai-loop.html">查看 AI 教学引导</a><a class="button-secondary" href="report.html">查看实验报告</a></div>
         </section>
       </div>
     </div>

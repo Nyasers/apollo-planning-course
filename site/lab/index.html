@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Planning Lab：城市道路自动驾驶综合仿真实验中心。">
   <title>实验中心 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-launcher-v1">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-optional-install-v2">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -19,10 +19,7 @@
     <nav class="lab-nav" aria-label="实验中心导航">
       <a href="./" aria-current="page">实验中心</a>
       <a href="ai-loop.html">AI 引导</a>
-      <a href="crosswalk.html">人行道避让</a>
       <a href="report.html">实验报告</a>
-      <a href="evidence.html">证据链</a>
-      <a href="../setup/index.html">环境部署</a>
       <a href="../index.html">返回课程</a>
     </nav>
     <div class="lab-actions">
@@ -40,7 +37,6 @@
         <div class="lab-hero-actions">
           <a class="button-primary" href="start.html?step=experiments">开启实验</a>
           <a class="button-secondary" href="report.html">查看实验报告</a>
-          <a class="button-secondary" href="../setup/index.html">配置本地环境</a>
         </div>
       </div>
       <div class="lab-hero-board">
@@ -103,7 +99,7 @@
       </div>
       <div class="lab-local-banner" style="margin-top:18px">
         <div><strong>AI 是教学引导，不是评分裁判</strong><p>脚本产出事实，模型解释事实，学生确认操作，教师保留最终评价。</p></div>
-        <div class="lab-card-actions"><a class="button-primary" href="ai-loop.html">查看详细 AI 引导</a><a class="button-secondary" href="evidence.html">查看证据链</a></div>
+        <div class="lab-card-actions"><a class="button-primary" href="ai-loop.html">查看详细 AI 引导</a></div>
       </div>
     </section>
 
@@ -170,15 +166,23 @@
     </section>
 
     <section class="lab-section reveal">
-      <div class="lab-section-head">
-        <div><p class="section-kicker">Local Harness</p><h2>本地环境与 Harness</h2></div>
-        <p>推荐使用预装 Ubuntu 镜像；也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。真实实验在本地 Harness 面板完成。</p>
-      </div>
-      <div class="lab-setup-grid">
-        <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐 · 准备中</span><h3>预装 Ubuntu 镜像</h3><p>镜像发布后将包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。</p><ul><li>离线导入镜像</li><li>启动脚本自检</li><li>Harness 面板内配置 DeepSeek Key</li></ul><div class="lab-card-actions"><a class="button-primary" href="../setup/index.html">查看导入说明</a></div></article>
-        <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉命令行的学生。需要在 WSL2 中验证 Docker、AEM、GUI 和 DreamView 端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>application-pnc + buildtool</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
-        <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但虚拟磁盘和内存占用更高。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
-      </div>
+      <details class="lab-card lab-optional-install">
+        <summary>
+          <div>
+            <span class="section-kicker">Optional Setup</span>
+            <h2>本地环境与 Harness</h2>
+            <p>已使用预装 WSL 镜像时可跳过本节。仅在首次安装、重新配置或故障排查时展开。</p>
+          </div>
+          <span class="lab-optional-toggle"><span class="is-open-label">展开安装方案</span><span class="is-close-label">收起安装方案</span></span>
+        </summary>
+        <div class="lab-optional-body">
+          <div class="lab-setup-grid">
+            <article class="lab-setup-card is-recommended"><span class="lab-chip">推荐 · 准备中</span><h3>预装 Ubuntu 镜像</h3><p>镜像发布后将包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。</p><ul><li>离线导入镜像</li><li>启动脚本自检</li><li>Harness 面板内配置 DeepSeek Key</li></ul><div class="lab-card-actions"><a class="button-primary" href="../setup/index.html">查看导入说明</a></div></article>
+            <article class="lab-setup-card"><h3>WSL2 手动安装</h3><p>适合熟悉命令行的学生。需要在 WSL2 中验证 Docker、AEM、GUI 和 DreamView 端口。</p><ul><li>Ubuntu 22.04</li><li>Docker Engine</li><li>application-pnc + buildtool</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+            <article class="lab-setup-card"><h3>Ubuntu 虚拟机手动安装</h3><p>兼容性通常更好，适合第一次接触 Linux 的学生，但虚拟磁盘和内存占用更高。</p><ul><li>VMware / VirtualBox</li><li>建议 16GB 内存</li><li>建议 55GB 以上虚拟磁盘</li></ul><div class="lab-card-actions"><a class="button-secondary" href="../lesson-00.html">查看第 00 课</a></div></article>
+          </div>
+        </div>
+      </details>
     </section>
   </main>
 
