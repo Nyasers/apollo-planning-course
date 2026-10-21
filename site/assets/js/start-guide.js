@@ -210,5 +210,10 @@
   root.querySelector("[data-demo-next]")?.addEventListener("click", () => { demoIndex = (demoIndex + 1) % demos.length; renderDemo(); });
   root.querySelector("[data-demo-prev]")?.addEventListener("click", () => { demoIndex = (demoIndex + demos.length - 1) % demos.length; renderDemo(); });
 
-  loadState(); renderDemo(); setStep(current); loadManifest(); loadCompetitionScenarios();
+  loadState();
+  if (new URLSearchParams(location.search).get("step") === "experiments") {
+    current = 4;
+    maxStep = 4;
+  }
+  renderDemo(); setStep(current); loadManifest(); loadCompetitionScenarios();
 })();
