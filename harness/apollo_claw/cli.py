@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 from . import __version__
 from .ai_presentation import build_ai_presentation
 from .config import Settings
+from .crosswalk import find_stop_pose, load_calibration, measure_distance, read_localization_rows, save_calibration
 from .deepseek import DeepSeekUnavailable, explain, fallback_explain
 from .environment import probe_runtime, start_simulation, stop_simulation
 from .evidence import read_json, write_json
@@ -847,6 +848,29 @@ def cmd_report_build(settings: Settings, args) -> int:
         "avg_speed_mps": comfort_data.get("avg_speed_ms"),
         "hard_brake": comfort_data.get("hard_brake_count"),
     }
+    if experiment["meta"].get("task") == "crosswalk":
+        localization_csv = _container_to_host(
+            settings,
+            f"{settings.record_root_container}/report/{exp_id}",
+        ) / "csv" / "apollo__localization__pose.csv"
+        if localization_csv.exists():
+            try:
+                localization_rows = read_localization_rows(localization_csv)
+                stop_pose = find_stop_pose(localization_rows)
+                calibration_path = Path(settings.output_dir).expanduser() / "crosswalk-calibration.json"
+                manual_distance = getattr(args, "crosswalk_distance", None)
+                if stop_pose and manual_distance is not None:
+                    save_calibration(calibration_path, exp_id, float(manual_distance), stop_pose)
+                calibration = load_calibration(calibration_path)
+                if stop_pose and calibration:
+                    crosswalk_measurement = measure_distance(exp_id, stop_pose, calibration)
+                    if crosswalk_measurement:
+                        experiment["metrics"]["crosswalk_stop_distance_m"] = crosswalk_measurement["distance_m"]
+                        experiment["metrics"]["crosswalk_stop_distance_min_m"] = crosswalk_measurement["min_m"]
+                        experiment["metrics"]["crosswalk_stop_distance_max_m"] = crosswalk_measurement["max_m"]
+                        experiment["score"]["crosswalk_stop_distance"] = crosswalk_measurement
+            except (OSError, ValueError) as exc:
+                print(f"人行横道停车距离计算失败：{exc}", file=sys.stderr)
     experiment["score"].update(compute_self_score(
         experiment["score"],
         experiment["metrics"],
@@ -1159,6 +1183,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--experiment")
     q.add_argument("--metric", help="评分配置，省略则用包内自评配置")
     q.add_argument("--scenario", help="scenario.json，用于填 ReachEnd 终点")
+    q.add_argument("--crosswalk-distance", type=float, help="人行横道实测停车距离（米），用于保存标定")
     q.add_argument("--timeout", type=int, default=300)
     q.add_argument("--execute", action="store_true")
     q.set_defaults(func=cmd_report_build)

@@ -893,6 +893,12 @@ function renderReport(report) {
     { label: scoreLabel, value: scoreText, note: scoreNote },
     { label: "证据数", value: (report.evidence || []).length, note: "" }
   ];
+  const crosswalkDistance = report.metrics && report.metrics.crosswalk_stop_distance_m;
+  const crosswalkScore = report.score && report.score.crosswalk_stop_distance;
+  if (crosswalkDistance !== undefined && crosswalkDistance !== null) {
+    const crosswalkPass = crosswalkScore && crosswalkScore.pass;
+    cards.push({ label: "人行道停车距离", value: String(crosswalkDistance) + " m", note: crosswalkPass ? "符合 1.5—2.0m" : "不在 1.5—2.0m 范围" });
+  }
   cards.forEach((item) => {
     const card = document.createElement("div");
     card.className = "report-card";
