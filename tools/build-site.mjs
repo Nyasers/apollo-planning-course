@@ -70,7 +70,7 @@ function renderSidebar(activeId = "") {
       <p class="sidebar-note"><span data-progress-count>0 / 21</span> 个单元已完成。进度只保存在你的浏览器。</p>
     </div>
     ${groups}
-    <section class="nav-group"><p class="nav-label">实验平台</p><ul class="nav-list"><li><a class="nav-link" href="lab/index.html"><span class="nav-index">LAB</span><span class="nav-title">MVP 实验中心</span><span class="nav-state" aria-hidden="true"></span></a></li><li><a class="nav-link" href="teaching-plan.html"><span class="nav-index">PLAN</span><span class="nav-title">课程教学计划</span><span class="nav-state" aria-hidden="true"></span></a></li></ul></section>
+    <section class="nav-group"><p class="nav-label">实验平台</p><ul class="nav-list"><li><a class="nav-link" href="lab/index.html"><span class="nav-index">LAB</span><span class="nav-title">MVP 实验中心</span><span class="nav-state" aria-hidden="true"></span></a></li><li><a class="nav-link" href="teaching-plan.html"><span class="nav-index">PLAN</span><span class="nav-title">课程教学计划</span><span class="nav-state" aria-hidden="true"></span></a></li><li><a class="nav-link" href="system-map.html"><span class="nav-index">SYS</span><span class="nav-title">系统模块全景</span><span class="nav-state" aria-hidden="true"></span></a></li></ul></section>
   </aside>`;
 }
 
@@ -106,7 +106,7 @@ function head(title, description, includeMermaid = false) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="${escapeHtml(description)}">
     <title>${escapeHtml(title)} | Apollo Planning 自学站</title>
-    <link rel="stylesheet" href="assets/css/site.css?v=20261021-course-map-v1">
+    <link rel="stylesheet" href="assets/css/site.css?v=20261021-system-map-v1">
     ${mermaidScript}
     <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
   </head>`;
@@ -159,9 +159,9 @@ ${head(lesson.title, lesson.summary, body.includes("language-mermaid"))}
   <div class="mobile-scrim" aria-hidden="true"></div>
   ${searchDialog()}
   ${shellFooter()}
-  <script src="assets/js/search-index.js?v=20261021-course-map-v1"></script>
+  <script src="assets/js/search-index.js?v=20261021-system-map-v1"></script>
   <script src="assets/js/site.js"></script>
-  <script src="assets/js/course-map.js?v=20261021-course-map-v1"></script>
+  <script src="assets/js/course-map.js?v=20261021-system-map-v1"></script>
 </body>
 </html>`;
 }
@@ -313,6 +313,12 @@ async function build() {
       href: "lab/crosswalk.html",
       text: "环境检查、场景运行、代码定位、录包、评分与优化闭环",
       keywords: "人行道 避让 apollo-env apollo-dev apollo-test apollo-eval"
+    },
+    {
+      title: "系统模块全景",
+      href: "system-map.html",
+      text: "感知、定位、预测、规划、控制、底盘与 Cyber RT channel 的结构关系",
+      keywords: "系统全景 感知 定位 预测 规划 控制 channel Perception Prediction Localization Control"
     },
     {
       title: "课程教学计划",

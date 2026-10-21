@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Apollo 自动驾驶系统模块全景：感知、定位、预测、规划、控制、底盘与 Cyber RT channel。">
+  <title>系统模块全景 | 城市道路自动驾驶综合仿真实验</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+  <link rel="stylesheet" href="assets/css/site.css?v=20261021-system-map-v1">
+  <link rel="stylesheet" href="assets/css/home.css?v=20261021-system-map-v1">
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="返回课程首页"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>城市道路自动驾驶综合仿真实验</span></span></a>
+    <nav class="home-nav" aria-label="主导航"><a href="index.html">课程</a><a href="teaching-plan.html">教学计划</a><a href="system-map.html" aria-current="page">系统全景</a><a href="lab/index.html">实验</a><a href="lab/report.html">报告</a><a href="setup/index.html">环境</a></nav>
+    <div class="top-actions"><span class="commit-pill">Apollo 9.0</span><button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题" aria-pressed="false">◐</button></div>
+  </header>
+
+  <main id="main-content">
+    <section class="home-section" style="padding-top:48px">
+      <div class="home-section-head reveal"><span class="section-number">SYS</span><div><p class="section-kicker">System Map · Extension</p><h1 style="margin:4px 0 12px;font-family:var(--font-display);font-size:clamp(2.6rem,5vw,5rem);line-height:1.04;letter-spacing:-.05em">系统模块全景</h1><p>课程主线以 Planning 为入口，但完整实验还包含感知、定位、预测、控制和底盘执行。本页补齐 PnC 上下游的结构关系、关键组件和 Cyber RT channel。</p></div></div>
+      <div class="course-bridge reveal">
+        <article><span>01</span><div><strong>感知与定位</strong><p>把传感器观测转化为障碍物和车辆位姿。</p></div></article>
+        <article><span>02</span><div><strong>预测与规划</strong><p>估计未来状态，生成安全、舒适、可执行的轨迹。</p></div></article>
+        <article><span>03</span><div><strong>控制与执行</strong><p>把轨迹变成油门、制动和转向指令，再由底盘执行。</p></div></article>
+      </div>
+    </section>
+
+    <section class="home-section">
+      <div class="home-section-head reveal"><span class="section-number">01</span><div><h2>六个核心模块</h2><p>模块名和组件名来自 Apollo 9.0 固定源码基线 <code>d53aa3d</code>。本页只做系统级导读，具体算法以对应源码和课程单元为准。</p></div></div>
+      <div class="course-module-grid">
+        <article class="course-module-card"><div class="course-module-code">P</div><div class="course-module-body"><div class="course-module-head"><h3>感知 Perception</h3><span class="course-module-range">输入：相机 / LiDAR / Radar</span></div><p>相机检测、激光雷达检测和多传感器融合组件输出障碍物位置、速度、尺寸和类别。</p><div class="course-module-foot"><span class="course-skill">CameraDetectionBevComponent</span><span class="course-skill">LidarDetectionComponent</span><span class="course-skill">multi_sensor_fusion</span></div></div></article>
+        <article class="course-module-card"><div class="course-module-code">L</div><div class="course-module-body"><div class="course-module-head"><h3>定位 Localization</h3><span class="course-module-range">输入：GNSS / IMU / map</span></div><p>MSF、NDT、RTK 等定位组件融合传感器和高精地图，发布车辆位姿、速度与姿态。</p><div class="course-module-foot"><span class="course-skill">MSFLocalizationComponent</span><span class="course-skill">NDTLocalizationComponent</span><span class="course-skill">RTKLocalizationComponent</span></div></div></article>
+        <article class="course-module-card"><div class="course-module-code">F</div><div class="course-module-body"><div class="course-module-head"><h3>预测 Prediction</h3><span class="course-module-range">输入：PerceptionObstacles</span></div><p>PredictionComponent 结合障碍物、定位和自车轨迹，输出未来轨迹与行为意图。</p><div class="course-module-foot"><span class="course-skill">PredictionComponent</span><span class="course-skill">PredictionObstacles</span></div></div></article>
+        <article class="course-module-card"><div class="course-module-code">E</div><div class="course-module-body"><div class="course-module-head"><h3>规划 Planning</h3><span class="course-module-range">输入：障碍物 / 位姿 / 预测</span></div><p>PlanningComponent 通过 Scenario、Stage、Task 组织交通规则、路径和速度规划，输出 ADCTrajectory。</p><div class="course-module-foot"><span class="course-skill">PlanningComponent</span><span class="course-skill">ScenarioManager</span><span class="course-skill">Task</span></div></div></article>
+        <article class="course-module-card"><div class="course-module-code">C</div><div class="course-module-body"><div class="course-module-head"><h3>控制 Control</h3><span class="course-module-range">输入：轨迹 / 位姿 / Chassis</span></div><p>ControlComponent 是 TimerComponent，读取规划轨迹、定位、底盘和 Pad 消息，计算控制指令。</p><div class="course-module-foot"><span class="course-skill">ControlComponent</span><span class="course-skill">PID / LQR</span><span class="course-skill">ControlCommand</span></div></div></article>
+        <article class="course-module-card"><div class="course-module-code">V</div><div class="course-module-body"><div class="course-module-head"><h3>底盘与车辆执行</h3><span class="course-module-range">输入：ControlCommand</span></div><p>Canbus/Chassis 网络接收控制指令并回传车辆状态，形成闭环；DreamView 用于观察和调试。</p><div class="course-module-foot"><span class="course-skill">Chassis</span><span class="course-skill">Canbus</span><span class="course-skill">DreamView</span></div></div></article>
+      </div>
+    </section>
+
+    <section class="home-section">
+      <div class="home-section-head reveal"><span class="section-number">02</span><div><h2>Channel 数据链路</h2><p>录制和调试时，先确认每个 channel 的发布者、订阅者和消息用途，再分析算法结果。</p></div></div>
+      <div class="roadmap-wrap course-matrix-block reveal"><table class="course-matrix"><thead><tr><th>Channel</th><th>消息 / 组件</th><th>发布者</th><th>主要订阅者</th><th>实验观察点</th></tr></thead><tbody>
+        <tr><td><code>/apollo/perception/obstacles</code></td><td>PerceptionObstacles</td><td>感知检测 / 融合组件</td><td>Prediction、Planning</td><td>障碍物是否稳定、是否漏检</td></tr>
+        <tr><td><code>/apollo/localization/pose</code></td><td>LocalizationEstimate</td><td>Localization</td><td>Prediction、Planning、Control</td><td>车辆位姿是否连续、是否存在跳变</td></tr>
+        <tr><td><code>/apollo/prediction</code></td><td>PredictionObstacles</td><td>PredictionComponent</td><td>Planning</td><td>目标未来轨迹是否合理</td></tr>
+        <tr><td><code>/apollo/planning</code></td><td>ADCTrajectory</td><td>PlanningComponent</td><td>Control、DreamView、Record</td><td>轨迹、速度与决策是否满足场景目标</td></tr>
+        <tr><td><code>/apollo/control</code></td><td>ControlCommand</td><td>ControlComponent</td><td>Canbus / Chassis</td><td>油门、制动和转向是否平滑</td></tr>
+        <tr><td><code>/apollo/canbus/chassis</code></td><td>Chassis</td><td>Canbus</td><td>Prediction、Control、DreamView</td><td>车辆速度、转向和底盘状态</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section class="home-section">
+      <div class="home-section-head reveal"><span class="section-number">03</span><div><h2>源码核对位置</h2><p>以下路径用于课程阅读和后续实验定位，运行前请以本地固定基线为准。</p></div></div>
+      <div class="outcome-layout"><ol class="outcome-list">
+        <li><span>01</span><div><h3>感知</h3><p><code>modules/perception/*_component.h</code>，重点看检测节点、融合节点和 PerceptionObstacles 输出。</p></div></li>
+        <li><span>02</span><div><h3>定位与预测</h3><p><code>modules/localization/msf/msf_localization_component.h</code>、<code>modules/prediction/prediction_component.h</code>。</p></div></li>
+        <li><span>03</span><div><h3>规划与控制</h3><p><code>modules/planning</code> 的 Scenario/Stage/Task 与 <code>modules/control/control_component/control_component.h</code>。</p></div></li>
+      </ol><aside class="toolchain"><h3>阅读顺序</h3><ul><li>先看 channel 和消息类型</li><li>再看组件 Init / Proc</li><li>再看算法和配置</li><li>最后对照 record 与 DreamView</li></ul><p class="aside-note">不要一开始陷入算法细节，先建立输入—输出—组件—证据的关系。</p></aside></div>
+      <div class="section-foot reveal"><p><strong>课程连接：</strong>本页补充感知、定位、预测和控制的全景；具体代码阅读仍从第 01–03 课、第 10–16 课和第 19 课进入。</p><a class="text-link" href="index.html#course-map">返回课程结构 <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+
+  <footer class="site-footer home-footer"><div><strong>城市道路自动驾驶综合仿真实验</strong><p>源码核对基线：Apollo 9.0 / d53aa3d。页面用于课程导读，不替代官方文档和实验验证。</p></div><nav aria-label="页脚导航"><a href="index.html">课程首页</a><a href="teaching-plan.html">教学计划</a><a href="lab/index.html">实验中心</a><a href="lab/report.html">实验报告</a></nav></footer>
+  <script src="assets/js/site.js?v=20261021-system-map-v1"></script>
+  <script src="assets/js/course-map.js?v=20261021-system-map-v1"></script>
+</body>
+</html>

@@ -1165,3 +1165,14 @@ body[data-page="home"] .teaching-plan-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+body[data-page="home"] .roadmap-wrap.course-matrix-block {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.outcome-list p,
+.outcome-list code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

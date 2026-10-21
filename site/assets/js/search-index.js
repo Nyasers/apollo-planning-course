@@ -2256,4 +2256,11 @@ window.COURSE_INDEX = [
     "text": "21 个课程单元、60 学时、16 学时实验、8 阶段闭环和评价证据。",
     "keywords": "教学计划 课程 60学时 16学时 8阶段 24步 评价 证据"
   }
+  ,
+  {
+    "title": "系统模块全景",
+    "href": "system-map.html",
+    "text": "感知、定位、预测、规划、控制、底盘与 Cyber RT channel 的结构关系。",
+    "keywords": "系统全景 感知 定位 预测 规划 控制 channel Perception Prediction Localization Control"
+  }
 ];
