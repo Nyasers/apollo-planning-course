@@ -70,7 +70,7 @@ function renderSidebar(activeId = "") {
       <p class="sidebar-note"><span data-progress-count>0 / 21</span> 个单元已完成。进度只保存在你的浏览器。</p>
     </div>
     ${groups}
-    <section class="nav-group"><p class="nav-label">实验平台</p><ul class="nav-list"><li><a class="nav-link" href="lab/index.html"><span class="nav-index">LAB</span><span class="nav-title">MVP 实验中心</span><span class="nav-state" aria-hidden="true"></span></a></li></ul></section>
+    <section class="nav-group"><p class="nav-label">实验平台</p><ul class="nav-list"><li><a class="nav-link" href="lab/index.html"><span class="nav-index">LAB</span><span class="nav-title">MVP 实验中心</span><span class="nav-state" aria-hidden="true"></span></a></li><li><a class="nav-link" href="teaching-plan.html"><span class="nav-index">PLAN</span><span class="nav-title">课程教学计划</span><span class="nav-state" aria-hidden="true"></span></a></li></ul></section>
   </aside>`;
 }
 
@@ -78,7 +78,7 @@ function topbar() {
   return `<header class="topbar">
     <a class="brand" href="index.html" aria-label="返回课程首页">
       <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>从仿真环境到 Scenario 与 Task</span></span>
+      <span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>城市道路自动驾驶综合仿真实验</span></span>
     </a>
     <div class="top-actions">
       <a class="action-button lab-entry-button" href="lab/index.html"><span>实验中心</span><span class="button-label">进入 MVP</span></a>
@@ -106,7 +106,7 @@ function head(title, description, includeMermaid = false) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="${escapeHtml(description)}">
     <title>${escapeHtml(title)} | Apollo Planning 自学站</title>
-    <link rel="stylesheet" href="assets/css/site.css">
+    <link rel="stylesheet" href="assets/css/site.css?v=20261021-course-map-v1">
     ${mermaidScript}
     <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
   </head>`;
@@ -159,8 +159,9 @@ ${head(lesson.title, lesson.summary, body.includes("language-mermaid"))}
   <div class="mobile-scrim" aria-hidden="true"></div>
   ${searchDialog()}
   ${shellFooter()}
-  <script src="assets/js/search-index.js"></script>
+  <script src="assets/js/search-index.js?v=20261021-course-map-v1"></script>
   <script src="assets/js/site.js"></script>
+  <script src="assets/js/course-map.js?v=20261021-course-map-v1"></script>
 </body>
 </html>`;
 }
@@ -289,7 +290,9 @@ async function build() {
     }
   }
 
-  await fs.writeFile(path.join(siteDir, "index.html"), renderHome(), "utf8");
+  // The project landing page is maintained separately from the legacy lesson renderer.
+  // Preserve it so a lesson rebuild does not overwrite the course map and project positioning.
+  console.log("Preserving site/index.html (project landing page)");
 
   for (let index = 0; index < builtLessons.length; index += 1) {
     const lesson = builtLessons[index];
@@ -310,6 +313,12 @@ async function build() {
       href: "lab/crosswalk.html",
       text: "环境检查、场景运行、代码定位、录包、评分与优化闭环",
       keywords: "人行道 避让 apollo-env apollo-dev apollo-test apollo-eval"
+    },
+    {
+      title: "课程教学计划",
+      href: "teaching-plan.html",
+      text: "21 个课程单元、60 学时、16 学时实验、8 阶段闭环和评价证据",
+      keywords: "教学计划 课程 60学时 16学时 8阶段 24步 评价 证据"
     },
     {
       title: "实验报告 · 人行道避让优化前后对比",

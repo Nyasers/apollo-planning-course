@@ -2249,4 +2249,11 @@ window.COURSE_INDEX = [
     "text": "Apollo Claw Harness 版本、命令和本地接口约定。",
     "keywords": "harness manifest doctor explain record report eval advise"
   }
+  ,
+  {
+    "title": "课程教学计划",
+    "href": "teaching-plan.html",
+    "text": "21 个课程单元、60 学时、16 学时实验、8 阶段闭环和评价证据。",
+    "keywords": "教学计划 课程 60学时 16学时 8阶段 24步 评价 证据"
+  }
 ];
