@@ -124,7 +124,7 @@
   }
   async function loadManifest() {
     try {
-      const response = await fetch("../harness/manifest.json", { cache: "no-store" });
+      const response = await fetch("../harness/manifest.json?v=20261021-harness-config-v2", { cache: "no-store" });
       if (!response.ok) throw new Error("manifest unavailable");
       manifest = await response.json();
       renderRequirements();
