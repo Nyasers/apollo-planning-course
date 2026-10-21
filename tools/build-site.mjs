@@ -106,7 +106,7 @@ function head(title, description, includeMermaid = false) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="${escapeHtml(description)}">
     <title>${escapeHtml(title)} | Apollo Planning 自学站</title>
-    <link rel="stylesheet" href="assets/css/site.css?v=20261021-system-map-v1">
+    <link rel="stylesheet" href="assets/css/site.css?v=20261021-course-ai-v1">
     ${mermaidScript}
     <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
   </head>`;
@@ -159,9 +159,9 @@ ${head(lesson.title, lesson.summary, body.includes("language-mermaid"))}
   <div class="mobile-scrim" aria-hidden="true"></div>
   ${searchDialog()}
   ${shellFooter()}
-  <script src="assets/js/search-index.js?v=20261021-system-map-v1"></script>
+  <script src="assets/js/search-index.js?v=20261021-course-ai-v1"></script>
   <script src="assets/js/site.js"></script>
-  <script src="assets/js/course-map.js?v=20261021-system-map-v1"></script>
+  <script src="assets/js/course-map.js?v=20261021-course-ai-v1"></script>
 </body>
 </html>`;
 }
