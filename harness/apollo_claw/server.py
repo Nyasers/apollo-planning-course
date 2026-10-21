@@ -9,7 +9,6 @@ import secrets
 import subprocess
 import sys
 import threading
-import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -20,6 +19,7 @@ from urllib.parse import unquote, urlparse
 
 from .config import Settings
 from .deepseek import DeepSeekUnavailable, answer_report_question, fallback_report_answer, test_connection
+from .environment import probe_runtime
 from .experiment import ExperimentStore
 
 WEB_ROOT = Path(__file__).resolve().parent / "web"
@@ -77,6 +77,10 @@ class JobManager:
             "APOLLO_CLAW_SKILLS_DIR": self.settings.skills_dir,
             "APOLLO_CONTAINER_NAME": self.settings.apollo_container_name,
             "APOLLO_CONTAINER_USER": self.settings.apollo_container_user,
+            "APOLLO_WSL_DISTRO": self.settings.wsl_distro,
+            "APOLLO_WSL_USER": self.settings.wsl_user,
+            "APOLLO_START_SCRIPT": self.settings.apollo_start_script,
+            "APOLLO_STOP_SCRIPT": self.settings.apollo_stop_script,
             "APOLLO_WORKSPACE_HOST": self.settings.apollo_workspace_host,
             "APOLLO_WORKSPACE_CONTAINER": self.settings.apollo_workspace_container,
             "APOLLO_DREAMVIEW_URL": self.settings.dreamview_url,
@@ -311,7 +315,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(404, {"error": "not found"})
                 return
             action = path.rsplit("/", 1)[-1]
-            if action not in {"doctor", "record", "report", "selfeval", "eval", "export", "explain"}:
+            if action not in {"doctor", "start-sim", "stop-sim", "record", "record-pause", "record-resume", "record-stop", "report", "selfeval", "eval", "export", "explain"}:
                 self._json(404, {"error": "unknown action"})
                 return
             try:
@@ -334,10 +338,21 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                         experiment_id = experiment["meta"]["experiment_id"]
                 if action == "doctor":
                     argv = ["doctor", "--json", "--experiment", experiment_id]
+                elif action == "start-sim":
+                    argv = ["sim", "start", "--execute"]
+                elif action == "stop-sim":
+                    argv = ["sim", "stop"]
+                    if experiment_id:
+                        argv.extend(["--experiment", experiment_id])
+                    argv.append("--execute")
                 elif action == "record":
-                    argv = ["test", "record", "--experiment", experiment_id, "--tag", body.get("tag", "crosswalk"), "--seconds", str(int(body.get("seconds", 25))), "--task", body.get("task", "crosswalk"), "--scenario", body.get("scenario", "人行道避让")]
+                    argv = ["test", "record-start", "--experiment", experiment_id, "--tag", body.get("tag", "crosswalk"), "--task", body.get("task", "crosswalk"), "--scenario", body.get("scenario", "人行道避让")]
                     if body.get("execute"):
                         argv.append("--execute")
+                elif action in {"record-pause", "record-resume", "record-stop"}:
+                    if not experiment_id:
+                        raise ValueError(f"{action} requires experiment_id")
+                    argv = ["test", action, "--experiment", experiment_id]
                 elif action == "report":
                     if not experiment_id or not body.get("record"):
                         raise ValueError("report requires experiment_id and record")
@@ -390,6 +405,9 @@ def make_handler(settings: Settings, token: Optional[str] = None):
 
         def do_GET(self):
             path = urlparse(self.path).path
+            if path == "/api/runtime":
+                self._json(200, probe_runtime(settings))
+                return
             if path == "/api/settings/deepseek":
                 self._json(200, _deepseek_status(settings))
                 return
@@ -397,7 +415,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 self._json(200, {
                     "ok": True,
                     "service": "apollo-claw-harness",
-                    "version": "0.3.4",
+                    "version": "0.5.1",
                     "settings": {
                         "container": settings.apollo_container_name,
                         "workspace": settings.apollo_workspace_host,
@@ -408,7 +426,7 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 })
                 return
             if path == "/api/session":
-                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.3.4"})
+                self._json(200, {"token": token, "tasks": _load_tasks(settings), "deepseek_configured": bool(settings.deepseek_api_key), "version": "0.5.1"})
                 return
             if path == "/api/tasks":
                 self._json(200, _load_tasks(settings))
@@ -481,10 +499,21 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                 body = index.read_text(encoding="utf-8").replace("__APOLLO_CLAW_TOKEN_VALUE__", token)
                 self._send(200, body.encode("utf-8"))
                 return
-            if path in ("/app.css", "/app.js"):
-                asset = WEB_ROOT / path.lstrip("/")
-                if asset.exists():
-                    ctype = "text/css; charset=utf-8" if asset.suffix == ".css" else "application/javascript; charset=utf-8"
+            if path in ("/app.css", "/app.js") or path.startswith("/assets/"):
+                asset = (WEB_ROOT / path.lstrip("/")).resolve()
+                try:
+                    asset.relative_to(WEB_ROOT.resolve())
+                except ValueError:
+                    self._json(404, {"error": "not found"})
+                    return
+                if asset.is_file():
+                    ctype = mimetypes.guess_type(asset.name)[0] or "application/octet-stream"
+                    if asset.suffix == ".css":
+                        ctype = "text/css; charset=utf-8"
+                    elif asset.suffix == ".js":
+                        ctype = "application/javascript; charset=utf-8"
+                    elif asset.suffix in {".webp", ".png", ".jpg", ".jpeg", ".svg"}:
+                        ctype = mimetypes.types_map.get(asset.suffix, "image/" + asset.suffix.lstrip("."))
                     self._send(200, asset.read_bytes(), ctype)
                     return
             self._json(404, {"error": "not found"})

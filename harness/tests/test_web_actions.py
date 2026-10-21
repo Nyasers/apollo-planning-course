@@ -60,7 +60,7 @@ class WebActionTest(unittest.TestCase):
                 base = f"http://127.0.0.1:{server.server_port}"
                 with urllib.request.urlopen(base + "/api/session", timeout=5) as response:
                     token = json.loads(response.read().decode("utf-8"))["token"]
-                body = json.dumps({"task": "crosswalk", "scenario": "人行道避让", "tag": "crosswalk", "seconds": 1, "execute": False}).encode("utf-8")
+                body = json.dumps({"task": "crosswalk", "scenario": "人行道避让", "tag": "crosswalk", "execute": False}).encode("utf-8")
                 request = urllib.request.Request(base + "/api/actions/record", data=body, method="POST")
                 request.add_header("Content-Type", "application/json")
                 request.add_header("X-Apollo-Claw-Token", token)

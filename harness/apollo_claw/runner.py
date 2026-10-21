@@ -1,6 +1,8 @@
 """Whitelisted command runner for host and Apollo container."""
 from __future__ import annotations
 
+import locale
+import os
 import shlex
 import subprocess
 import time
@@ -113,6 +115,14 @@ def docker_exec(settings: Settings, command: Iterable[str], timeout: Optional[in
     argv.extend([settings.apollo_container_name, "bash", "-lc", shlex.join(command)])
     started = time.monotonic()
     timeout = timeout or settings.container_tool_timeout
+    if os.name == "nt":
+        # The Apollo Docker daemon and CLI live inside WSL on Windows hosts.
+        # Calling the Windows docker.exe either fails outright or targets a
+        # different daemon, so proxy the full docker command through WSL.
+        result = run_wsl(settings, shlex.join(argv), timeout=timeout)
+        result.argv = command
+        result.mode = "container-wsl"
+        return result
     try:
         proc = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, check=False)
         return CommandResult(command, proc.returncode, proc.stdout, proc.stderr, time.monotonic() - started, mode="container")
@@ -121,6 +131,48 @@ def docker_exec(settings: Settings, command: Iterable[str], timeout: Optional[in
         stderr = exc.stderr.decode() if isinstance(exc.stderr, bytes) else (exc.stderr or "")
         return CommandResult(command, 124, stdout, stderr + "\ncommand timed out", time.monotonic() - started, True, "container")
 
+
+def decode_process_output(raw: bytes) -> str:
+    """Decode Windows/WSL command output without assuming the ANSI code page."""
+    if not raw:
+        return ""
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return raw.decode("utf-16", errors="replace")
+    if raw.count(b"\x00") > max(4, len(raw) // 4):
+        return raw.decode("utf-16-le", errors="replace")
+    for encoding in ("utf-8", locale.getpreferredencoding(False), "gb18030", "latin-1"):
+        try:
+            return raw.decode(encoding)
+        except (LookupError, UnicodeDecodeError):
+            continue
+    return raw.decode("utf-8", errors="replace")
+
+
+def run_wsl(settings: Settings, command: str, timeout: int = 60) -> CommandResult:
+    """Run a fixed command inside the configured WSL distribution.
+
+    Invoking WSL also starts a stopped distribution. Callers must check the VM
+    state first when they need a non-invasive probe.
+    """
+    argv = [
+        "wsl.exe", "-d", settings.wsl_distro, "-u", settings.wsl_user,
+        "--", "bash", "-lc", command,
+    ]
+    started = time.monotonic()
+    try:
+        proc = subprocess.run(argv, capture_output=True, timeout=timeout, check=False)
+        return CommandResult(
+            argv,
+            proc.returncode,
+            decode_process_output(proc.stdout),
+            decode_process_output(proc.stderr),
+            time.monotonic() - started,
+            mode="wsl",
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = decode_process_output(exc.stdout or b"")
+        stderr = decode_process_output(exc.stderr or b"")
+        return CommandResult(argv, 124, stdout, stderr + "\ncommand timed out", time.monotonic() - started, True, "wsl")
 
 def save_command_output(result: CommandResult, directory: Path, stem: str) -> None:
     directory.mkdir(parents=True, exist_ok=True)

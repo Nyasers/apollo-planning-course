@@ -8,38 +8,54 @@ import platform
 import re
 import shutil
 import sys
-import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from . import __version__
+from .ai_presentation import build_ai_presentation
 from .config import Settings
 from .deepseek import DeepSeekUnavailable, explain, fallback_explain
+from .environment import probe_runtime, start_simulation, stop_simulation
 from .evidence import read_json, write_json
 from .experiment import ExperimentStore
+from .recording import is_active, pause_recording, resume_recording, start_recording, stop_recording
 from .knowledge import search as search_knowledge
 from .lab_report import build_lab_report, export_lab_report
 from .report import build_report, export_report, validate_report
 from .router import route
-from .runner import CommandResult, docker_exec, run_host, save_command_output
-from .skills import resolve_skills
+from .runner import CommandResult, docker_exec, save_command_output
+from .scoring import compute_self_score
+from .skills import SKILL_NAMES, resolve_skills
 
-
-def _which(name: str) -> str:
-    return shutil.which(name) or ""
-
-
-def _host_probe(argv):
-    try:
-        result = run_host(argv, timeout=20)
-        return {"ok": result.ok, "returncode": result.returncode, "stdout": result.stdout.strip()[:2000], "stderr": result.stderr.strip()[:1000]}
-    except Exception as exc:
-        return {"ok": False, "error": str(exc)}
 
 
 def _store(settings: Settings) -> ExperimentStore:
     return ExperimentStore(Path(settings.output_dir))
 
+
+def _skills_workspace_path(settings: Settings) -> Path:
+    workspace_container = settings.apollo_workspace_container.rstrip("/") + "/"
+    skills_container = settings.skills_container_dir.rstrip("/")
+    if skills_container.startswith(workspace_container):
+        relative = skills_container[len(workspace_container):]
+        return Path(settings.apollo_workspace_host).expanduser() / relative
+    return Path(settings.apollo_workspace_host).expanduser() / ".comate" / "skills"
+
+
+def _sync_skills_to_workspace(settings: Settings) -> Path:
+    skills = resolve_skills(settings)
+    if not skills.root:
+        raise FileNotFoundError("找不到 Apollo Claw skills 目录")
+    source = skills.root.resolve()
+    target = _skills_workspace_path(settings)
+    target.mkdir(parents=True, exist_ok=True)
+    target_resolved = target.resolve()
+    if source != target_resolved:
+        for name in SKILL_NAMES:
+            source_skill = source / name
+            if source_skill.is_dir():
+                shutil.copytree(source_skill, target / name, dirs_exist_ok=True)
+    return target
 
 def _get_or_create_experiment(settings: Settings, args) -> Dict[str, Any]:
     store = _store(settings)
@@ -70,11 +86,19 @@ def _host_to_container(settings: Settings, path: str) -> str:
         return settings.apollo_workspace_container + "/" + str(candidate.relative_to(host_root)).replace("\\", "/")
     except ValueError:
         pass
-    skills_root = Path(settings.skills_dir).expanduser().resolve()
-    try:
-        return settings.skills_container_dir + "/" + str(candidate.relative_to(skills_root)).replace("\\", "/")
-    except ValueError:
-        return path
+    skill_roots = [
+        Path(settings.skills_dir).expanduser().resolve(),
+        _skills_workspace_path(settings).resolve(),
+        (Path(__file__).resolve().parents[1] / "skills").resolve(),
+        (Path.cwd() / "skills").resolve(),
+    ]
+    for skills_root in skill_roots:
+        try:
+            relative = candidate.relative_to(skills_root)
+            return settings.skills_container_dir + "/" + str(relative).replace("\\", "/")
+        except ValueError:
+            continue
+    return path
 
 
 def _container_to_host(settings: Settings, path: str) -> Path:
@@ -109,69 +133,95 @@ def _parse_record_report(settings: Settings, output: str) -> Dict[str, Optional[
     return result
 
 
-def _dreamview_check(settings: Settings) -> Dict[str, Any]:
-    try:
-        with urllib.request.urlopen(settings.dreamview_url, timeout=settings.dreamview_timeout) as response:
-            return {"ok": 200 <= response.status < 400, "status": response.status, "url": settings.dreamview_url}
-    except Exception as exc:
-        return {"ok": False, "error": str(exc), "url": settings.dreamview_url}
-
-
 def cmd_doctor(settings: Settings, args) -> int:
     store = _store(settings)
     experiment = _get_or_create_experiment(settings, args)
     workspace = Path(settings.apollo_workspace_host).expanduser()
     disk = shutil.disk_usage(workspace if workspace.exists() else Path.home())
+    runtime = probe_runtime(settings)
     data: Dict[str, Any] = {
         "meta": {"version": __version__, "skill": "apollo-env", "checked_at": experiment["meta"]["updated_at"]},
         "host": {
             "platform": platform.platform(),
             "python": sys.version.split()[0],
             "cwd": str(Path.cwd()),
-            "docker": _which("docker"),
-            "aem": _which("aem"),
             "workspace": str(workspace),
             "workspace_exists": workspace.exists(),
             "disk_free_gb": round(disk.free / (1024 ** 3), 1),
+            "wsl_distro": settings.wsl_distro,
         },
-        "checks": {
-            "docker_version": _host_probe(["docker", "--version"]),
-            "docker_info": _host_probe(["docker", "info", "--format", "{{.ServerVersion}}"]),
-            "aem_version": _host_probe(["aem", "version"]),
-        },
-        "dreamview": _dreamview_check(settings),
+        **runtime,
         "skills": {
             "root": str(resolve_skills(settings).root) if resolve_skills(settings).root else "",
             "missing": resolve_skills(settings).missing(),
         },
     }
-    try:
-        ps = run_host(["docker", "ps", "--format", "{{.Names}}"], timeout=20)
-        names = [name for name in ps.stdout.splitlines() if name.strip()]
-        data["apollo"] = {"containers": names, "container_running": settings.apollo_container_name in names}
-    except Exception as exc:
-        data["apollo"] = {"containers": [], "container_running": False, "error": str(exc)}
+    # Keep the legacy fields consumed by older reports and clients.
+    data["apollo"]["container_running"] = bool(data["apollo"].get("started"))
+    data["checks"] = {
+        "linux": data["linux"],
+        "docker": data["docker"],
+        "apollo": data["apollo"],
+        "dreamview": data["dreamview"],
+    }
     directory = store.experiment_dir(experiment["meta"]["experiment_id"])
     out = Path(args.output).expanduser() if getattr(args, "output", None) else directory / "doctor.json"
     write_json(out, data)
-    store.set_section(experiment, "environment", data.get("host", {}))
-    store.add_evidence(experiment, "doctor", str(out), "环境检查 JSON")
-    # 环境检查只描述起点，不能把已经录到数据的实验状态改回去
+    store.set_section(experiment, "environment", {
+        "host": data["host"],
+        "linux": data["linux"],
+        "docker": data["docker"],
+        "apollo": data["apollo"],
+        "dreamview": data["dreamview"],
+        "simulation": data["simulation"],
+    })
+    store.add_evidence(experiment, "doctor", str(out), data["simulation"]["summary"])
+    # 环境检查只描述起点，不能把已经录到数据的实验状态改回去。
     if experiment["meta"].get("status") in (None, "created", "environment_checked", "environment_warning"):
-        experiment["meta"]["status"] = "environment_checked" if data.get("apollo", {}).get("container_running") else "environment_warning"
+        experiment["meta"]["status"] = "environment_checked" if data["simulation"].get("started") else "environment_warning"
     store.save(experiment)
     if args.json:
         print(json.dumps(data, ensure_ascii=False, indent=2))
     else:
         print("Apollo Claw doctor")
         print(f"experiment: {experiment['meta']['experiment_id']}")
-        print(f"workspace: {data['host']['workspace']} ({data['host']['workspace_exists']})")
-        print(f"docker: {data['host']['docker'] or 'not found'}")
-        print(f"aem: {data['host']['aem'] or 'not found'}")
-        print(f"Apollo container running: {data['apollo']['container_running']}")
+        print(f"Linux: {data['linux'].get('state', 'unknown')} ({data['linux'].get('distro', '')})")
+        print(f"Docker: {'running' if data['docker'].get('started') else 'not running'}")
+        print(f"Apollo container: {data['apollo'].get('state', 'unknown')}")
+        print(f"DreamView: {'ready' if data['dreamview'].get('ok') else 'not ready'}")
+        print(f"Simulation: {data['simulation'].get('summary', '')}")
         print(f"saved: {out}")
     return 0
 
+
+def cmd_sim_start(settings: Settings, args) -> int:
+    if not getattr(args, "execute", False):
+        result = probe_runtime(settings)
+        print(json.dumps({"dry_run": True, "command": f"bash {settings.apollo_start_script}", "runtime": result}, ensure_ascii=False, indent=2))
+        return 0
+    result = start_simulation(settings)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result["after"]["simulation"]["started"] else 2
+
+def cmd_sim_stop(settings: Settings, args) -> int:
+    if not getattr(args, "execute", False):
+        result = probe_runtime(settings)
+        print(json.dumps({"dry_run": True, "command": f"bash {settings.apollo_stop_script}; wsl.exe --shutdown", "runtime": result}, ensure_ascii=False, indent=2))
+        return 0
+    experiment_id = getattr(args, "experiment", "")
+    if experiment_id:
+        try:
+            store = _store(settings)
+            experiment = store.load(experiment_id)
+            if is_active(experiment.get("record", {}) or {}):
+                stop_recording(settings, store, experiment)
+                print(f"录制已保存：{experiment_id}")
+        except Exception as exc:
+            print(f"退出前保存录制失败，将继续关闭环境：{exc}", file=sys.stderr)
+    result = stop_simulation(settings)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    stopped = not result["after"].get("linux", {}).get("running") and not result["after"].get("simulation", {}).get("started")
+    return 0 if stopped else 2
 
 def _load_evidence(path: Optional[str]):
     if path:
@@ -336,6 +386,68 @@ def cmd_test_record(settings: Settings, args) -> int:
     return 0 if has_record else result.returncode
 
 
+def cmd_test_record_start(settings: Settings, args) -> int:
+    experiment = _get_or_create_experiment(settings, args)
+    if args.execute:
+        runtime = probe_runtime(settings)
+        if not runtime["simulation"]["started"]:
+            print(
+                "仿真环境尚未就绪，不能开始真实录制："
+                + runtime["simulation"]["summary"]
+                + "。请先点击“去启动”，完成二次确认并等待 DreamView 就绪。",
+                file=sys.stderr,
+            )
+            return 2
+    try:
+        record = start_recording(
+            settings,
+            _store(settings),
+            experiment,
+            tag=args.tag,
+            execute=args.execute,
+        )
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps({"experiment_id": experiment["meta"]["experiment_id"], "record": record}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_test_record_pause(settings: Settings, args) -> int:
+    store = _store(settings)
+    try:
+        experiment = store.load(args.experiment)
+        record = pause_recording(settings, store, experiment)
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps({"experiment_id": args.experiment, "record": record}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_test_record_resume(settings: Settings, args) -> int:
+    store = _store(settings)
+    try:
+        experiment = store.load(args.experiment)
+        record = resume_recording(settings, store, experiment)
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps({"experiment_id": args.experiment, "record": record}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_test_record_stop(settings: Settings, args) -> int:
+    store = _store(settings)
+    try:
+        experiment = store.load(args.experiment)
+        record = stop_recording(settings, store, experiment)
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps({"experiment_id": args.experiment, "record": record}, ensure_ascii=False, indent=2))
+    return 0 if record.get("status") == "recorded" else 2
+
 def _resolve_container_script(settings: Settings, script: Optional[str], skill_script: Optional[Path]) -> Optional[str]:
     if script:
         return _host_to_container(settings, script)
@@ -346,14 +458,20 @@ def _resolve_container_script(settings: Settings, script: Optional[str], skill_s
 
 def cmd_test_report(settings: Settings, args) -> int:
     experiment = _get_or_create_experiment(settings, args)
+    try:
+        _sync_skills_to_workspace(settings)
+    except Exception as exc:
+        print(f"同步 Apollo skills 到工作区失败：{exc}", file=sys.stderr)
+        return 2
     skills = resolve_skills(settings)
     script = _resolve_container_script(settings, getattr(args, "script", None), skills.test_report_script)
     if not script:
         print("需要指定 --script，或把 apollo-test 放到 APOLLO_CLAW_SKILLS_DIR", file=sys.stderr)
         return 2
     record = _host_to_container(settings, args.record)
-    # 允许传入 *.record 基名：cyber_recorder 产出的其实是 <name>.00000.<timestamp>
-    if record.rstrip("/").endswith(".record"):
+    # 报告应分析同一实验的全部分片，而不是只分析第一段。
+    record_name = record.rstrip("/").rsplit("/", 1)[-1]
+    if record_name.endswith(".record") or ".record." in record_name:
         record = record.rstrip("/").rsplit("/", 1)[0]
     output = args.output or f"{settings.record_root_container}/report/{experiment['meta']['experiment_id']}"
     argv = ["python3", script, record, "-o", output]
@@ -370,6 +488,11 @@ def cmd_test_report(settings: Settings, args) -> int:
     experiment["record"]["message_count"] = summary["message_count"]
     store = _store(settings)
     store.add_evidence(experiment, "channel_report", output, "channel_summary.csv / record_report.md / plots")
+    if result.ok:
+        experiment["errors"] = [
+            item for item in experiment.get("errors", [])
+            if item.get("source") not in {"test-report", "record"}
+        ]
     if result.ok and summary.get("channel_count") == 0:
         experiment["record"]["status"] = "empty"
         experiment["meta"]["status"] = "empty_record"
@@ -386,6 +509,11 @@ def cmd_test_report(settings: Settings, args) -> int:
 
 def cmd_eval(settings: Settings, args) -> int:
     experiment = _get_or_create_experiment(settings, args)
+    try:
+        _sync_skills_to_workspace(settings)
+    except Exception as exc:
+        print(f"同步 Apollo skills 到工作区失败：{exc}", file=sys.stderr)
+        return 2
     skills = resolve_skills(settings)
 
     if getattr(args, "comfort", False):
@@ -628,6 +756,11 @@ def _remaining_distance(settings: Settings, experiment_id: str, end_point) -> Op
 def cmd_report_build(settings: Settings, args) -> int:
     """自评报告：场景指标 + 体感指标 + 改进建议，合并成一份 Markdown。"""
     experiment = _get_or_create_experiment(settings, args)
+    try:
+        _sync_skills_to_workspace(settings)
+    except Exception as exc:
+        print(f"同步 Apollo skills 到工作区失败：{exc}", file=sys.stderr)
+        return 2
     skills = resolve_skills(settings)
     exp_id = experiment["meta"]["experiment_id"]
     record = experiment.get("record", {}).get("path", "")
@@ -707,11 +840,18 @@ def cmd_report_build(settings: Settings, args) -> int:
     experiment["metrics"] = {
         "max_lon_accel": comfort_data.get("max_lon_accel"),
         "max_jerk": comfort_data.get("max_lon_jerk"),
+        "max_jerk_time": comfort_data.get("max_lon_jerk_time"),
+        "jerk_p95": comfort_data.get("jerk_p95"),
         "max_lat_accel": comfort_data.get("max_lat_accel"),
         "max_speed_mps": comfort_data.get("max_speed_ms"),
         "avg_speed_mps": comfort_data.get("avg_speed_ms"),
         "hard_brake": comfort_data.get("hard_brake_count"),
     }
+    experiment["score"].update(compute_self_score(
+        experiment["score"],
+        experiment["metrics"],
+        scenario_pass=grading_summary.get("scenario_pass"),
+    ))
     experiment["meta"]["status"] = "evaluated" if grading.ok else "eval_failed"
     if scenario:
         experiment["meta"]["scenario_file"] = scenario
@@ -732,6 +872,7 @@ def cmd_report_build(settings: Settings, args) -> int:
         experiment["errors"] = [e for e in (experiment.get("errors") or []) if e.get("source") not in stale]
     ai_evidence = _build_ai_evidence(settings, experiment, grading_summary, comfort_data, remaining)
     ai_result = _ai_analyze(settings, ai_evidence, experiment["meta"].get("scenario", ""))
+    ai_result["presentation"] = build_ai_presentation(experiment, grading_summary, comfort_data, remaining, ai_result)
     experiment["ai"] = ai_result
     report_path = _write_selfeval_report(settings, experiment, grading_summary, comfort_data, suggestions, remaining, ai_result)
     _store(settings).add_evidence(experiment, "selfeval_report", str(report_path), "自评报告（评分 + 体感 + 建议）")
@@ -829,12 +970,13 @@ def _ai_analyze(settings, evidence, scenario_name):
         result = explain(settings, evidence, question)
         result["mode"] = "deepseek"
         result.setdefault("model", settings.deepseek_model)
-        return result
     except DeepSeekUnavailable as exc:
         result = fallback_explain(evidence)
         result["mode"] = "fallback"
         result["note"] = f"未使用模型：{exc}"
-        return result
+    result.setdefault("skills", ["apollo-eval", "apollo-test"])
+    result.setdefault("skill", "apollo-eval")
+    return result
 
 
 def _write_selfeval_report(settings, experiment, grading, comfort, suggestions, remaining=None, ai=None) -> Path:
@@ -975,6 +1117,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output")
     p.set_defaults(func=cmd_doctor)
 
+    p = sub.add_parser("sim", help="启动或检查 Apollo 仿真环境")
+    ssub = p.add_subparsers(dest="sim_command", required=True)
+    q = ssub.add_parser("start", help="启动 WSL、Apollo 容器和 DreamView")
+    q.add_argument("--execute", action="store_true", help="真实启动；省略时只预览")
+    q.set_defaults(func=cmd_sim_start)
+
+    q = ssub.add_parser("stop", help="停止 Apollo、DreamView 并关闭 WSL")
+    q.add_argument("--experiment", help="退出前保存该实验的录制会话")
+    q.add_argument("--execute", action="store_true", help="真实退出；省略时只预览")
+    q.set_defaults(func=cmd_sim_stop)
     p = sub.add_parser("explain", help="解释证据或日志")
     p.add_argument("--evidence")
     p.add_argument("--log")
@@ -1013,6 +1165,25 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("test", help="测试与数据命令")
     tsub = p.add_subparsers(dest="test_command", required=True)
+    q = tsub.add_parser("record-start", help="启动可暂停的录制会话")
+    q.add_argument("--experiment")
+    q.add_argument("--task", default="crosswalk")
+    q.add_argument("--scenario", default="人行道避让")
+    q.add_argument("--tag", default="crosswalk")
+    q.add_argument("--execute", action="store_true")
+    q.set_defaults(func=cmd_test_record_start)
+
+    q = tsub.add_parser("record-pause", help="暂停当前录制")
+    q.add_argument("--experiment", required=True)
+    q.set_defaults(func=cmd_test_record_pause)
+
+    q = tsub.add_parser("record-resume", help="继续当前录制")
+    q.add_argument("--experiment", required=True)
+    q.set_defaults(func=cmd_test_record_resume)
+
+    q = tsub.add_parser("record-stop", help="结束并保存当前录制")
+    q.add_argument("--experiment", required=True)
+    q.set_defaults(func=cmd_test_record_stop)
     q = tsub.add_parser("record", help="录制 record")
     q.add_argument("--experiment")
     q.add_argument("--task", default="crosswalk")

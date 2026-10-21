@@ -77,6 +77,9 @@ def _summary(report: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "passed_metrics": score.get("passed_metrics", "—"),
         "scenario_pass": score.get("scenario_pass"),
         "score_value": score.get("value"),
+        "performance_score": score.get("performance_score"),
+        "comfort_score": score.get("comfort_score"),
+        "gate_status": score.get("gate_status"),
         "metrics": metrics,
         "failing": [
             item.get("name")
@@ -171,8 +174,10 @@ def build_lab_report(current: Dict[str, Any], baseline: Optional[Dict[str, Any]]
     if not next_actions:
         next_actions.append("保留本轮报告，继续扩展场景或进行教师复核。")
 
+    score_value = current_summary.get("score_value")
     headline = (
         f"本轮真实自评：通过 {current_summary.get('passed_metrics', '—')} 项。"
+        + (f"综合自评 {score_value}/100（非官方）。" if score_value is not None else "")
         + ("已到达终点。" if (after_metrics.get("ReachEnd", {}) or {}).get("pass") is True else "")
     )
     lab = {

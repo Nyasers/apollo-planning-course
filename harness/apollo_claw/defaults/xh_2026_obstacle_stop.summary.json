@@ -1,0 +1,136 @@
+{
+  "scenario_id": "6a699aefabf06e2936590839",
+  "description": "xh_2026_gsxx_障碍物停车避让场景",
+  "tags": [
+    "Straight Road",
+    "Traveling straight in a through lane",
+    "Static obstacle",
+    "Pedestrian"
+  ],
+  "map_file": "modules/map/data/Xh_2026_contest",
+  "map_id": "69d51ffd0e41e1217f2fda19",
+  "start": {
+    "x": 423278.1921700501,
+    "y": 4437610.951445828,
+    "heading": -0.0030717789872249197
+  },
+  "end": {
+    "x": 423491.1058530354,
+    "y": 4437610.338116104
+  },
+  "scenario_time_limit_sec": 100,
+  "official_time_limit_observed_sec": 90,
+  "grading_config": {
+    "baseGradeConfigFile": "grading_system/conf/grading_metrics_default.conf",
+    "deselectDefaultMetric": [
+      "Checkpoint"
+    ]
+  },
+  "entities": [
+    {
+      "id": "3098",
+      "name": "3098",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 30,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423395.2505164961,
+        "y": 4437613.01141641,
+        "h": 1.3473163789190833e-05
+      }
+    },
+    {
+      "id": "4717",
+      "name": "4717",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 15,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423416.1211917925,
+        "y": 4437613.348046626,
+        "h": -0.007702149080089782
+      }
+    },
+    {
+      "id": "4857",
+      "name": "4857",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 30,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423298.30388844607,
+        "y": 4437613.231436771,
+        "h": -0.005846247842466074
+      }
+    },
+    {
+      "id": "5530",
+      "name": "5530",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 30,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423438.4330286651,
+        "y": 4437612.878770446,
+        "h": -1.5242303112052435e-10
+      }
+    },
+    {
+      "id": "6324",
+      "name": "6324",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 30,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423329.6721221407,
+        "y": 4437613.136311449,
+        "h": -0.003639768937625505
+      }
+    },
+    {
+      "id": "6503",
+      "name": "6503",
+      "type": "unknownUnmovableObject",
+      "dimensions": {
+        "length": 30,
+        "width": 0.3,
+        "height": 2
+      },
+      "position": {
+        "x": 423362.1692299976,
+        "y": 4437613.025052393,
+        "h": 0.002039370349563765
+      }
+    },
+    {
+      "id": "7673",
+      "name": "7673",
+      "type": "pedestrian",
+      "dimensions": {
+        "length": 5,
+        "width": 2,
+        "height": 1.8
+      },
+      "position": {
+        "x": 423446.6661009572,
+        "y": 4437610.949332887,
+        "h": -0.04542327851144682
+      }
+    }
+  ]
+}

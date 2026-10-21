@@ -1,0 +1,99 @@
+{
+  "recordId": "6a720d14f0642a7e1f34b830",
+  "gradingInfo": {
+    "is_pass": 1,
+    "metric_result": {
+      "AccelerationLimit": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "AccelerationLimit",
+        "not_pass_timestamp": [],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "CentripetalAccelerationLimit": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "CentripetalAccelerationLimit",
+        "not_pass_timestamp": [],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "Collision": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "Collision",
+        "not_pass_timestamp": [
+          0,
+          71.6
+        ],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "DistToObstacleCar": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "DistToObstacleCar",
+        "not_pass_timestamp": [
+          0,
+          0,
+          16.499999999999975,
+          16.499999999999975,
+          16.99999999999997,
+          16.99999999999997
+        ],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "KeyPoint": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "KeyPoint",
+        "not_pass_timestamp": [
+          0,
+          64.40000000000057
+        ],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "OnRoad": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "OnRoad",
+        "not_pass_timestamp": [],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "ReachEnd": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "ReachEnd",
+        "not_pass_timestamp": [
+          0,
+          69.00000000000064
+        ],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "SpeedLimit": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "SpeedLimit",
+        "not_pass_timestamp": [],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      },
+      "TimeLimit": {
+        "is_pass": 1,
+        "detail": [],
+        "name": "TimeLimit",
+        "not_pass_timestamp": [],
+        "total_timestamp": 71.6,
+        "metric_score": 100
+      }
+    },
+    "score": 100,
+    "timestamp": 69,
+    "status": "finish_pass"
+  }
+}

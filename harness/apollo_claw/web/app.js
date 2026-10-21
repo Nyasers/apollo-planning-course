@@ -1,5 +1,16 @@
 const token = window.__APOLLO_CLAW_TOKEN__;
-const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, doctor: null, chat: [], chatBusy: false, deepseekConfigured: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", token: "" };
+const state = { tasks: [], experiments: [], task: null, experiment: null, experimentId: "", report: null, doctor: null, runtime: null, chat: [], chatBusy: false, deepseekConfigured: false, jobId: "", pollTimer: null, actionTimer: null, actionStartedAt: 0, activeAction: "", simWindow: null, token: "" };
+const TASK_VISUALS = {
+  "speed-bump": "/assets/scenario-obstacle-stop-low.webp",
+  crosswalk: "/assets/scenario-crosswalk-low.webp",
+  "traffic-light": "/assets/scenario-obstacle-stop-low.webp",
+  "stop-sign": "/assets/scenario-obstacle-stop-low.webp",
+  "obstacle-stop": "/assets/scenario-obstacle-stop-low.webp",
+  "dynamic-follow": "/assets/scenario-obstacle-stop-low.webp",
+  "empty-crosswalk-slow": "/assets/scenario-crosswalk-low.webp",
+  "traffic-light-slow": "/assets/scenario-obstacle-stop-low.webp",
+  "valet-parking": "/assets/hero-planning-lab-low.webp",
+};
 const $ = (id) => document.getElementById(id);
 function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
 
@@ -48,7 +59,7 @@ function setWorkflowStatus(text, kind = "") {
 }
 
 function actionLabel(action) {
-  return ({ doctor: "检查环境", record: "开始录制", report: "生成报告", selfeval: "生成自评", export: "导出", explain: "开始诊断" })[action] || "执行中";
+  return ({ doctor: "检查环境", "start-sim": "启动仿真", "stop-sim": "退出仿真", record: "开始录制", "record-pause": "暂停录制", "record-resume": "继续录制", "record-stop": "结束录制", report: "生成报告", selfeval: "生成自评", export: "导出", explain: "开始诊断" })[action] || "执行中";
 }
 
 function updateActionElapsed() {
@@ -56,14 +67,19 @@ function updateActionElapsed() {
   const button = document.querySelector(`[data-action="${state.activeAction}"]`);
   if (!button) return;
   const elapsed = Math.max(0, Math.floor((Date.now() - state.actionStartedAt) / 1000));
-  const prefix = state.activeAction === "record" ? "录制中" : "处理中";
+  const prefix = state.activeAction === "record" ? "启动录制" : state.activeAction === "start-sim" ? "启动仿真" : state.activeAction === "stop-sim" ? "退出仿真" : "处理中";
   button.textContent = `${prefix} ${elapsed}s`;
-  setWorkflowStatus(state.activeAction === "record"
-    ? `正在录制，已等待 ${elapsed}s。请保持 DreamView 和仿真场景运行，不要关闭本页面。`
-    : `${actionLabel(state.activeAction)}中，已等待 ${elapsed}s。`, "running");
+  setWorkflowStatus(state.activeAction === "start-sim"
+    ? `正在启动 WSL、Apollo 容器和 DreamView，已等待 ${elapsed}s。首次启动可能需要一到数分钟。`
+    : state.activeAction === "stop-sim"
+      ? `正在停止 DreamView、Apollo 容器和守护进程，并关闭 WSL，已等待 ${elapsed}s。`
+      : state.activeAction === "record"
+      ? `正在启动录制会话，已等待 ${elapsed}s。启动后可使用暂停、继续和结束按钮。`
+      : `${actionLabel(state.activeAction)}中，已等待 ${elapsed}s。`, "running");
 }
 
 function setActionBusy(action, busy) {
+  document.body.classList.toggle("is-operation-running", Boolean(busy));
   document.querySelectorAll("[data-action]").forEach((button) => {
     if (busy) {
       button.disabled = true;
@@ -117,10 +133,26 @@ function jobHumanSummary(job) {
   if (failed) {
     return { text: `${actionLabel(job.action)}失败。请展开“查看技术日志”定位原因，或先检查环境/场景状态。`, kind: "error" };
   }
+  if (job.action === "start-sim") {
+    return { text: "Linux、Apollo 容器和 DreamView 已启动，正在打开仿真页面。", kind: "success" };
+  }
+  if (job.action === "stop-sim") {
+    return { text: "仿真已退出：DreamView、Apollo 容器、录制与守护进程均已停止，WSL 已关闭。", kind: "success" };
+  }
   if (job.action === "record") {
     return dryRun
-      ? { text: "这次只是演练：生成了录制命令，但没有真正进入 Apollo 容器。勾选“真实执行”后再点“开始录制”。", kind: "warn" }
-      : { text: "录制完成。下一步点击“生成 channel 报告”，再点击“生成自评”。", kind: "success" };
+      ? { text: "这次只是演练：生成了录制命令，但没有真正进入 Apollo 容器。勾选“实际运行”后再点“开始录制”。", kind: "warn" }
+      : { text: "录制会话已开始。需要时可暂停或继续；完成后点击“结束并保存”，再生成 channel 报告。", kind: "success" };
+  }
+  if (job.action === "record-pause") {
+    return { text: "录制已暂停；仿真仍可继续运行，点击“继续录制”后会从同一录制会话恢复。", kind: "warn" };
+  }
+  if (job.action === "record-resume") {
+    return { text: "录制已继续。需要结束时点击“结束并保存”。", kind: "success" };
+  }
+  if (job.action === "record-stop") {
+    const match = raw.match(/录制\s+(\d+)\s+秒，(\d+)\s+个文件/);
+    return { text: match ? `录制已保存：${match[1]} 秒，${match[2]} 个文件。下一步生成 channel 报告。` : "录制已结束并保存。下一步生成 channel 报告。", kind: "success" };
   }
   if (job.action === "report") {
     return { text: "channel 报告已生成：CSV、PNG 和 Markdown 已准备好。下一步点击“生成自评”。", kind: "success" };
@@ -132,7 +164,7 @@ function jobHumanSummary(job) {
     return { text: "报告文件已导出：report.json 和 report.md 已准备好。", kind: "success" };
   }
   if (job.action === "doctor") {
-    return { text: "环境检查完成，结果已保存为 doctor.json。建议接着启动 DreamView 场景。", kind: "success" };
+    return { text: "环境检查完成：已区分 Linux、Docker、Apollo 容器和 DreamView 状态。", kind: "success" };
   }
   if (job.action === "explain") {
     return { text: "AI 诊断完成，结果已显示在上方的“DeepSeek 诊断”区域。", kind: "success" };
@@ -143,14 +175,16 @@ function jobHumanSummary(job) {
 function renderTasks() {
   const list = $("task-list");
   list.innerHTML = "";
-  state.tasks.forEach((task) => {
+  state.tasks.forEach((task, index) => {
     const button = document.createElement("button");
     button.className = "task" + (state.task && state.task.id === task.id ? " active" : "");
     button.type = "button";
     const strong = document.createElement("strong");
     strong.textContent = task.title || task.id;
     const small = document.createElement("small");
-    small.textContent = `${task.id} · ${task.status || "open"}`;
+    const number = task.number || `实验${index + 1}`;
+    const status = task.status === "planned" ? "待接入" : task.status === "open" ? "可开始" : (task.status || "可用");
+    small.textContent = `${number} · ${status}`;
     button.append(strong, small);
     button.addEventListener("click", () => selectTask(task));
     list.appendChild(button);
@@ -161,9 +195,17 @@ function selectTask(task) {
   state.task = task;
   state.experimentId = "";
   state.experiment = null;
-  $("task-title").textContent = task.title || "城市道路自动驾驶综合仿真实验";
+  document.body.dataset.task = task.id || "crosswalk";
+  const taskImage = $("task-visual-image");
+  if (taskImage) {
+    taskImage.src = TASK_VISUALS[task.id] || TASK_VISUALS.crosswalk;
+    taskImage.alt = (task.title || "实验任务") + " 场景";
+  }
+  const taskLabel = [task.number, task.title || task.id].filter(Boolean).join(" · ");
+  if ($("task-visual-title")) $("task-visual-title").textContent = taskLabel || "实验任务";
+  $("task-title").textContent = taskLabel || "城市道路自动驾驶综合仿真实验";
   $("task-desc").textContent = task.description || "按流程完成环境检查、场景运行、record、报告和复盘。";
-  setPill("active-task", task.title || task.id, "ok");
+  setPill("active-task", taskLabel || task.id, "ok");
   renderTasks();
   renderExperiments();
   renderExperiment();
@@ -236,6 +278,8 @@ async function loadExperiment(id) {
     renderReport(null);
   }
   state.doctor = await fetchDoctor(id);
+  renderEnvironmentCheck();
+  renderRecordingControls();
   loadChatHistory();
   updateReportContext();
   updateConfigStatus();
@@ -248,10 +292,11 @@ function updateConfigStatus() {
   const record = exp.record || {};
   const status = meta.status || "created";
   const hasRecord = Boolean(record.path || record.status || record.channel_count);
-  const doctor = state.doctor || {};
-  const dreamview = doctor.dreamview || {};
-  const dreamviewText = dreamview.ok === true ? "已连接" : dreamview.error ? "未连接" : "未检查";
-  const recordText = hasRecord ? (record.status || "已记录") : "未录制";
+  const runtime = runtimeSnapshot() || state.doctor || {};
+  const dreamview = runtime.dreamview || {};
+  const simulation = runtime.simulation || {};
+  const dreamviewText = dreamview.ok === true ? "已连接" : runtime ? "未连接" : "未检查";
+  const recordText = isRecordActive(record) ? (recordPhase(record) === "paused" ? "已暂停" : "录制中") : hasRecord ? (record.status || "已记录") : "未录制";
   const reportText = state.report ? "已生成" : "未生成";
   const experimentLabel = state.experimentId
     ? (meta.scenario || meta.task || "已选择") + " · " + state.experimentId
@@ -265,8 +310,8 @@ function updateConfigStatus() {
   if ($("config-hint")) {
     $("config-hint").textContent = !state.experimentId
       ? "选择实验后显示运行状态。"
-      : status === "environment_warning" || dreamview.error
-        ? "当前实验环境有警告：请在 WSL 中启动 Docker、aem 和 DreamView 后重新检查。"
+      : (!runtime && status === "environment_warning") || (runtime && !simulation.started)
+        ? "当前仿真环境未就绪：点击“去启动”，确认后会启动 WSL、Apollo 容器和 DreamView。"
         : !hasRecord
           ? "当前实验还没有 record。启动场景后，勾选“实际运行”再录制。"
           : !state.report
@@ -451,37 +496,187 @@ function initChat() {
   }
 }
 
+function formatDuration(seconds) {
+  const total = Math.max(0, Math.floor(Number(seconds) || 0));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return String(minutes).padStart(2, "0") + ":" + String(rest).padStart(2, "0");
+}
+
+function recordPhase(record) {
+  return (record && record.session && record.session.phase) || (record && record.status) || "";
+}
+
+function isRecordActive(record) {
+  return Boolean(record?.session?.active) && ["recording", "paused"].includes(recordPhase(record));
+}
+
+function recordElapsed(record) {
+  let elapsed = Number(record?.elapsed_sec || 0);
+  if (recordPhase(record) === "recording" && record?.session?.resumed_at) {
+    const resumed = new Date(record.session.resumed_at).getTime();
+    if (Number.isFinite(resumed)) elapsed += Math.max(0, (Date.now() - resumed) / 1000);
+  }
+  return Math.floor(elapsed);
+}
+
+function renderRecordingControls() {
+  const record = state.experiment?.record || {};
+  const active = isRecordActive(record);
+  document.body.classList.toggle("is-recording", active && recordPhase(record) === "recording");
+  const startControls = document.querySelector(".record-start-controls");
+  const bar = $("record-session-bar");
+  if (startControls) startControls.hidden = active;
+  if (bar) bar.hidden = !active;
+  if ($("execute")) $("execute").disabled = active;
+  if (!active) return;
+  const phase = recordPhase(record);
+  if ($("record-session-state")) {
+    $("record-session-state").textContent = phase === "paused"
+      ? "已暂停 · 等待手动继续"
+      : "录制中 · 手动结束";
+  }
+  if ($("record-session-time")) $("record-session-time").textContent = formatDuration(recordElapsed(record));
+  const pause = document.querySelector('[data-action="record-pause"]');
+  const resume = document.querySelector('[data-action="record-resume"]');
+  if (pause) pause.hidden = phase !== "recording";
+  if (resume) resume.hidden = phase !== "paused";
+}
+
+function runtimeSnapshot() {
+  if (state.runtime) return state.runtime;
+  const doctor = state.doctor || {};
+  if (doctor.linux || doctor.docker || doctor.apollo || doctor.dreamview) return doctor;
+  return null;
+}
+
+function renderEnvironmentCheck() {
+  const box = $("env-check-result");
+  if (!box) return;
+  const runtime = runtimeSnapshot();
+  if (!runtime) {
+    box.hidden = true;
+    box.innerHTML = "";
+    return;
+  }
+  const linux = runtime.linux || {};
+  const docker = runtime.docker || {};
+  const apollo = runtime.apollo || {};
+  const dreamview = runtime.dreamview || {};
+  const simulation = runtime.simulation || {};
+  const dockerDetail = docker.started ? `Engine ${docker.version || "已启动"}` : linux.running ? "Docker 服务未就绪" : "Linux 未启动";
+  const apolloDetail = apollo.started ? `${apollo.container || "容器"} · running` : linux.running ? `${apollo.container || "容器"} · ${apollo.state || "stopped"}` : "Linux 未启动，容器未检查";
+  const rows = [
+    ["Linux", Boolean(linux.running), linux.running ? `${linux.distro || "WSL"} · ${linux.kernel || "运行中"}` : "未启动"],
+    ["Docker", Boolean(docker.started), dockerDetail],
+    ["Apollo", Boolean(apollo.started), apolloDetail],
+    ["DreamView", Boolean(dreamview.ok), dreamview.ok ? (dreamview.url || "已连接") : "未连接"],
+  ];
+  box.hidden = false;
+  box.innerHTML = `<div class="env-check-head"><div><span class="eyebrow">RUNTIME CHECK</span><strong>${simulation.started ? "仿真环境已就绪" : "仿真环境未就绪"}</strong></div><span class="pill ${simulation.started ? "ok" : "bad"}">${simulation.started ? "READY" : "WARN"}</span></div><div class="env-check-grid">${rows.map(([name, ok, detail]) => `<div class="env-check-row ${ok ? "is-ok" : "is-warn"}"><span class="env-dot"></span><b>${esc(name)}</b><small>${esc(detail)}</small></div>`).join("")}</div><p class="env-check-summary">${esc(simulation.summary || "尚未完成环境检查")}</p>`;
+}
+
+async function loadRuntime() {
+  try {
+    state.runtime = await api("/api/runtime");
+    renderEnvironmentCheck();
+    updateConfigStatus();
+  } catch {
+    state.runtime = null;
+  }
+}
+
+async function refreshActiveRecord() {
+  if (state.recordRefreshing || state.jobId || !state.experimentId) return;
+  if (!isRecordActive(state.experiment?.record || {})) return;
+  state.recordRefreshing = true;
+  try {
+    state.experiment = await api(`/api/experiments/${encodeURIComponent(state.experimentId)}`);
+    renderExperiment();
+    renderRecordingControls();
+    updateConfigStatus();
+  } catch {
+    // A transient refresh failure should not interrupt the recording session.
+  } finally {
+    state.recordRefreshing = false;
+  }
+}
+
+function confirmSimulationAction(action) {
+  const dialog = $("confirm-dialog");
+  const stopping = action === "stop-sim";
+  const title = stopping ? "确认退出仿真？" : "确认启动仿真？";
+  const message = stopping
+    ? "将停止 DreamView、Apollo 容器、录制与守护进程，并执行 wsl --shutdown。未结束的录制会先尝试保存。"
+    : "Harness 将进入本地 WSL，启动 Apollo 容器和 DreamView。该操作可能需要一到数分钟。";
+  if ($("confirm-title")) $("confirm-title").textContent = title;
+  if ($("confirm-message")) $("confirm-message").textContent = message;
+  if ($("confirm-ok")) $("confirm-ok").textContent = stopping ? "确认退出" : "确认启动";
+  if (!dialog || typeof dialog.showModal !== "function") {
+    return Promise.resolve(window.confirm(message));
+  }
+  return new Promise((resolve) => {
+    const onClose = () => resolve(dialog.returnValue === "confirm");
+    dialog.addEventListener("close", onClose, { once: true });
+    dialog.returnValue = "cancel";
+    dialog.showModal();
+  });
+}
+
+function openSimulationPlaceholder() {
+  try {
+    state.simWindow = window.open("about:blank", "_blank");
+    if (state.simWindow) {
+      state.simWindow.document.title = "Apollo 仿真启动中";
+      state.simWindow.document.body.innerHTML = '<main style="font-family:system-ui;background:#07111c;color:#ecf5fc;min-height:100vh;display:grid;place-items:center"><div style="text-align:center"><h2>正在启动 Apollo 仿真</h2><p style="color:#8ea6be">请等待 Linux、容器与 DreamView 就绪，此页会自动跳转。</p></div></main>';
+    }
+  } catch {
+    state.simWindow = null;
+  }
+}
 function renderExperiment() {
   const box = $("experiment-summary");
   if (!state.experiment) {
     box.textContent = "尚无实验记录。点击“检查环境”或“开始录制”会自动创建。";
+    renderRecordingControls();
     return;
   }
   const exp = state.experiment;
   const record = exp.record || {};
   const status = exp.meta?.status || "created";
+  const phase = recordPhase(record);
+  const active = isRecordActive(record);
   const statusLabels = {
     environment_warning: "环境检查有警告",
     created: "已创建",
     recording: "录制中",
+    recording_paused: "录制已暂停",
     recorded: "已录制",
+    record_failed: "录制失败",
     evaluated: "已完成评分",
     complete: "已完成"
   };
   const statusText = statusLabels[status] || status;
-  const hasRecord = Boolean(record.path || record.status || record.channel_count);
-  const recordStatus = record.status || (hasRecord ? "已记录" : "未录制");
+  const hasRecord = Boolean(record.path || record.channel_count || ["recorded", "dry-run", "failed"].includes(record.status));
+  const recordStatus = active ? (phase === "paused" ? "已暂停" : "录制中") : (record.status || (hasRecord ? "已记录" : "未录制"));
   const channelText = record.channel_count ?? (hasRecord ? "—" : "未录制");
   const sizeText = record.size_bytes ?? (hasRecord ? "—" : "未录制");
-  const recordText = hasRecord ? channelText + " channels · " + sizeText + " bytes" : "未录制";
-  const recordHint = !hasRecord
-    ? "当前实验还没有 record。请先在 DreamView 启动场景，再勾选“实际运行”开始录制。"
-    : record.status === "dry-run"
-      ? "本次只生成了录制命令，没有真正写入 Apollo 记录。"
-      : "";
+  const recordText = active
+    ? `${formatDuration(recordElapsed(record))} · ${record.file_count ?? 0} 个文件`
+    : hasRecord ? channelText + " channels · " + sizeText + " bytes" : "未录制";
+  const recordHint = active
+    ? (phase === "paused"
+      ? "录制已暂停，仿真仍在运行。点击“继续录制”恢复，或“结束并保存”完成本轮。"
+      : "正在使用原生 cyber_recorder 写入。暂停不会停止仿真，只停止记录 channel 消息。")
+    : !hasRecord
+      ? "当前实验还没有 record。请先启动仿真，再勾选“实际运行”开始录制。"
+      : record.status === "dry-run"
+        ? "本次只生成了录制命令，没有真正写入 Apollo 记录。"
+        : "";
   box.innerHTML = `<strong>${esc(statusText)}</strong><div>实验：${esc(exp.meta?.scenario || exp.meta?.task || "-")}</div><div>record：${esc(recordText)}</div><div>记录状态：${esc(recordStatus)}</div>${recordHint ? `<div class="summary-note">${esc(recordHint)}</div>` : ""}`;
   if ($("metric-status")) $("metric-status").textContent = statusText;
-  if ($("metric-channels")) $("metric-channels").textContent = hasRecord ? (record.channel_count ?? "—") : "未录制";
+  if ($("metric-channels")) $("metric-channels").textContent = active ? "写入中" : hasRecord ? (record.channel_count ?? "—") : "未录制";
+  renderRecordingControls();
 }
 
 function renderAI(ai) {
@@ -654,7 +849,7 @@ function renderReport(report) {
     const webButton = document.querySelector("#open-web-report");
     if (webButton) webButton.hidden = true;
     if ($("metric-score")) $("metric-score").textContent = "—";
-    if ($("metric-score-label")) $("metric-score-label").textContent = "场景分数";
+    if ($("metric-score-label")) $("metric-score-label").textContent = "综合自评";
     if ($("metric-evidence")) $("metric-evidence").textContent = "—";
     return;
   }
@@ -670,12 +865,12 @@ function renderReport(report) {
   const scoreText = scoreValue === null || scoreValue === undefined
     ? (score.passed_metrics || "未评分")
     : String(scoreValue);
-  const scoreLabel = scoreValue === null || scoreValue === undefined ? "场景通过项" : "场景分数";
+  const scoreLabel = scoreValue === null || scoreValue === undefined ? "场景通过项" : "综合自评";
   const scoreNote = scoreValue === null || scoreValue === undefined
     ? (score.passed_metrics
       ? "没有总分 · " + (failedMetrics.length ? failedMetrics.map((item) => item.name).join("、") + " 未通过" : "无失败项")
       : "尚未生成评分结果")
-    : "评分来源：" + (score.source || "未注明");
+    : (score.is_official ? "官方评分" : "非官方自评") + " · 性能 " + (score.performance_score ?? "—") + " · 舒适 " + (score.comfort_score ?? "—") + " · " + (score.gate_status || "—");
   const cards = [
     { label: "实验状态", value: meta.status || "-", note: "" },
     { label: "channels", value: record.channel_count ?? "-", note: "" },
@@ -717,7 +912,7 @@ function renderReport(report) {
       : String(scoreValue);
   }
   if ($("metric-score-label")) {
-    $("metric-score-label").textContent = scoreValue === null || scoreValue === undefined ? "场景通过项" : "场景分数";
+    $("metric-score-label").textContent = scoreValue === null || scoreValue === undefined ? "场景通过项" : "综合自评";
   }
   if ($("metric-evidence")) $("metric-evidence").textContent = (report.evidence || []).length;
 }
@@ -751,7 +946,7 @@ async function openCurrentReportInWebsite() {
     let binary = "";
     bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
     const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-    window.open("https://apc.nyase.ru/lab/report.html?v=20261019-report-handoff-3#report=" + encoded, "_blank", "noopener");
+    window.open("https://apc.nyase.ru/lab/report.html?v=20261021-ai-readable-v041#report=" + encoded, "_blank", "noopener");
   } catch (error) {
     showToast("打开网站报告失败：" + error.message, "error");
   }
@@ -760,8 +955,11 @@ async function openCurrentReportInWebsite() {
 async function actionBody(action) {
   const execute = $("execute").checked;
   const task = state.task || { id: "crosswalk", title: "人行道避让" };
-  if (action === "doctor") return { task: task.id, scenario: task.title };
-  if (action === "record") return { experiment_id: state.experimentId || undefined, task: task.id, scenario: task.title, tag: task.id, seconds: Number($("seconds").value || 25), execute };
+  if (action === "doctor") return { experiment_id: state.experimentId || undefined, task: task.id, scenario: task.title };
+  if (action === "start-sim") return { task: task.id, scenario: task.title };
+  if (action === "stop-sim") return { task: task.id, scenario: task.title, experiment_id: state.experimentId || undefined };
+  if (action === "record") return { experiment_id: state.experimentId || undefined, task: task.id, scenario: task.title, tag: task.id, execute };
+  if (["record-pause", "record-resume", "record-stop"].includes(action)) return { experiment_id: state.experimentId };
   if (action === "report") return { experiment_id: state.experimentId, record: state.experiment?.record?.path, execute };
   if (action === "selfeval") return { experiment_id: state.experimentId, execute };
   if (action === "export") return { experiment_id: state.experimentId };
@@ -773,6 +971,11 @@ async function runAction(action) {
   if (state.jobId) {
     showToast("已有任务正在运行，请等待当前任务完成。", "error");
     return;
+  }
+  if (action === "start-sim" || action === "stop-sim") {
+    const confirmed = await confirmSimulationAction(action);
+    if (!confirmed) return;
+    if (action === "start-sim") openSimulationPlaceholder();
   }
   const label = actionLabel(action);
   setActionBusy(action, true);
@@ -786,7 +989,7 @@ async function runAction(action) {
     if ((action === "report" || action === "selfeval" || action === "export" || action === "explain") && !payload.experiment_id) throw new Error("请先选择或创建实验记录");
     const data = await api(`/api/actions/${action}`, { method: "POST", body: payload });
     state.jobId = data.job.job_id;
-    state.experimentId = data.experiment_id;
+    if (data.experiment_id) state.experimentId = data.experiment_id;
     setConsoleSummary(`${label}已提交，任务编号 ${state.jobId}，请等待运行结果。`, "running");
     setConsoleDetails(`[${action}] 任务已启动：${state.jobId}\n`);
     setPill("job-status", "运行中", "ok");
@@ -800,6 +1003,7 @@ async function runAction(action) {
     setConsoleSummary(`${label}失败：${error.message}`, "error");
     setConsoleDetails(`错误：${error.message}`);
     state.jobId = "";
+    if (action === "start-sim" && state.simWindow && !state.simWindow.closed) state.simWindow.close();
   }
 }
 
@@ -829,7 +1033,16 @@ async function pollJob(jobId) {
       showToast(`${actionLabel(job.action)}失败，请查看任务控制台。`, "error");
     }
     await loadExperiments();
+    if (job.action === "doctor" || job.action === "start-sim" || job.action === "stop-sim") await loadRuntime();
     await loadExperiment(state.experimentId || job.experiment_id);
+    if (job.action === "start-sim") {
+      if (job.status === "succeeded") {
+        if (state.simWindow && !state.simWindow.closed) state.simWindow.location.href = "http://localhost:8888/";
+        else window.open("http://localhost:8888/", "_blank", "noopener");
+      } else if (state.simWindow && !state.simWindow.closed) {
+        state.simWindow.close();
+      }
+    }
   } catch (error) {
     setActionBusy(false);
     state.jobId = "";
@@ -848,6 +1061,7 @@ async function init() {
     state.tasks = session.tasks?.tasks || [];
     setDeepSeekStatus(Boolean(session.deepseek_configured));
     await loadDeepSeekSettings();
+    await loadRuntime();
     const params = new URLSearchParams(location.search);
     const wanted = params.get("task");
     selectTask(state.tasks.find((task) => task.id === wanted) || state.tasks[0] || { id: "crosswalk", title: "人行道避让" });
@@ -861,6 +1075,37 @@ async function init() {
   }
 }
 
+function initAmbientInteractions() {
+  const supportsFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!supportsFinePointer || reducedMotion) return;
+
+  const spotlightSelector = ".panel, .metric, .task, .sidebar-card, .assistant-card, .sidebar-visual, .step";
+  document.addEventListener("pointermove", (event) => {
+    const target = event.target.closest(spotlightSelector);
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      target.style.setProperty("--spot-x", (event.clientX - rect.left) + "px");
+      target.style.setProperty("--spot-y", (event.clientY - rect.top) + "px");
+      target.classList.add("is-pointer-over");
+    }
+    const hero = document.querySelector(".hero");
+    if (hero) {
+      const rect = hero.getBoundingClientRect();
+      if (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom) {
+        const x = (event.clientX - rect.left) / Math.max(1, rect.width) - 0.5;
+        const y = (event.clientY - rect.top) / Math.max(1, rect.height) - 0.5;
+        hero.style.setProperty("--hero-x", (x * 8).toFixed(2) + "px");
+        hero.style.setProperty("--hero-y", (y * 5).toFixed(2) + "px");
+      }
+    }
+  }, { passive: true });
+  document.addEventListener("pointerout", (event) => {
+    const target = event.target.closest(spotlightSelector);
+    if (target && !target.contains(event.relatedTarget)) target.classList.remove("is-pointer-over");
+  }, { passive: true });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", () => runAction(button.dataset.action)));
   $("refresh").addEventListener("click", async () => { await loadExperiments(); await loadExperiment(state.experimentId); });
@@ -872,5 +1117,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const webReportButton = document.getElementById("open-web-report");
   if (webReportButton) webReportButton.addEventListener("click", openCurrentReportInWebsite);
   initChat();
+  initAmbientInteractions();
+  setInterval(renderRecordingControls, 1000);
+  setInterval(refreshActiveRecord, 2500);
   init();
 });

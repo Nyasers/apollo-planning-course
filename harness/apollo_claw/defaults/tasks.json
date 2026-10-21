@@ -1,0 +1,183 @@
+{
+  "version": "0.5.1",
+  "apollo": "9.0",
+  "localPanel": "http://127.0.0.1:8765/",
+  "updated_at": "2026-10-21",
+  "tasks": [
+    {
+      "id": "speed-bump",
+      "number": "实验一",
+      "title": "减速带场景",
+      "description": "主车通过减速带时速度不超过 3 m/s。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "crosswalk",
+      "number": "实验二",
+      "lesson": "lesson-15",
+      "title": "人行道场景",
+      "description": "主车遇行人通过人行道时，应在人行道前 1.5—2.0m 内停车，待行人完全通过后继续行驶。",
+      "localEntry": "http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15",
+      "status": "open",
+      "skills": [
+        "apollo-env",
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "doctor.json",
+        "record",
+        "channel_summary.csv",
+        "plots/*.png",
+        "score.json",
+        "report.md",
+        "report.json",
+        "selfeval.md",
+        "lab-report.json",
+        "lab-report.md"
+      ]
+    },
+    {
+      "id": "traffic-light",
+      "number": "实验三",
+      "lesson": "lesson-16",
+      "title": "红绿灯场景",
+      "description": "主车监测到前方红灯时，应停车在停止线前 1.5—2.0m 处，不得超过停止线。",
+      "localEntry": "http://127.0.0.1:8765/?task=traffic-light&lesson=lesson-16",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "stop-sign",
+      "number": "实验四",
+      "title": "停止标志场景",
+      "description": "遇停止标志须完全停止，在停止线前 1.5—2.0m 内停车，确认安全后通行。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "obstacle-stop",
+      "number": "实验五",
+      "title": "障碍物停车避让场景",
+      "description": "前方静止车辆无法安全绕行时，应平稳减速并在前车后方停车，保持不少于 2m 的安全距离。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "dynamic-follow",
+      "number": "实验六",
+      "title": "动态障碍物跟随场景",
+      "description": "前方同向动态障碍物无法安全超车或绕行时，应平稳跟随并保持合理安全距离。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "empty-crosswalk-slow",
+      "number": "实验七",
+      "title": "人行道路口减速通行场景",
+      "description": "通过无人的人行道时，主车速度不得超过 5 m/s。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "traffic-light-slow",
+      "number": "实验八",
+      "title": "交通灯路口减速通行场景",
+      "description": "红灯变为绿灯后可继续行驶，通过交通信号灯区域时速度不得超过 5 m/s。",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "channel_summary.csv",
+        "score.json",
+        "report.md"
+      ]
+    },
+    {
+      "id": "valet-parking",
+      "number": "实验九",
+      "lesson": "lesson-18",
+      "title": "自主泊车场景",
+      "description": "进入泊车场景后，搜索距离停车场入口最近的可用泊车位并完成泊车，限时 90 秒。",
+      "localEntry": "http://127.0.0.1:8765/?task=valet-parking&lesson=lesson-18",
+      "status": "planned",
+      "skills": [
+        "apollo-dev",
+        "apollo-test",
+        "apollo-eval"
+      ],
+      "evidence": [
+        "record",
+        "trajectory.png",
+        "score.json",
+        "report.md"
+      ]
+    }
+  ]
+}

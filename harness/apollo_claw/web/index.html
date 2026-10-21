@@ -4,41 +4,62 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Apollo Claw Harness</title>
+  <link rel="icon" type="image/webp" href="/assets/brand-claw-path-low.webp">
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
+  <div class="ambient-background" aria-hidden="true">
+    <div class="ambient-grid"></div>
+    <div class="ambient-radar"><span></span><span></span><span></span></div>
+    <svg class="ambient-route" viewBox="0 0 900 620" preserveAspectRatio="none">
+      <path class="route-shadow" d="M-40 500 C180 470 250 300 430 300 S650 390 940 120" />
+      <path class="route-line" d="M-40 500 C180 470 250 300 430 300 S650 390 940 120" />
+      <path class="route-branch" d="M430 300 C510 215 610 200 710 180" />
+      <circle cx="430" cy="300" r="4" />
+      <circle cx="710" cy="180" r="3" />
+    </svg>
+    <div class="ambient-scanline"></div>
+  </div>
   <header class="topbar">
     <a class="brand" href="/">
-      <span class="brand-mark">A</span>
-      <span class="brand-copy"><strong>APOLLO CLAW</strong><small>LOCAL HARNESS</small></span>
+      <img class="brand-mark-img" src="/assets/brand-claw-path-low.webp" alt="Apollo Claw path mark">
+      <span class="brand-copy"><strong>APOLLO CLAW</strong><small>MECHA LAB / LOCAL HARNESS</small></span>
     </a>
-    <div class="topbar-context"><span class="eyebrow">APOLLO / PLANNING LAB</span><span class="divider"></span><span class="muted">城市道路自动驾驶综合仿真实验</span></div>
+    <div class="topbar-context"><span class="eyebrow">PLANNING / SIMULATION / EVIDENCE</span><span class="divider"></span><span class="muted">近未来自动驾驶实验终端</span></div>
     <div class="topbar-actions"><span id="service-status" class="pill">连接中</span><span class="local-chip">127.0.0.1</span></div>
   </header>
 
   <main class="app-shell">
     <aside class="sidebar">
-      <div class="sidebar-head"><span class="eyebrow">EXPERIMENTS</span><h1>实验任务</h1><p>选择一个任务，按流程完成实验闭环。</p></div>
+      <div class="sidebar-head"><span class="eyebrow">EXPERIMENTS</span><h1>实验任务</h1><p>选择一个实验，按流程完成实验闭环。</p></div>
       <div id="task-list" class="task-list"></div>
+      <div id="task-visual" class="sidebar-visual">
+        <img id="task-visual-image" src="/assets/scenario-crosswalk-low.webp" alt="当前实验场景">
+        <div class="sidebar-visual-caption"><span>ACTIVE SCENARIO</span><strong id="task-visual-title">人行道避让</strong></div>
+      </div>
       <div class="sidebar-card">
         <span class="eyebrow">RUNTIME</span>
         <div class="side-stat"><span>Harness</span><b>LOCAL</b></div>
         <div class="side-stat"><span>DreamView</span><a href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 ↗</a></div>
         <div class="side-stat"><span>DeepSeek</span><b id="deepseek-side-status">规则降级</b></div>
       </div>
-      <div class="side-note">网页只发出受控动作，真实仿真、record 和模型调用都在本地执行。</div>
+      <div class="assistant-card">
+        <img src="/assets/apollo-claw-drone-low.webp" alt="Apollo Claw 实验助手">
+        <div><span>APOLLO CLAW</span><strong>实验诊断单元</strong><small>LOCAL / PRIVATE / AUDITABLE</small></div>
+      </div>
+      <div class="side-note">受控本地执行 · 仿真 / record / 模型 / 证据链</div>
     </aside>
 
     <section class="workspace">
       <section class="hero">
-        <div class="hero-copy"><span class="eyebrow">AI + VIRTUAL SIMULATION</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
+        <div class="hero-copy"><span class="eyebrow">PLANNING EXPERIMENT / M-01</span><h2 id="task-title">城市道路自动驾驶综合仿真实验</h2><p id="task-desc">选择左侧任务，按流程完成环境检查、场景运行、record、报告和复盘。</p></div>
         <div class="hero-actions"><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a><button id="refresh" class="button secondary">刷新状态</button></div>
       </section>
 
       <section class="metric-row">
         <article class="metric"><span>实验状态</span><strong id="metric-status">—</strong></article>
         <article class="metric"><span>Record Channels</span><strong id="metric-channels">—</strong></article>
-        <article class="metric"><span id="metric-score-label">场景得分</span><strong id="metric-score">—</strong></article>
+        <article class="metric"><span id="metric-score-label">综合自评</span><strong id="metric-score">—</strong></article>
         <article class="metric"><span>证据文件</span><strong id="metric-evidence">—</strong></article>
       </section>
 
@@ -46,10 +67,11 @@
         <section class="panel workflow-panel">
           <div class="panel-head"><div><span class="eyebrow">WORKFLOW</span><h3>实验流程</h3></div><span id="active-task" class="pill">未选择</span></div>
           <div id="workflow-status" class="workflow-status" role="status" aria-live="polite">等待操作</div>
+          <div id="env-check-result" class="env-check-result" hidden></div>
           <div class="step-list">
-            <div class="step"><span class="step-no">01</span><div class="step-copy"><strong>环境检查</strong><small>Docker / aem / Apollo / DreamView</small></div><button class="button" data-action="doctor">检查环境</button></div>
-            <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>在 DreamView 中选择地图、SimControl 和场景</small></div><a class="button secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">去启动</a></div>
-            <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>建议 20-30 秒，先确认 channel 有消息</small><small class="step-hint">不勾选“实际运行”时只预览命令，不会读取 Apollo 容器</small></div><div class="inline"><input id="seconds" type="number" min="5" max="120" value="25"><label class="check" title="勾选后才会真正连接 Apollo 容器执行命令"><input id="execute" type="checkbox">实际运行</label><button class="button" data-action="record">开始录制</button></div></div>
+            <div class="step"><span class="step-no">01</span><div class="step-copy"><strong>环境检查</strong><small>Linux / Docker / Apollo / DreamView 分层检查</small></div><button class="button" data-action="doctor">检查环境</button></div>
+            <div class="step"><span class="step-no">02</span><div class="step-copy"><strong>启动场景</strong><small>自动启动 WSL、Apollo 容器和 DreamView，确认后再进入仿真</small></div><div class="step-actions"><button class="button secondary" data-action="start-sim">去启动</button><button class="button secondary danger" data-action="stop-sim">退出仿真</button></div></div>
+            <div class="step"><span class="step-no">03</span><div class="step-copy"><strong>录制 record</strong><small>由你手动结束；可暂停、继续，完成后统一生成报告</small><small class="step-hint">不勾选“实际运行”时只预览命令，不会读取 Apollo 容器</small></div><div class="record-controls"><div class="inline record-start-controls"><label class="check" title="勾选后才会真正连接 Apollo 容器执行命令"><input id="execute" type="checkbox">实际运行</label><button class="button" data-action="record">开始录制</button></div><div id="record-session-bar" class="record-session-bar" hidden><span id="record-session-state" class="record-session-state">未开始</span><span id="record-session-time" class="record-session-time">00:00</span><button class="button secondary compact" type="button" data-action="record-pause">暂停</button><button class="button compact" type="button" data-action="record-resume" hidden>继续录制</button><button class="button secondary compact danger" type="button" data-action="record-stop">结束并保存</button></div></div></div>
             <div class="step"><span class="step-no">04</span><div class="step-copy"><strong>生成 channel 报告</strong><small>读取 record，生成 CSV / PNG / Markdown</small></div><button class="button" data-action="report">生成报告</button></div>
             <div class="step"><span class="step-no">05</span><div class="step-copy"><strong>生成自评报告</strong><small>场景指标 + 体感指标 + 改进建议</small></div><button class="button" data-action="selfeval">生成自评</button></div>
             <div class="step"><span class="step-no">06</span><div class="step-copy"><strong>导出实验报告</strong><small>生成 report.json / report.md</small></div><button class="button" data-action="export">导出</button></div>
@@ -60,7 +82,7 @@
           <div class="panel-head"><div><span class="eyebrow">RUN</span><h3>当前实验</h3></div><button id="refresh-exp" class="text-button">刷新</button></div>
           <label class="field">实验记录<select id="experiment-select"><option value="">新建实验</option></select></label>
           <div id="experiment-summary" class="summary">尚无实验记录</div>
-          <div class="manual-box"><strong>实际运行开关</strong><p>默认关闭时只生成命令预览，不接触 Apollo 容器；勾选“实际运行”后才会真正录制或评分。</p></div>
+          <div class="manual-box"><strong>实际运行开关</strong><p>默认关闭时只生成命令预览；勾选“实际运行”后会启动原生 cyber_recorder，并支持暂停、继续和结束保存。</p></div>
           <div class="run-note"><span class="eyebrow">NEXT</span><p>先完成环境检查和场景启动，再录制 record。没有场景时 channel 会是 0。</p></div>
         </section>
 
@@ -124,6 +146,17 @@
       </div>
     </section>
   </main>
+  <dialog id="confirm-dialog" class="confirm-dialog">
+    <form method="dialog">
+      <span class="eyebrow">CONFIRM</span>
+      <h3 id="confirm-title">确认启动仿真？</h3>
+      <p id="confirm-message">Harness 将进入本地 WSL，启动 Apollo 容器和 DreamView。该操作可能需要一到数分钟。</p>
+      <div class="confirm-actions">
+        <button id="confirm-cancel" class="button secondary" value="cancel">取消</button>
+        <button id="confirm-ok" class="button" value="confirm">确认启动</button>
+      </div>
+    </form>
+  </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>window.__APOLLO_CLAW_TOKEN__ = "__APOLLO_CLAW_TOKEN_VALUE__";</script>
   <script src="/app.js"></script>
