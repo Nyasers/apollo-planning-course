@@ -1,5 +1,29 @@
 # Apollo Planning 新手自学路线（V2）
 
+> 本仓库同时公开课程网站和 Apollo Claw Harness 源码。Harness 位于 [`harness/`](./harness/)，用于本地环境检查、仿真启动、record 控制、报告生成和实验证据管理。
+
+## 仓库内容
+
+- [`site/`](./site/)：课程网站、实验中心、报告页和静态资源。
+- [`harness/`](./harness/)：Apollo Claw Harness 源码、本地实验面板、脚本、技能和测试。
+- [`tools/`](./tools/)：网站构建和检查工具。
+- 课程 Markdown 和实验说明位于仓库根目录及 `reference/`。
+
+Harness 快速开始：
+
+```bash
+cd harness
+python3 -m apollo_claw serve --port 8765
+```
+
+Windows 一键配置：
+
+```text
+harness/一键配置Harness.cmd
+```
+
+Harness 的安装、命令和目录说明见 [`harness/README.md`](./harness/README.md)。原创代码采用 [Apache-2.0](./LICENSE) 许可证；`harness/skills` 中涉及 Apollo 的参考资料和第三方资源仍遵循各自的原始许可。
+
 ## 1. 这次调整的原则
 
 原来的内容从源码细节和函数调用开始，对零基础学习者偏难。

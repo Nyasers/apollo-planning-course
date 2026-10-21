@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "apollo-claw-harness"
 version = "0.5.1"
 description = "Thin local harness for Apollo Claw experiment workflow"
+license = { text = "Apache-2.0" }
 requires-python = ">=3.9"
 dependencies = []
 
