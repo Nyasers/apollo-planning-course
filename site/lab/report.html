@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Apollo Claw 实验报告：人行道避让优化前后对比。">
+  <meta name="description" content="Apollo Claw 实验报告：导入本地 Harness 结果，查看指标、AI 建议和证据链。">
   <title>实验报告 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css?v=20261021-ai-readable-v041">
   <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-launcher-v1">
@@ -34,10 +34,10 @@
   <main class="lab-shell" id="main-content" data-lab-report>
     <section class="lab-hero">
       <div class="lab-hero-copy">
-        <p class="lesson-kicker">Report · <span data-report-scenario>人行道避让</span></p>
+        <p class="lesson-kicker">Report · <span data-report-scenario>等待导入报告</span></p>
         <div class="lab-report-status"><span class="lab-source-badge is-demo" data-report-mode-badge>报告加载中</span></div>
         <h1>实验数据<span>与证据报告</span></h1>
-        <p data-report-intro>当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 或 lab-report.json 后，可在此导入真实指标、AI 建议、基线与本轮对比和证据链。</p>
+        <p data-report-intro>完成本地 Harness 实验后，通过“在网页中打开”或选择 report.json / lab-report.json 导入。本页不会上传文件，并会显示当前导入报告的场景、指标、AI 建议和证据链。</p>
         <div class="lab-hero-actions">
           <button class="button-primary" type="button" data-download-report>下载当前报告摘要</button>
           <a class="button-secondary" data-local-panel data-local-launch href="#">启动并打开 Harness</a>
@@ -53,41 +53,31 @@
           <li><b data-report-score-before>—</b><span>优化前得分</span><em>BASELINE</em></li>
           <li><b data-report-score-current>—</b><span>当前报告得分</span><em>REPORT</em></li>
         </div>
-        <p class="lab-board-note" data-report-official>本地自评估，不替代官方评分。</p>
+        <p class="lab-board-note" data-report-official>导入报告后显示本地自评结果。</p>
       </div>
     </section>
 
-    <section class="lab-section">
-      <div class="lab-report-modes" role="group" aria-label="报告视图">
-        <button class="lab-report-mode" type="button" aria-pressed="true" data-report-mode="real">当前进度产物</button>
-        <button class="lab-report-mode" type="button" aria-pressed="false" data-report-mode="import">导入我的报告</button>
-        <button class="lab-report-mode" type="button" aria-pressed="false" data-report-mode="preview">目标形态预览</button>
-      </div>
-      <div class="lab-notice lab-report-preview-banner" data-report-preview-banner hidden><strong>目标形态预览：</strong>以下为产品完善后的报告界面示意，使用演示数据，不代表当前实验结果。</div>
-    </section>
 
     <section class="lab-section" data-report-import-section>
       <div class="lab-section-head">
-        <div><p class="section-kicker">Report Source</p><h2 data-report-import-title>报告来源</h2></div>
-        <p data-report-import-desc>报告加载后显示数据来源和元数据。</p>
+        <div><p class="section-kicker">Report Source</p><h2 data-report-import-title>导入本地 Harness 报告</h2></div>
+        <p data-report-import-desc>选择报告文件，或从本地 Harness 点击“在网页中打开”。文件只在当前浏览器读取。</p>
       </div>
       <div class="lab-report-import-card">
         <div class="lab-report-import-copy">
           <span class="lab-chip">报告来源</span>
-          <p data-report-import-status role="status">当前显示网站内置演示数据，不代表真实仿真结果。</p>
+          <p data-report-import-status role="status">尚未导入报告。请选择 report.json 或 lab-report.json。</p>
         </div>
         <div class="lab-report-import-actions" data-report-import-actions>
           <label class="lab-file-button">选择报告文件<input type="file" accept="application/json,.json" data-report-file></label>
-          <button class="button-secondary" type="button" data-load-sample-report>加载当前进度产物</button>
-          <button class="button-secondary" type="button" data-report-reset>查看目标形态预览</button>
         </div>
         <dl class="lab-report-meta-grid">
           <div><dt>实验编号</dt><dd data-report-run-id>—</dd></div>
-          <div><dt>实验任务</dt><dd data-report-task>人行道避让</dd></div>
+          <div><dt>实验任务</dt><dd data-report-task>等待导入</dd></div>
           <div><dt>生成时间</dt><dd data-report-created-at>—</dd></div>
           <div><dt>Record</dt><dd data-report-record>—</dd></div>
           <div><dt>环境检查</dt><dd data-report-environment>—</dd></div>
-          <div><dt>评分来源</dt><dd data-report-score-source>网站演示</dd></div>
+          <div><dt>评分来源</dt><dd data-report-score-source>—</dd></div>
           <div><dt>AI 技能</dt><dd data-report-ai-skills>—</dd></div>
         </dl>
       </div>
@@ -167,7 +157,7 @@
         </article>
         <article class="lab-report-card">
           <h3>报告结论</h3>
-          <p data-report-conclusion>尚无当前进度产物数据。</p>
+          <p data-report-conclusion>导入报告后显示实验结论。</p>
         </article>
         <article class="lab-report-card">
           <h3>错误与阻塞</h3>
@@ -192,6 +182,6 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-index-snapshot-v1"></script>
+  <script src="../assets/js/lab.js?v=20261021-report-import-v2"></script>
 </body>
 </html>
