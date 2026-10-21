@@ -359,8 +359,8 @@
     if (kicker) kicker.insertAdjacentElement("afterend", box);
     else header.prepend(box);
 
-    const link = el("a", "lesson-context-link", "进入对应实验台 →");
-    link.href = "lab/crosswalk.html";
+    const link = el("a", "lesson-context-link", lessonId === "lesson-00" ? "开始首次实验引导 →" : "进入对应实验台 →");
+    link.href = lessonId === "lesson-00" ? "lab/start.html" : "lab/crosswalk.html";
     box.appendChild(link);
   }
 

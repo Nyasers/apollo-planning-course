@@ -315,6 +315,12 @@ async function build() {
       keywords: "人行道 避让 apollo-env apollo-dev apollo-test apollo-eval"
     },
     {
+      title: "首次使用引导 · 开始实验",
+      href: "lab/start.html",
+      text: "流程演示、配置确认、WSL 镜像、Harness 包、环境检查和真实实验入口",
+      keywords: "开始实验 首次使用 配置 WSL 镜像 Harness 安装 环境检查"
+    },
+    {
       title: "系统模块全景",
       href: "system-map.html",
       text: "感知、定位、预测、规划、控制、底盘与 Cyber RT channel 的结构关系",

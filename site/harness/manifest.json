@@ -1,10 +1,15 @@
 {
   "harness": "apollo-claw-harness",
-  "version": "0.3.4",
+  "version": "0.5.1",
   "apollo": "9.0",
   "panel": "http://127.0.0.1:8765/",
-  "status": "selfeval-ready",
+  "status": "guided-onboarding-ready",
   "capabilities": [
+    "ambient motion",
+    "runtime check",
+    "sim start",
+    "sim stop",
+    "record pause/resume",
     "doctor",
     "explain",
     "test record",
@@ -17,5 +22,43 @@
   ],
   "localOnly": true,
   "apiKeyLocation": "~/.apollo-claw/.env",
-  "notes": "网页负责展示和导入报告；真实执行、模型调用、自评和证据由本地 Harness 完成。"
+  "notes": "网页负责展示和导入报告；真实执行、模型调用、自评和证据由本地 Harness 完成。",
+  "onboarding": {
+    "estimated": {
+      "demoMinutes": 5,
+      "downloadMinutes": "5-20",
+      "setupMinutes": "20-40",
+      "experimentMinutes": "45-60"
+    },
+    "requirements": {
+      "os": "Windows 10/11 64 位",
+      "memoryGb": 16,
+      "diskGb": 80,
+      "cpu": "四核 2.0 GHz 及以上",
+      "adminRequired": true,
+      "networkRequired": true
+    },
+    "wslImage": {
+      "status": "pending",
+      "label": "预装 WSL / Apollo 镜像",
+      "format": "WSL tar",
+      "version": "",
+      "url": "",
+      "sizeBytes": 0,
+      "sha256": "",
+      "note": "镜像链接与校验值待负责人补充"
+    },
+    "harnessPackage": {
+      "status": "ready",
+      "label": "Apollo Claw Harness 0.5.1",
+      "version": "0.5.1",
+      "url": "/harness/apollo-claw-harness-0.5.1.zip",
+      "sizeBytes": 1163698,
+      "sha256": "1fd915556d5474a68d5a22216bc63c92712e01f43f16e42694e6540d3f703188",
+      "note": "包含 Harness 源码、脚本、技能和测试；不包含 API Key"
+    },
+    "manualSetupUrl": "/setup/",
+    "startExperimentUrl": "/lab/crosswalk.html",
+    "harnessPanel": "http://127.0.0.1:8765/"
+  }
 }

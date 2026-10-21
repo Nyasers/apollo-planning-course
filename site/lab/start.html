@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="城市道路自动驾驶综合仿真实验首次使用引导：流程演示、配置确认、材料下载、环境检查和真实实验入口。">
+  <title>开始实验 | 城市道路自动驾驶综合仿真实验</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/css/site.css?v=20261021-start-guide-v1">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-start-guide-v1">
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>首次使用引导</span></span></a>
+    <nav class="lab-nav" aria-label="实验中心导航"><a href="./">实验中心</a><a href="start.html" aria-current="page">开始实验</a><a href="ai-loop.html">AI 引导</a><a href="crosswalk.html">人行道避让</a><a href="report.html">实验报告</a><a href="../index.html">返回课程</a></nav>
+    <div class="lab-actions"><span class="lab-status-pill">Guided Start</span><button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button></div>
+  </header>
+  <main class="lab-shell" id="main-content" data-start-guide>
+    <section class="start-hero">
+      <div><p class="lesson-kicker">Guided Start · 5 Steps</p><h1>先用演示看懂，<br><span>再开始真实实验。</span></h1><p>本页带你完成从流程演示、配置确认到环境检查的首次使用流程。演示不会产生正式实验数据；只有完成本地环境检查和真实场景运行后，才会生成可提交的证据。</p></div>
+      <div class="start-hero-badge"><span>预计首次完成</span><strong>55—90 分钟</strong><small>已有环境约 45—60 分钟</small></div>
+    </section>
+    <nav class="start-stepper" aria-label="首次使用步骤">
+      <button type="button" data-start-nav="0" class="is-active"><b>01</b><span>流程演示</span></button>
+      <button type="button" data-start-nav="1"><b>02</b><span>配置确认</span></button>
+      <button type="button" data-start-nav="2"><b>03</b><span>准备材料</span></button>
+      <button type="button" data-start-nav="3"><b>04</b><span>检查环境</span></button>
+      <button type="button" data-start-nav="4"><b>05</b><span>开始实验</span></button>
+    </nav>
+    <section class="start-panel is-active" data-start-panel="0">
+      <div class="lab-section-head"><div><p class="section-kicker">Step 01 · Demo</p><h2>AI 辅助仿真流程演示</h2></div><p>演示数据仅用于说明交互方式，不写入国家实验平台。</p></div>
+      <div class="start-demo-shell">
+        <div class="start-demo-stage">
+          <div class="start-demo-top"><span>DEMO ONLY</span><span data-demo-count>01 / 05</span></div>
+          <div class="start-demo-body"><div class="start-demo-index" data-demo-index>01</div><div><p class="lesson-kicker" data-demo-kicker>Environment</p><h3 data-demo-title>环境检查与 AI 诊断</h3><p data-demo-text>系统检查 Linux、Docker、Apollo 和 DreamView；AI 只解释检查结果，并给出下一步验证建议。</p></div></div>
+          <div class="start-demo-data" data-demo-data></div>
+        </div>
+        <aside class="start-demo-notes"><h3>这一段你会看到</h3><ol><li>当前系统发生了什么</li><li>AI 如何区分事实、推测和建议</li><li>学生需要确认什么</li><li>最终留下什么证据</li></ol><div class="start-demo-controls"><button type="button" class="button-secondary" data-demo-prev>上一步</button><button type="button" class="button-primary" data-demo-next>下一段</button></div></aside>
+      </div>
+      <div class="start-actions"><span>演示模式不会调用正式实验记录。</span><button type="button" class="button-primary" data-start-next>我已看懂，继续</button></div>
+    </section>
+    <section class="start-panel" data-start-panel="1">
+      <div class="lab-section-head"><div><p class="section-kicker">Step 02 · Requirements</p><h2>确认真实实验条件</h2></div><p>真实实验会在本机启动 WSL/Ubuntu、Docker、Apollo 和 Harness。</p></div>
+      <div class="start-requirement-grid" data-start-requirements></div>
+      <div class="start-confirm-box"><label><input type="checkbox" data-start-confirm> 我已确认电脑满足配置要求，并理解演示数据不能用于正式提交。</label><p>配置不足时仍可查看课程和演示，但不能完成真实仿真。</p></div>
+      <div class="start-actions"><button type="button" class="button-secondary" data-start-prev>返回演示</button><button type="button" class="button-primary" data-start-next disabled>确认并查看材料</button></div>
+    </section>
+    <section class="start-panel" data-start-panel="2">
+      <div class="lab-section-head"><div><p class="section-kicker">Step 03 · Materials</p><h2>准备镜像与 Harness</h2></div><p>材料信息从统一 manifest 读取；镜像未发布时请先使用手动配置说明。</p></div>
+      <div class="start-material-list" data-start-materials><div class="lab-report-empty">正在读取材料信息…</div></div>
+      <div class="start-confirm-box"><label><input type="checkbox" data-materials-confirm> 我已了解镜像/Harness 版本、文件大小和部署方式。</label></div>
+      <div class="start-actions"><button type="button" class="button-secondary" data-start-prev>返回配置确认</button><button type="button" class="button-primary" data-start-next disabled>继续检查环境</button></div>
+    </section>
+    <section class="start-panel" data-start-panel="3">
+      <div class="lab-section-head"><div><p class="section-kicker">Step 04 · Runtime</p><h2>启动并检查本地环境</h2></div><p>先安装镜像和 Harness，再点击启动。Harness 打开后会自动执行分层环境检查。</p></div>
+      <div class="start-runtime-card"><div><span class="start-runtime-label">LOCAL HARNESS</span><h3>启动本地实验台</h3><p>首次点击需要浏览器允许打开 <code>Apollo_Harness</code>。如果浏览器未响应，请使用手动配置说明。</p></div><div class="start-runtime-actions"><a class="button-primary" data-local-panel data-local-launch href="#">启动并打开 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">已启动？直接打开</a><a class="button-secondary" href="../setup/index.html">查看手动配置</a></div></div>
+      <p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p>
+      <div class="start-check-grid"><article><span>Linux / WSL</span><strong>由 Harness 检查</strong></article><article><span>Docker / AEM</span><strong>由 Harness 检查</strong></article><article><span>Apollo / DreamView</span><strong>由 Harness 检查</strong></article><article><span>Record 与报告</span><strong>检查通过后生成</strong></article></div>
+      <div class="start-actions"><button type="button" class="button-secondary" data-start-prev>返回材料</button><button type="button" class="button-primary" data-start-next>环境已就绪，开始实验</button></div>
+    </section>
+    <section class="start-panel" data-start-panel="4">
+      <div class="start-finish"><p class="lesson-kicker">Step 05 · Start</p><h2>进入人行道避让实验</h2><p>真实实验会按 8 个主阶段执行，并在后台记录至少 10 个可回传过程步骤。完成 record、指标和报告后，才允许进入正式提交环节。</p><div class="start-finish-status"><span>环境检查</span><span>场景运行</span><span>record</span><span>评分</span><span>报告</span></div><div class="lab-card-actions"><a class="button-primary" href="crosswalk.html">进入真实实验</a><a class="button-secondary" href="ai-loop.html">先查看 AI 引导</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">打开 Harness</a></div></div>
+      <div class="start-actions"><button type="button" class="button-secondary" data-start-prev>返回环境检查</button><button type="button" class="button-secondary" data-start-reset>重新开始引导</button></div>
+    </section>
+  </main>
+  <div class="search-dialog" data-search-dialog aria-hidden="true" role="dialog" aria-modal="true" aria-label="搜索课程内容"><div class="search-panel"><div class="search-input-wrap"><span>SEARCH</span><input class="search-input" data-search-input type="search" placeholder="搜索 Task、Harness、WSL..."><span>ESC</span></div><div class="search-results" data-search-results></div></div></div>
+  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
+  <script src="../assets/js/search-index.js?v=20261021-start-guide-v1"></script>
+  <script src="../assets/js/site.js?v=20261021-start-guide-v1"></script>
+  <script src="../assets/js/lab.js?v=20261021-start-guide-v1"></script>
+  <script src="../assets/js/start-guide.js?v=20261021-start-guide-v1"></script>
+</body>
+</html>

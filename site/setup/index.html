@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 本地实验环境：预装 Ubuntu 镜像、WSL2、Harness 和 DeepSeek 配置。">
   <title>本地环境与 Harness | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-progress-artifact">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-start-guide-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -24,7 +24,7 @@
         <p class="lesson-kicker">Local Linux + Local Harness</p>
         <h1>先准备环境，<span>再开始实验。</span></h1>
         <p>推荐使用预装 Ubuntu 镜像，镜像内包含 Docker、AEM、Apollo 容器、application-pnc、编译缓存、Apollo Claw 四技能和 Harness。也可以使用 WSL2 或 Ubuntu 虚拟机手动搭建。</p>
-        <div class="lab-hero-actions"><a class="button-primary" data-local-panel href="#">启动并打开本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">已启动？直接打开</a><a class="button-secondary" href="../lesson-00.html">查看第 00 课安装指南</a><a class="button-secondary" href="../lab/ai-loop.html">查看 AI 闭环</a></div>
+        <div class="lab-hero-actions"><a class="button-primary" href="../lab/start.html">开始首次使用引导</a><a class="button-secondary" data-local-panel data-local-launch href="#">启动并打开 Harness</a><a class="button-secondary" href="../lesson-00.html">查看环境认知课</a></div><p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p>
       </div>
       <div class="lab-hero-board"><p class="lab-board-label">SETUP ROUTES</p><ol class="lab-flow"><li><b>A</b><span>预装 Ubuntu 镜像</span><em>推荐</em></li><li><b>B</b><span>WSL2 手动安装</span><em>需验证</em></li><li><b>C</b><span>Ubuntu 虚拟机</span><em>兼容性好</em></li></ol></div>
     </section>
@@ -95,6 +95,6 @@ chmod 600 ~/.apollo-claw/.env</pre>
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261019-progress-artifact"></script>
+  <script src="../assets/js/lab.js?v=20261021-start-guide-v1"></script>
 </body>
 </html>
