@@ -1,5 +1,6 @@
-param(
-  [switch]$NoStart
+﻿param(
+  [switch]$NoStart,
+  [switch]$CheckOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,8 +21,8 @@ function Find-Python {
     $command = Get-Command $candidate -ErrorAction SilentlyContinue
     if (-not $command) { continue }
     try {
-      $args = if ($candidate -eq "py") { @("-3", "--version") } else { @("--version") }
-      $versionText = & $command.Source @args 2>&1 | Out-String
+      $versionArgs = if ($candidate -eq "py") { @("-3", "--version") } else { @("--version") }
+      $versionText = & $command.Source @versionArgs 2>&1 | Out-String
       if ($versionText -match "Python\s+(\d+)\.(\d+)") {
         $major = [int]$Matches[1]
         $minor = [int]$Matches[2]
@@ -42,6 +43,15 @@ try {
     throw "未找到 Python 3.9+。请先安装 Python 3.9 或更高版本，并勾选 Add Python to PATH。"
   }
   Write-Step "Python: $($python.Version)"
+  if ($CheckOnly) {
+    if (-not (Test-Path -LiteralPath $launcherInstaller)) {
+      throw "Missing launcher installer: $launcherInstaller"
+    }
+    Write-Step "Preflight checks passed"
+    Write-Host ""
+    Write-Host "Check-only mode completed. No files or settings were changed." -ForegroundColor Green
+    return
+  }
   $envDir = Join-Path $HOME ".apollo-claw"
   New-Item -ItemType Directory -Force -Path $envDir | Out-Null
   $envFile = Join-Path $envDir ".env"

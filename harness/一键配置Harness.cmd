@@ -1,13 +1,27 @@
 @echo off
 setlocal
-title Apollo Claw Harness 一键配置
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install-harness-oneclick.ps1"
-if errorlevel 1 (
+chcp 65001 >nul
+title Apollo Claw Harness Setup
+set "SCRIPT=%~dp0scripts\install-harness-oneclick.ps1"
+set "CHECK_ARG="
+set "NO_PAUSE="
+if /I "%~1"=="--check" (
+  set "CHECK_ARG=-CheckOnly"
+  set "NO_PAUSE=1"
+)
+if not exist "%SCRIPT%" (
+  echo [ERROR] Setup script not found: %SCRIPT%
+  if not defined NO_PAUSE pause
+  exit /b 1
+)
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" %CHECK_ARG%
+set "EXIT_CODE=%ERRORLEVEL%"
+if not "%EXIT_CODE%"=="0" (
   echo.
-  echo 一键配置没有完成，请查看上方提示。
+  echo [ERROR] Harness setup failed. Review the messages above.
 ) else (
   echo.
-  echo 一键配置完成。
+  echo Harness setup completed.
 )
-pause
-endlocal
+if not defined NO_PAUSE pause
+exit /b %EXIT_CODE%
