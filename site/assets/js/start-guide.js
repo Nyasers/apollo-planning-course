@@ -7,6 +7,7 @@
   const navButtons = Array.from(root.querySelectorAll("[data-start-nav]"));
   const requirementsBox = root.querySelector("[data-start-requirements]");
   const materialsBox = root.querySelector("[data-start-materials]");
+  const scenariosBox = root.querySelector("[data-competition-scenarios]");
   const requirementConfirm = root.querySelector("[data-start-confirm]");
   const materialsConfirm = root.querySelector("[data-materials-confirm]");
   let manifest = null;
@@ -122,9 +123,72 @@
     card.querySelector("small").textContent = ready ? "下载后请核对 SHA256。" : "请联系项目负责人获取发布版本。";
     return card;
   }
+  function renderCompetitionScenarios(data) {
+    if (!scenariosBox || !data || !Array.isArray(data.scenarios)) return;
+    scenariosBox.innerHTML = "";
+    data.scenarios.forEach((scenario) => {
+      const card = document.createElement("article");
+      const open = scenario.status === "open";
+      card.className = "competition-card " + (open ? "is-open" : "is-planned");
+      const head = document.createElement("div");
+      head.className = "competition-card-head";
+      const number = document.createElement("span");
+      number.className = "competition-number";
+      number.textContent = scenario.number || "赛题";
+      const status = document.createElement("span");
+      status.className = "competition-status " + (open ? "is-open" : "is-planned");
+      status.textContent = open ? "可开始" : "待接入";
+      head.append(number, status);
+      const title = document.createElement("h3");
+      title.textContent = scenario.title || "未命名场景";
+      const goal = document.createElement("p");
+      goal.className = "competition-goal";
+      goal.textContent = scenario.goal || "";
+      const details = document.createElement("details");
+      details.className = "competition-rules";
+      const summary = document.createElement("summary");
+      summary.textContent = "查看扣分规则";
+      details.appendChild(summary);
+      const list = document.createElement("ul");
+      (scenario.penalties || []).forEach((text) => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        list.appendChild(li);
+      });
+      details.appendChild(list);
+      const actions = document.createElement("div");
+      actions.className = "competition-actions";
+      if (open && scenario.page) {
+        const link = document.createElement("a");
+        link.className = "button-primary";
+        link.href = scenario.page;
+        link.textContent = "进入真实实验";
+        actions.appendChild(link);
+      } else {
+        const pending = document.createElement("span");
+        pending.className = "competition-pending";
+        pending.textContent = "实验页面待接入";
+        actions.appendChild(pending);
+      }
+      card.append(head, title, goal, details, actions);
+      scenariosBox.appendChild(card);
+    });
+  }
+
+  async function loadCompetitionScenarios() {
+    if (!scenariosBox) return;
+    try {
+      const response = await fetch("../harness/competition-scenarios.json?v=20261021-competition-scenarios-v1", { cache: "no-store" });
+      if (!response.ok) throw new Error("scenarios unavailable");
+      renderCompetitionScenarios(await response.json());
+    } catch (error) {
+      scenariosBox.innerHTML = '<div class="lab-report-empty">赛题信息暂时无法读取。</div>';
+    }
+  }
+
   async function loadManifest() {
     try {
-      const response = await fetch("../harness/manifest.json?v=20261021-harness-config-v4", { cache: "no-store" });
+      const response = await fetch("../harness/manifest.json?v=20261021-competition-scenarios-v1", { cache: "no-store" });
       if (!response.ok) throw new Error("manifest unavailable");
       manifest = await response.json();
       renderRequirements();
@@ -146,5 +210,5 @@
   root.querySelector("[data-demo-next]")?.addEventListener("click", () => { demoIndex = (demoIndex + 1) % demos.length; renderDemo(); });
   root.querySelector("[data-demo-prev]")?.addEventListener("click", () => { demoIndex = (demoIndex + demos.length - 1) % demos.length; renderDemo(); });
 
-  loadState(); renderDemo(); setStep(current); loadManifest();
+  loadState(); renderDemo(); setStep(current); loadManifest(); loadCompetitionScenarios();
 })();

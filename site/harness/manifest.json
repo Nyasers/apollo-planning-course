@@ -59,6 +59,7 @@
     },
     "manualSetupUrl": "/setup/",
     "startExperimentUrl": "/lab/crosswalk.html",
-    "harnessPanel": "http://127.0.0.1:8765/"
+    "harnessPanel": "http://127.0.0.1:8765/",
+    "competitionScenarios": "/harness/competition-scenarios.json"
   }
 }

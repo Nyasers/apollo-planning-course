@@ -1942,3 +1942,39 @@
 .lab-details .lab-setup-grid {
   padding: 14px;
 }
+
+.competition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.competition-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.competition-card.is-open {
+  border-color: color-mix(in srgb, var(--green) 42%, var(--line));
+  background: color-mix(in srgb, var(--green) 5%, var(--surface));
+}
+.competition-card-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.competition-number { color:var(--blue); font:10px var(--font-mono); letter-spacing:.1em; }
+.competition-status { padding:3px 7px; border-radius:999px; font:9px var(--font-mono); }
+.competition-status.is-open { color:var(--green); background:color-mix(in srgb, var(--green) 12%, transparent); }
+.competition-status.is-planned { color:var(--amber); background:color-mix(in srgb, var(--amber) 12%, transparent); }
+.competition-card h3 { margin:0; font-size:1.02rem; line-height:1.35; }
+.competition-goal { margin:0; color:var(--ink-soft); font-size:.78rem; line-height:1.65; }
+.competition-rules { border-top:1px solid var(--line); padding-top:9px; }
+.competition-rules summary { cursor:pointer; color:var(--blue-deep); font-size:.75rem; font-weight:650; }
+.competition-rules ul { margin:8px 0 0; padding-left:18px; color:var(--ink-soft); font-size:.74rem; line-height:1.65; }
+.competition-actions { display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:4px; }
+.competition-actions .button-primary { padding:8px 10px; font-size:.74rem; }
+.competition-pending { color:var(--ink-faint); font-size:.72rem; }
+@media (max-width: 760px) {
+  .competition-grid { grid-template-columns: minmax(0, 1fr); }
+}
