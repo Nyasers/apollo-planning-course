@@ -70,6 +70,32 @@
     });
   }
 
+  function initLocalLauncher() {
+    const launchLinks = document.querySelectorAll("[data-local-launch]");
+    const status = document.querySelector("[data-local-launch-status]");
+    launchLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        if (!status) return;
+        let leftPage = false;
+        const markLeft = () => { leftPage = true; };
+        window.addEventListener("blur", markLeft, { once: true });
+        status.hidden = false;
+        status.className = "lab-local-status is-pending";
+        status.textContent = "正在唤起本机启动器，请在弹出的系统提示中选择“打开 Apollo_Harness”。首次启动通常需要 5—15 秒。";
+        window.setTimeout(() => {
+          if (!status || status.classList.contains("is-warn")) return;
+          if (leftPage || document.hidden) {
+            status.className = "lab-local-status is-ok";
+            status.textContent = "已向本机启动器发出请求。Harness 就绪后会自动打开；如果没有打开，请使用下方“直接打开本地 Harness”。";
+          } else {
+            status.className = "lab-local-status is-warn";
+            status.textContent = "未检测到启动器响应。请确认已运行 install-harness-launcher.ps1，并允许浏览器打开 Apollo_Harness。";
+          }
+        }, 3000);
+      });
+    });
+  }
+
   function setText(root, selector, value) {
     const el = root && root.querySelector(selector);
     if (el) el.textContent = value;
@@ -1077,6 +1103,7 @@
   }
 
   syncLocalPanelLinks();
+  initLocalLauncher();
   initRunPage();
   initReportPage().catch((error) => { console.error(error); });
 })();

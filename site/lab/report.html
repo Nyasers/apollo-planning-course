@@ -6,7 +6,7 @@
   <meta name="description" content="Apollo Claw 实验报告：人行道避让优化前后对比。">
   <title>实验报告 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css?v=20261021-ai-readable-v041">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-progress-artifact">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-launcher-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -40,9 +40,11 @@
         <p data-report-intro>当前展示网站内置演示数据。完成本地 Harness 实验并导出 report.json 或 lab-report.json 后，可在此导入真实指标、AI 建议、基线与本轮对比和证据链。</p>
         <div class="lab-hero-actions">
           <button class="button-primary" type="button" data-download-report>下载当前报告摘要</button>
-          <a class="button-secondary" data-local-panel href="#">启动本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">直接打开</a>
+          <a class="button-secondary" data-local-panel data-local-launch href="#">启动并打开 Harness</a>
           <a class="button-secondary" href="crosswalk.html">返回实验台</a>
         </div>
+        <p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p>
+        <p class="lab-local-hint">若本地 Harness 已启动但未自动打开，可<a data-local-direct href="http://127.0.0.1:8765/">直接打开本地 Harness</a>。</p>
       </div>
       <div class="lab-hero-board">
         <p class="lab-board-label">SCORE</p>
@@ -190,6 +192,6 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-ai-readable-v041"></script>
+  <script src="../assets/js/lab.js?v=20261021-harness-launcher-v1"></script>
 </body>
 </html>

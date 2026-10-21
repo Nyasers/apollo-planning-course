@@ -1825,3 +1825,33 @@
     min-width: 520px;
   }
 }
+.lab-local-status {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+  font-size: .78rem;
+  line-height: 1.6;
+}
+.lab-local-status.is-pending {
+  border-left-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 9%, var(--surface));
+}
+.lab-local-status.is-ok {
+  border-left-color: var(--green);
+  background: color-mix(in srgb, var(--green) 8%, var(--surface));
+}
+.lab-local-status.is-warn {
+  border-left-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 12%, var(--surface));
+}
+.lab-local-hint a,
+.lab-local-status a {
+  color: var(--blue-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

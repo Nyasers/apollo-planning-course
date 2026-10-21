@@ -6,7 +6,7 @@
   <meta name="description" content="人行道避让综合仿真实验：Apollo Claw 综合实验台。">
   <title>人行道避让实验 | Apollo Planning Lab</title>
   <link rel="stylesheet" href="../assets/css/site.css">
-  <link rel="stylesheet" href="../assets/css/lab.css?v=20261019-progress-artifact">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261021-harness-launcher-v1">
   <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body class="lab-body" data-page="lab">
@@ -67,7 +67,7 @@
 
         <div class="lab-local-banner" style="margin-top:16px">
           <div><strong>AI 辅助模式</strong><p>页面以演示数据展示 AI 如何介入 8 个阶段。本地 Harness 完成环境检查、record、评分和 DeepSeek 解释后，导出 report.json，再回到“实验报告”页导入本地实验产物。</p></div>
-          <div class="lab-card-actions"><a class="button-primary" data-local-panel href="#">启动并打开本地 Harness</a><a class="button-secondary" data-local-direct href="http://127.0.0.1:8765/">已启动？直接打开</a><a class="button-secondary" href="evidence.html">查看证据链</a></div><p class="lab-local-hint">首次使用需在本地仓库运行一次 <code>harness\scripts\install-harness-launcher.ps1</code>，并在浏览器弹窗中选择“打开 Apollo_Harness”。</p>
+          <div class="lab-card-actions"><a class="button-primary" data-local-panel data-local-launch href="#">启动并打开本地 Harness</a><a class="button-secondary" href="evidence.html">查看证据链</a></div><p class="lab-local-status" data-local-launch-status hidden aria-live="polite"></p><p class="lab-local-hint">首次使用需在本地仓库运行一次 <code>harness\scripts\install-harness-launcher.ps1</code>，并在浏览器弹窗中选择“打开 Apollo_Harness”。如果本地服务已经启动但未自动打开，可<a data-local-direct href="http://127.0.0.1:8765/">直接打开本地 Harness</a>。</p>
         </div>
 
         <div class="lab-workspace-grid">
@@ -94,7 +94,7 @@
             <div class="lab-controls">
               <button class="lab-control-button is-primary" type="button" data-run-demo>运行演示流程</button>
               <button class="lab-control-button" type="button" data-open-simulation>打开仿真入口</button>
-              <a class="lab-control-button" data-local-panel href="http://127.0.0.1:8765/">启动本地实验台</a>
+              <a class="lab-control-button" data-local-direct href="http://127.0.0.1:8765/">打开本地 Harness</a>
               <a class="lab-control-button" href="report.html" data-report-link aria-disabled="true">查看实验报告</a>
             </div>
           </section>
@@ -145,6 +145,6 @@
   <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261019-progress-artifact"></script>
+  <script src="../assets/js/lab.js?v=20261021-harness-launcher-v1"></script>
 </body>
 </html>
