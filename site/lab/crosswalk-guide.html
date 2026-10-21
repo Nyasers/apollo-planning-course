@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="人行道避让真实实验引导：从打开 Harness 到生成报告与 AI 分析的可操作步骤。">
+  <title>人行道避让真实实验 | Apollo Planning Lab</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem("apollo-planning-theme");if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/css/site.css?v=20261022-crosswalk-guide-v1">
+  <link rel="stylesheet" href="../assets/css/lab.css?v=20261022-score-reason-v1">
+  <link rel="stylesheet" href="../assets/css/crosswalk-guide.css?v=20261022-v1">
+</head>
+<body class="lab-body" data-page="lab">
+  <a class="skip-link" href="#main-content">跳到正文</a>
+  <header class="lab-topbar">
+    <a class="lab-brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy"><strong>APOLLO / PLANNING LAB</strong><span>实验二 · 人行道避让</span></span></a>
+    <nav class="lab-nav" aria-label="实验导航"><a href="./">实验中心</a><a href="start.html?step=experiments">开始实验</a><a href="crosswalk-guide.html" aria-current="page">人行道真实实验</a><a href="report.html">实验报告</a><a href="../index.html">返回课程</a></nav>
+    <div class="lab-actions"><span class="lab-status-pill">真实实验引导</span><button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅主题">◐</button></div>
+  </header>
+
+  <main class="lab-shell" id="main-content">
+    <section class="guide-hero reveal">
+      <div>
+        <p class="lesson-kicker">Guided Experiment · Crosswalk</p>
+        <h1>人行道避让<span>真实实验</span></h1>
+        <p>按照真实 Harness 和 Apollo 仿真界面完成一轮人行道场景实验。每一步都对应实际按钮与界面，截图用于辅助定位；实际运行和报告仍由本地 Harness 完成。</p>
+        <div class="guide-hero-actions">
+          <a class="button-primary" href="http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc" data-local-panel data-local-launch>打开本地 Harness</a>
+          <a class="button-secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a>
+          <a class="button-secondary" href="report.html">查看实验报告</a>
+        </div>
+      </div>
+      <aside class="guide-hero-board">
+        <span class="section-kicker">One complete run</span>
+        <strong id="guide-progress-count">0 / 11</strong>
+        <small>完成后可回到实验报告页导入 report.json，查看评分、证据和 AI 解释。</small>
+        <div class="guide-progress-track" aria-label="实验步骤完成进度"><i id="guide-progress-bar"></i></div>
+      </aside>
+    </section>
+
+    <div class="guide-progress-head reveal"><div><p class="section-kicker">Step by step</p><h2>从启动到复盘</h2></div><span>建议按顺序完成，每一步都以实际界面为准</span></div>
+    <ol class="guide-step-list">
+      <li class="guide-step reveal" id="step-01"><div class="guide-step-index">01</div><div><p class="section-kicker">Open Harness</p><h2>打开本地 Harness</h2><p>在实验中心打开 Harness。首次点击需要允许浏览器打开 <code>Apollo_Harness</code> 本地应用。</p><div class="guide-step-actions"><a class="button-primary" href="http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc" data-local-panel data-local-launch>启动并打开 Harness</a><a class="button-secondary" href="http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc" data-local-direct>已启动？直接打开</a></div><div class="guide-step-note">如果浏览器没有响应，先检查本地启动器是否安装，再重新尝试。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="01">本步完成</label><span>HARNESS</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/01-open-harness.webp" alt="Harness 首次打开界面截图"><figcaption>打开 Harness 后的实验面板。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-02"><div class="guide-step-index">02</div><div><p class="section-kicker">Start runtime</p><h2>启动 Linux 与仿真环境</h2><p>点击 Harness 中的启动仿真。系统会启动 WSL/Ubuntu、Docker、Apollo 容器和 DreamView，页面期间可能处于等待状态。</p><div class="guide-step-note">启动需要几秒到数分钟；不要重复点击，也不要关闭等待中的页面。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="02">本步完成</label><span>RUNTIME</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/02-waiting.webp" alt="启动仿真等待界面截图"><figcaption>等待 Linux 和仿真环境准备完成。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-03"><div class="guide-step-index">03</div><div><p class="section-kicker">SimControl</p><h2>进入仿真并选择 Scenario Sim</h2><p>DreamView 打开后，进入 SimControl，选择 <code>scenario_sim</code>。这是本轮真实场景运行的入口。</p><div class="guide-step-actions"><a class="button-secondary" href="http://localhost:8888/" target="_blank" rel="noreferrer">打开 DreamView</a></div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="03">本步完成</label><span>DREAMVIEW</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/03-select-scenario.webp" alt="选择 scenario_sim 截图"><figcaption>在 SimControl 中进入场景选择。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-04"><div class="guide-step-index">04</div><div><p class="section-kicker">Map</p><h2>选择人行横道地图</h2><p>选择人行道场景对应的地图。地图和场景必须匹配，否则停车距离、行人和停止线数据都会失去意义。</p><div class="guide-step-note">不要为了“先跑起来”随意更换地图；先确认地图名称和场景一致。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="04">本步完成</label><span>SCENARIO</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/04-select-map.webp" alt="选择人行横道地图截图"><figcaption>选择人行横道地图和对应场景资源。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-05"><div class="guide-step-index">05</div><div><p class="section-kicker">Modules</p><h2>打开全部规划控制模块</h2><p>启动 Planning、Control 及其他场景需要的模块。确认主界面没有明显报错，再进入下一步。</p><div class="guide-step-note">如果模块启动失败，先看 Harness 的环境检查和技术日志，不要直接开始录制。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="05">本步完成</label><span>MODULES</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/05-open-modules.webp" alt="打开全部模块截图"><figcaption>启动 Planning、Control 等模块。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-06"><div class="guide-step-index">06</div><div><p class="section-kicker">Record</p><h2>回到 Harness，开始录制</h2><p>回到 Harness，在录制步骤勾选“实际运行”，点击“开始录制”。录制会采集 planning、control、localization 等核心 channel。</p><div class="guide-step-note">录制由人工结束，不设固定 25 秒限制。先让车辆完成一次完整的人行横道运行。</div><div class="guide-step-actions"><a class="button-secondary" href="http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc" data-local-panel data-local-launch>打开 Harness 录制</a></div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="06">本步完成</label><span>RECORD</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/06-start-record.webp" alt="在 Harness 开始录制截图"><figcaption>勾选实际运行并开始录制。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-07"><div class="guide-step-index">07</div><div><p class="section-kicker">Run</p><h2>回到仿真界面开始运行</h2><p>回到 DreamView/SimControl 启动车辆运行，观察车辆接近人行横道、识别行人、减速停车和继续通行。</p><div class="guide-step-note">本实验的主评分规则是车头到人行横道边界 1.5—2.0 m 内停车；以最终报告中的停车距离为准。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="07">本步完成</label><span>RUN</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/07-start-simulation.webp" alt="仿真运行截图"><figcaption>在仿真界面启动并观察车辆运行。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-08"><div class="guide-step-index">08</div><div><p class="section-kicker">Stop record</p><h2>停止录制并生成 channel 报告</h2><p>车辆完成后回到 Harness，人工点击“结束并保存”，再点击“生成报告”。检查 record、CSV、图表和 channel 汇总是否生成。</p><div class="guide-step-note">不要为了凑时长继续录制；以一次完整场景运行的数据为准。</div><div class="guide-step-actions"><a class="button-secondary" href="http://127.0.0.1:8765/?task=crosswalk&lesson=lesson-15&source=apc" data-local-panel data-local-launch>打开 Harness 生成报告</a></div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="08">本步完成</label><span>REPORT</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/08-generate-report.webp" alt="停止录制并生成报告截图"><figcaption>停止录制后生成 channel 报告。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-09"><div class="guide-step-index">09</div><div><p class="section-kicker">Self-eval</p><h2>生成自评并导出报告</h2><p>依次点击“生成自评”和“导出”，生成 report.json、report.md、selfeval.md 和证据文件。</p><div class="guide-step-note">报告的完整数据必须来自同一轮 record；导出后再进入网站复盘。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="09">本步完成</label><span>SELF-EVAL</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/09-generate-selfeval.webp" alt="生成自评截图"><figcaption>生成自评并导出实验报告。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-10"><div class="guide-step-index">10</div><div><p class="section-kicker">AI review</p><h2>接入 DeepSeek 解释报告</h2><p>在 Harness 的 DeepSeek 设置中保存自己的 API Key，只保存在本机。随后围绕报告提问，例如“为什么没有通过？”或“下一轮先改什么？”。</p><div class="guide-step-note danger-note">不要把 API Key 发到网页、文档或聊天中；AI 只解释证据和提出建议，不替代学生确认与重新运行。</div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="10">本步完成</label><span>AI REVIEW</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/10-deepseek.webp" alt="使用 DeepSeek 分析报告截图"><figcaption>围绕当前报告向 DeepSeek 追问原因和建议。</figcaption></figure></li>
+      <li class="guide-step reveal" id="step-11"><div class="guide-step-index">11</div><div><p class="section-kicker">Web report</p><h2>在网站查看证据和结论</h2><p>回到实验报告页，导入本轮 report.json，查看场景分、停车距离、过程证据和 AI 建议。确认页面显示的是同一轮实验数据。</p><div class="guide-step-actions"><a class="button-primary" href="report.html">打开实验报告</a><a class="button-secondary" href="ai-loop.html">查看 AI 使用引导</a></div><div class="guide-step-meta"><label><input type="checkbox" data-guide-check="11">本步完成</label><span>WEB REVIEW</span></div></div><figure class="guide-figure"><img loading="lazy" src="../assets/images/crosswalk-guide/11-web-report.webp" alt="在网站查看报告截图"><figcaption>回到网站查看具体问题、建议和证据链。</figcaption></figure></li>
+    </ol>
+
+    <section class="guide-callout reveal"><article><p class="section-kicker">Evidence first</p><b>报告只认同一轮数据</b><p>不要拼接不同 record、不同场景或不同时间的结果。</p></article><article><p class="section-kicker">AI boundary</p><b>AI 不替代判断</b><p>模型给解释和建议，学生确认操作，教师保留最终评价权。</p></article><article><p class="section-kicker">Safety</p><b>不要跳过环境检查</b><p>环境未就绪时先修复，不要用演示结果代替真实实验。</p></article></section>
+    <div class="guide-footer-actions"><span>当前步骤进度保存在浏览器本地；更换浏览器或清理存储后会重置。</span><span><a href="crosswalk.html">打开旧版实验台（备用）</a> · <a href="start.html?step=experiments">返回实验选择</a></span></div>
+  </main>
+
+  <script>window.APOLLO_LAB_CONFIG={apiBase:"",simulationUrl:"http://localhost:8888",localPanelUrl:"http://127.0.0.1:8765",taskId:"crosswalk",lesson:"lesson-15",demoMode:true};</script>
+  <script src="../assets/js/site.js?v=20261022-crosswalk-guide-v1"></script>
+  <script src="../assets/js/lab.js?v=20261022-score-reason-v1"></script>
+  <script>
+    (function(){
+      const key='apollo-crosswalk-guide-progress-v1';
+      const checks=Array.from(document.querySelectorAll('[data-guide-check]'));
+      const steps=Array.from(document.querySelectorAll('.guide-step'));
+      const read=()=>{try{return new Set(JSON.parse(localStorage.getItem(key)||'[]'))}catch(e){return new Set()}};
+      const done=read();
+      function render(){
+        checks.forEach((input)=>{const id=input.dataset.guideCheck;const step=document.getElementById('step-'+id);input.checked=done.has(id);if(step)step.classList.toggle('is-done',input.checked)});
+        const count=done.size,total=checks.length;
+        document.getElementById('guide-progress-count').textContent=count+' / '+total;
+        document.getElementById('guide-progress-bar').style.width=(total?count/total*100:0)+'%';
+      }
+      checks.forEach((input)=>input.addEventListener('change',()=>{const id=input.dataset.guideCheck;if(input.checked)done.add(id);else done.delete(id);localStorage.setItem(key,JSON.stringify([...done]));render()}));
+      render();
+    })();
+  </script>
+</body>
+</html>
