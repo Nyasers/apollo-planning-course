@@ -162,6 +162,34 @@ class WebActionTest(unittest.TestCase):
                 server.server_close()
                 thread.join(timeout=2)
 
+    def test_open_report_folder_opens_validated_experiment_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tasks = Path(tmp) / "tasks.json"
+            tasks.write_text(json.dumps({"tasks": [{"id": "crosswalk", "title": "人行道避让"}]}), encoding="utf-8")
+            settings = Settings(tasks_file=str(tasks), output_dir=tmp)
+            store = ExperimentStore(Path(tmp))
+            exp = store.create("crosswalk", "人行道避让")
+            exp_id = exp["meta"]["experiment_id"]
+            server = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(settings))
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                base = f"http://127.0.0.1:{server.server_port}"
+                with urllib.request.urlopen(base + "/api/session", timeout=5) as response:
+                    token = json.loads(response.read().decode("utf-8"))["token"]
+                request = urllib.request.Request(base + f"/api/experiments/{exp_id}/open-folder", data=b"{}", method="POST")
+                request.add_header("Content-Type", "application/json")
+                request.add_header("X-Apollo-Claw-Token", token)
+                with patch("apollo_claw.server.open_directory") as open_directory:
+                    with urllib.request.urlopen(request, timeout=5) as response:
+                        result = json.loads(response.read().decode("utf-8"))
+                    open_directory.assert_called_once_with(store.experiment_dir(exp_id))
+                self.assertTrue(result["ok"])
+                self.assertEqual(Path(result["path"]), store.experiment_dir(exp_id))
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=2)
     def test_deepseek_settings_can_be_saved_and_cleared(self):
         with tempfile.TemporaryDirectory() as tmp:
             tasks = Path(tmp) / "tasks.json"

@@ -789,6 +789,22 @@ function renderReportFiles(report) {
   const heading = document.createElement("div");
   heading.className = "report-files-head";
   heading.innerHTML = "<span class='eyebrow'>ARTIFACTS</span><strong>报告文件与地址</strong>";
+  const folderButton = document.createElement("button");
+  folderButton.type = "button";
+  folderButton.className = "report-folder-button";
+  folderButton.textContent = "打开本机报告目录";
+  folderButton.addEventListener("click", async () => {
+    folderButton.disabled = true;
+    try {
+      const data = await api(`/api/experiments/${encodeURIComponent(experimentId)}/open-folder`, { method: "POST", body: {} });
+      showToast("已打开本机报告目录：" + (data.path || ""), "success");
+    } catch (error) {
+      showToast("打开报告目录失败：" + error.message, "error");
+    } finally {
+      folderButton.disabled = false;
+    }
+  });
+  heading.appendChild(folderButton);
   box.appendChild(heading);
   const files = [
     ["report.json", "原始报告 JSON", "report.json"],

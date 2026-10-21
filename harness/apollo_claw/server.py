@@ -158,6 +158,17 @@ def _best_report(store: ExperimentStore, experiment_id: str):
     return None, ""
 
 
+def open_directory(path: Path) -> None:
+    """Open a validated local directory in the host file manager."""
+    target = str(path)
+    if os.name == "nt":
+        os.startfile(target)
+    elif sys.platform == "darwin":
+        subprocess.Popen(["open", target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        subprocess.Popen(["xdg-open", target], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
 def _deepseek_settings_path() -> Path:
     return Path.home() / ".apollo-claw" / ".env"
 
@@ -275,6 +286,20 @@ def make_handler(settings: Settings, token: Optional[str] = None):
                     self._json(200, test_connection(settings))
                 except Exception as exc:
                     self._json(400, {"error": str(exc)})
+                return
+            if path.startswith("/api/experiments/") and path.endswith("/open-folder"):
+                try:
+                    experiment_id = unquote(path[len("/api/experiments/"):-len("/open-folder")]).strip("/")
+                    if not experiment_id or "/" in experiment_id:
+                        raise ValueError("invalid experiment id")
+                    store.load(experiment_id)
+                    directory = store.experiment_dir(experiment_id)
+                    if not directory.is_dir():
+                        raise ValueError("experiment directory not found")
+                    open_directory(directory)
+                    self._json(200, {"ok": True, "path": str(directory)})
+                except Exception as exc:
+                    self._json(404, {"error": str(exc)})
                 return
             if path.startswith("/api/experiments/") and path.endswith("/ask"):
                 try:
