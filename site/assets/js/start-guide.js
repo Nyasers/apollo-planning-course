@@ -134,7 +134,7 @@
       head.className = "competition-card-head";
       const number = document.createElement("span");
       number.className = "competition-number";
-      number.textContent = scenario.number || "赛题";
+      number.textContent = scenario.number || "实验";
       const status = document.createElement("span");
       status.className = "competition-status " + (open ? "is-open" : "is-planned");
       status.textContent = open ? "可开始" : "待接入";
@@ -178,17 +178,17 @@
   async function loadCompetitionScenarios() {
     if (!scenariosBox) return;
     try {
-      const response = await fetch("../harness/competition-scenarios.json?v=20261021-competition-scenarios-v1", { cache: "no-store" });
+      const response = await fetch("../harness/competition-scenarios.json?v=20261021-competition-scenarios-v2", { cache: "no-store" });
       if (!response.ok) throw new Error("scenarios unavailable");
       renderCompetitionScenarios(await response.json());
     } catch (error) {
-      scenariosBox.innerHTML = '<div class="lab-report-empty">赛题信息暂时无法读取。</div>';
+      scenariosBox.innerHTML = '<div class="lab-report-empty">实验信息暂时无法读取。</div>';
     }
   }
 
   async function loadManifest() {
     try {
-      const response = await fetch("../harness/manifest.json?v=20261021-competition-scenarios-v1", { cache: "no-store" });
+      const response = await fetch("../harness/manifest.json?v=20261021-competition-scenarios-v2", { cache: "no-store" });
       if (!response.ok) throw new Error("manifest unavailable");
       manifest = await response.json();
       renderRequirements();
