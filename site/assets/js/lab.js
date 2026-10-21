@@ -272,6 +272,76 @@
     localStorage.setItem(harnessReportKey, JSON.stringify(report));
   }
 
+  async function initLabIndexSnapshot() {
+    const snapshot = document.querySelector("[data-lab-snapshot]");
+    if (!snapshot) return;
+
+    let report = readHarnessReport();
+    let source = "browser";
+    if (!report) {
+      try {
+        const response = await fetch("./data/lab-report-round2.json", { cache: "no-store" });
+        if (response.ok) {
+          const parsed = await response.json();
+          if (validateHarnessReport(parsed).length === 0) {
+            report = parsed;
+            source = "built-in";
+          }
+        }
+      } catch (error) {}
+    }
+    if (!report) {
+      setText(document, "[data-lab-source]", "当前没有可读取的实验报告。");
+      setText(document, "[data-lab-headline-summary]", "完成本地实验并导入 report.json 后，这里会显示最新结果。");
+      setText(document, "[data-lab-current-copy]", "暂无当前报告指标。");
+      setText(document, "[data-lab-failing]", "暂无未通过指标数据");
+      return;
+    }
+
+    const meta = report.meta || {};
+    const score = report.score || {};
+    const record = report.record || {};
+    const metrics = report.metrics || {};
+    const lab = report.lab || {};
+    const current = lab.current || {};
+    const scoreMetrics = Array.isArray(score.metrics) ? score.metrics : [];
+    const passedCount = scoreMetrics.filter((item) => item && item.pass === true).length;
+    const passed = score.passed_metrics || current.passed_metrics || (scoreMetrics.length ? passedCount + "/" + scoreMetrics.length : "—");
+    const ttc = scoreMetrics.find((item) => String(item.name || "").toUpperCase() === "TTC") || {};
+    const ttcText = ttc.total !== undefined ? String(ttc.fail ?? "—") + "/" + String(ttc.total) : "—";
+    const failing = scoreMetrics.filter((item) => item && item.pass === false).map((item) => item.name).filter(Boolean);
+    const messageCount = record.message_count ?? current.message_count ?? "—";
+    const duration = record.duration_sec ?? current.duration_sec ?? "—";
+    const channelCount = record.channel_count ?? current.channel_count ?? "—";
+    const jerk = metrics.max_jerk ?? current.metrics?.max_jerk ?? "—";
+    const hardBrake = metrics.hard_brake ?? current.metrics?.hard_brake ?? "—";
+    const scenario = meta.scenario || meta.task || "人行道避让";
+    const statusMap = { evaluated: "已完成自评", recorded: "已录制", reported: "已生成报告", record_failed: "录制失败", environment_warning: "环境待检查", created: "已创建", demo: "演示报告" };
+    const statusText = statusMap[meta.status] || meta.status || "当前报告";
+    const sourceText = source === "browser" ? "当前浏览器最新导入报告 · 本地自评" : "网站内置阶段性报告 · 本地自评";
+
+    setText(document, "[data-lab-score]", passed);
+    setText(document, "[data-lab-score-note]", score.is_official === true ? "官方评分" : "通过项");
+    setText(document, "[data-lab-ttc]", ttcText);
+    setText(document, "[data-lab-ttc-note]", ttc.pass === true ? "已通过" : ttc.total !== undefined ? "仍需优化" : "无 TTC 数据");
+    setText(document, "[data-lab-messages]", formatCount(messageCount));
+    setText(document, "[data-lab-duration]", duration === "—" ? "record 时长未知" : duration + " 秒记录");
+    setText(document, "[data-lab-source]", sourceText);
+    setText(document, "[data-lab-headline-summary]", scenario + " 当前报告已载入。结果、问题和证据一起保留，作为下一轮优化的起点。");
+    setText(document, "[data-lab-badge]", lab.badge || score.source || "阶段性本地自评");
+    setText(document, "[data-lab-headline]", scenario + " · " + statusText);
+    setText(document, "[data-lab-meta]", "实验编号 " + (meta.experiment_id || "—") + " · " + formatDateTime(meta.created_at) + " · " + (duration === "—" ? "record 时长未知" : duration + " 秒 record"));
+    setText(document, "[data-lab-score-detail]", passed);
+    setText(document, "[data-lab-ttc-detail]", ttcText);
+    setText(document, "[data-lab-messages-detail]", formatCount(messageCount));
+    setText(document, "[data-lab-duration-detail]", duration === "—" ? "record 时长未知" : duration + " 秒");
+    setText(document, "[data-lab-channels]", String(channelCount));
+    setText(document, "[data-lab-jerk]", jerk === "—" ? "—" : formatNumber(jerk, 2));
+    setText(document, "[data-lab-hard-brake]", String(hardBrake));
+    setText(document, "[data-lab-failing]", failing.length ? "仍待优化：" + failing.join("、") + (ttc.total !== undefined ? "（TTC " + ttcText + " 失败帧）" : "") : "未发现未通过指标，仍需教师复核");
+    setText(document, "[data-lab-current-copy]", passed + " 通过" + (failing.length ? "，" + failing.join("、") + " 仍需优化" : "") + "；共 " + formatCount(messageCount) + " 条 record 消息。当前数据和问题都保留。");
+  }
+
   function validateHarnessReport(report) {
     const errors = [];
     if (!report || typeof report !== "object" || Array.isArray(report)) return ["文件内容不是 JSON 对象"];
@@ -359,6 +429,11 @@
     if (value === null || value === undefined || value === "") return null;
     const number = Number(value);
     return Number.isFinite(number) ? number : null;
+  }
+
+  function formatCount(value) {
+    const number = numberOrNull(value);
+    return number === null ? "—" : number.toLocaleString("zh-CN");
   }
 
   function formatNumber(value, digits) {
@@ -1105,5 +1180,12 @@
   syncLocalPanelLinks();
   initLocalLauncher();
   initRunPage();
+  initLabIndexSnapshot().catch((error) => { console.error(error); });
   initReportPage().catch((error) => { console.error(error); });
+  window.addEventListener("storage", (event) => {
+    if (event.key === harnessReportKey) initLabIndexSnapshot().catch((error) => { console.error(error); });
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) initLabIndexSnapshot().catch((error) => { console.error(error); });
+  });
 })();

@@ -45,32 +45,32 @@
       </div>
       <div class="lab-hero-board">
         <p class="lab-board-label">CURRENT STATUS</p>
-        <div class="lab-progress-list">
-          <div><span>场景自评</span><strong>8/9</strong><small>通过项</small></div>
-          <div><span>TTC 失败帧</span><strong>29/267</strong><small>仍需优化</small></div>
-          <div><span>Record 消息</span><strong>7,729</strong><small>25 秒记录</small></div>
+        <div class="lab-progress-list" data-lab-snapshot>
+          <div><span>场景自评</span><strong data-lab-score>—</strong><small data-lab-score-note>加载中</small></div>
+          <div><span>TTC 失败帧</span><strong data-lab-ttc>—</strong><small data-lab-ttc-note>加载中</small></div>
+          <div><span>Record 消息</span><strong data-lab-messages>—</strong><small data-lab-duration>加载中</small></div>
         </div>
-        <p class="lab-board-note">本地自评，不是官方总分。</p>
+        <p class="lab-board-note" data-lab-source>正在读取当前报告…</p>
       </div>
     </section>
 
     <section class="lab-section reveal">
       <div class="lab-section-head">
         <div><p class="section-kicker">Current Evidence</p><h2>当前进度与产物</h2></div>
-        <p>第二轮人行道避让实验已跑通本地闭环。结果和问题一起保留，作为下一轮优化的起点。</p>
+        <p data-lab-headline-summary>正在读取当前报告与证据…</p>
       </div>
       <div class="lab-current-grid">
         <article class="lab-card is-primary">
-          <span class="lab-chip">阶段性本地自评</span>
-          <h3>人行道避让 · 第二轮</h3>
-          <p>实验编号 20261018-232816-56f463-crosswalk · 2026-10-18 · 25 秒 record</p>
+          <span class="lab-chip" data-lab-badge>报告加载中</span>
+          <h3 data-lab-headline>人行道避让 · 当前报告</h3>
+          <p data-lab-meta>正在读取当前报告…</p>
           <div class="lab-current-metrics">
-            <div class="lab-metric"><span>场景自评</span><strong>8/9</strong><small>通过项</small></div>
-            <div class="lab-metric"><span>TTC 失败帧</span><strong>29/267</strong><small>仍需优化</small></div>
-            <div class="lab-metric"><span>Record 消息</span><strong>7,729</strong><small>25 秒</small></div>
-            <div class="lab-metric"><span>核心通道</span><strong>6</strong><small>planning / control / localization</small></div>
-            <div class="lab-metric"><span>最大 Jerk</span><strong>2.90</strong><small>舒适性指标</small></div>
-            <div class="lab-metric"><span>急刹次数</span><strong>0</strong><small>本轮记录</small></div>
+            <div class="lab-metric"><span>场景自评</span><strong data-lab-score-detail>—</strong><small>通过项</small></div>
+            <div class="lab-metric"><span>TTC 失败帧</span><strong data-lab-ttc-detail>—</strong><small>仍需优化</small></div>
+            <div class="lab-metric"><span>Record 消息</span><strong data-lab-messages-detail>—</strong><small data-lab-duration-detail>—</small></div>
+            <div class="lab-metric"><span>核心通道</span><strong data-lab-channels>—</strong><small>planning / control / localization</small></div>
+            <div class="lab-metric"><span>最大 Jerk</span><strong data-lab-jerk>—</strong><small>舒适性指标</small></div>
+            <div class="lab-metric"><span>急刹次数</span><strong data-lab-hard-brake>—</strong><small>本轮记录</small></div>
           </div>
           <a class="button-primary" href="report.html">查看当前进度产物</a>
         </article>
@@ -78,7 +78,7 @@
           <h3>当前边界</h3>
           <ul class="lab-report-list">
             <li>已跑通：环境检查、场景运行、record、评分、报告</li>
-            <li>仍待优化：TTC 29/267 失败帧</li>
+            <li data-lab-failing>正在读取未通过指标…</li>
             <li>尚未开放：交通灯、自主泊车、完整 24 步</li>
           </ul>
           <div class="lab-notice" style="margin-top:14px">24 步是完整建设方案，不代表已经全部上线。</div>
@@ -146,7 +146,7 @@
         <article class="lab-card">
           <span class="lab-chip">当前可用</span>
           <h3>阶段性本地自评产物</h3>
-          <p>8/9 通过，TTC 29/267 失败帧，7,729 条 record 消息。当前数据和问题都保留。</p>
+          <p data-lab-current-copy>正在读取当前报告指标…</p>
           <a class="button-primary" href="report.html">查看当前进度产物</a>
         </article>
       </div>
@@ -187,6 +187,6 @@
   </div>
   <script src="../assets/js/search-index.js"></script>
   <script src="../assets/js/site.js"></script>
-  <script src="../assets/js/lab.js?v=20261021-harness-launcher-v1"></script>
+  <script src="../assets/js/lab.js?v=20261021-index-snapshot-v1"></script>
 </body>
 </html>
